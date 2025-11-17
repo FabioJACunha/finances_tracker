@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../home_stats_provider.dart';
 import 'package:collection/collection.dart';
+import '../../../helpers/app_colors.dart';
 
 class BalanceEvolutionChart extends ConsumerWidget {
   final int accountId;
@@ -25,7 +26,9 @@ class BalanceEvolutionChart extends ConsumerWidget {
     );
 
     return Card(
+      color: AppColors.lightGrey,
       margin: const EdgeInsets.all(8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: dataAsync.when(
@@ -43,7 +46,7 @@ class BalanceEvolutionChart extends ConsumerWidget {
               children: [
                 const Text(
                   'Balance Evolution',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.darkGreen, fontSize: 20),
                 ),
                 const SizedBox(height: 16),
                 SizedBox(

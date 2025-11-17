@@ -1,0 +1,7 @@
+{
+  "@@locale": "en",
+  "helloWorld": "Hello World!",
+  "navHome": "Home",
+  "navTransactions": "Transactions",
+  "navAccounts": "Accounts"
+}

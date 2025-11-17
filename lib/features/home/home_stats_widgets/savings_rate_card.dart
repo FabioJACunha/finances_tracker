@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../home_stats_provider.dart';
+import '../../../helpers/app_colors.dart';
 
 class SavingsRateCard extends ConsumerWidget {
   final int accountId;
@@ -16,10 +17,16 @@ class SavingsRateCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final dataAsync = ref.watch(savingsRateProvider(PeriodArgs(accountId: accountId, start: start, end: end)));
+    final dataAsync = ref.watch(
+      savingsRateProvider(
+        PeriodArgs(accountId: accountId, start: start, end: end),
+      ),
+    );
 
     return Card(
+      color: AppColors.lightGrey,
       margin: const EdgeInsets.all(8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: dataAsync.when(
@@ -28,7 +35,11 @@ class SavingsRateCard extends ConsumerWidget {
             children: [
               const Text(
                 'Savings Rate',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.darkGreen,
+                  fontSize: 20,
+                ),
               ),
               const SizedBox(height: 8),
               Text(

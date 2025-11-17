@@ -2,20 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../home_stats_provider.dart';
+import '../../../helpers/app_colors.dart';
 
 class IncomeVsExpenseBar extends ConsumerWidget {
   final int accountId;
   final DateTime start;
   final DateTime end;
 
-  const IncomeVsExpenseBar({required this.accountId, required this.start, required this.end, super.key});
+  const IncomeVsExpenseBar({
+    required this.accountId,
+    required this.start,
+    required this.end,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final dataAsync = ref.watch(incomeExpenseProvider(PeriodArgs(accountId: accountId, start: start, end: end)));
+    final dataAsync = ref.watch(
+      incomeExpenseProvider(
+        PeriodArgs(accountId: accountId, start: start, end: end),
+      ),
+    );
 
     return Card(
+      color: AppColors.lightGrey,
       margin: const EdgeInsets.all(8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: dataAsync.when(
@@ -23,8 +35,16 @@ class IncomeVsExpenseBar extends ConsumerWidget {
             final income = data['income']!;
             final expense = data['expense']!;
             return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Income vs Expense', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Income vs Expense',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.darkGreen,
+                    fontSize: 20,
+                  ),
+                ),
                 const SizedBox(height: 16),
                 SizedBox(
                   height: 200,
@@ -33,16 +53,33 @@ class IncomeVsExpenseBar extends ConsumerWidget {
                       alignment: BarChartAlignment.spaceAround,
                       maxY: (income > expense ? income : expense) * 1.2,
                       barGroups: [
-                        BarChartGroupData(x: 0, barRods: [BarChartRodData(toY: income, color: Colors.green)]),
-                        BarChartGroupData(x: 1, barRods: [BarChartRodData(toY: expense, color: Colors.red)]),
+                        BarChartGroupData(
+                          x: 0,
+                          barRods: [
+                            BarChartRodData(toY: income, color: Colors.green),
+                          ],
+                        ),
+                        BarChartGroupData(
+                          x: 1,
+                          barRods: [
+                            BarChartRodData(toY: expense, color: Colors.red),
+                          ],
+                        ),
                       ],
                       titlesData: FlTitlesData(
-                        bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, getTitlesWidget: (v, _) {
-                          if (v == 0) return const Text('Income');
-                          if (v == 1) return const Text('Expense');
-                          return const SizedBox.shrink();
-                        })),
-                        leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true)),
+                        bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            getTitlesWidget: (v, _) {
+                              if (v == 0) return const Text('Income');
+                              if (v == 1) return const Text('Expense');
+                              return const SizedBox.shrink();
+                            },
+                          ),
+                        ),
+                        leftTitles: AxisTitles(
+                          sideTitles: SideTitles(showTitles: true),
+                        ),
                       ),
                     ),
                   ),

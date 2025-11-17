@@ -5,6 +5,8 @@ import '../../providers/transactions_provider.dart';
 import '../../data/db/tables.dart';
 import 'package:intl/intl.dart';
 import 'transaction_form_screen.dart';
+import '../../helpers/app_colors.dart';
+import '../../models/transaction_type_filter.dart';
 
 class TransactionHistoryScreen extends ConsumerStatefulWidget {
   const TransactionHistoryScreen({super.key});
@@ -15,100 +17,257 @@ class TransactionHistoryScreen extends ConsumerStatefulWidget {
 }
 
 class _TransactionHistoryScreenState
-    extends ConsumerState<TransactionHistoryScreen> {
+    extends ConsumerState<TransactionHistoryScreen>
+    with SingleTickerProviderStateMixin {
   int? _selectedAccountId;
+  late TabController _tabController;
+  TransactionTypeFilter _currentFilter = TransactionTypeFilter.all;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize TabController here
+    _tabController = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final accountsAsync = ref.watch(accountsListProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Transaction History')),
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        foregroundColor: Colors.white,
+        title: const Text("Transaction History"),
+      ),
       body: accountsAsync.when(
         data: (accounts) {
           if (accounts.isEmpty) {
             return const Center(child: Text("No accounts yet"));
           }
-
           _selectedAccountId ??= accounts.first.id;
-
-          // Find the selected account
-          final selectedAccount = accounts.firstWhere(
-            (a) => a.id == _selectedAccountId,
-          );
 
           return Column(
             children: [
-              // Dropdown + total balance
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    DropdownButton<int>(
-                      value: _selectedAccountId,
-                      items: accounts
-                          .map(
-                            (a) => DropdownMenuItem(
-                              value: a.id,
-                              child: Text(a.name),
+              // Horizontal scrollable account pills
+              SizedBox(
+                height: 50,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  itemCount: accounts.length,
+                  separatorBuilder: (_, _) => const SizedBox(width: 8),
+                  itemBuilder: (context, index) {
+                    final account = accounts[index];
+                    final selected = account.id == _selectedAccountId;
+                    return GestureDetector(
+                      onTap: () =>
+                          setState(() => _selectedAccountId = account.id),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: selected
+                              ? AppColors.lightGreen
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Center(
+                          child: Text(
+                            account.name,
+                            style: TextStyle(
+                              color: selected
+                                  ? AppColors.darkGreen
+                                  : Colors.white,
+                              fontWeight: FontWeight.bold,
                             ),
-                          )
-                          .toList(),
-                      onChanged: (val) =>
-                          setState(() => _selectedAccountId = val),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Total Balance: €${selectedAccount.balance.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
+                    );
+                  },
                 ),
               ),
+              const SizedBox(height: 8),
+
+              // Tabs
+              TabBar(
+                controller: _tabController,
+                labelColor: AppColors.lightGreen,
+                unselectedLabelColor: Colors.white,
+                dividerHeight: 0,
+                splashFactory: NoSplash.splashFactory,
+                overlayColor: WidgetStateProperty.all(Colors.transparent),
+                indicator: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: AppColors.lightGreen, width: 2),
+                  ),
+                ),
+                indicatorColor: Colors.transparent,
+                indicatorSize: TabBarIndicatorSize.tab,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                tabs: const [
+                  Tab(text: 'All'),
+                  Tab(text: 'Expense'),
+                  Tab(text: 'Income'),
+                ],
+                onTap: (index) {
+                  setState(() {
+                    _currentFilter = TransactionTypeFilter.values[index];
+                  });
+                },
+              ),
+
+              const SizedBox(height: 8, width: double.infinity),
 
               // Transactions list
               Expanded(
-                child: _selectedAccountId == null
-                    ? const SizedBox.shrink()
-                    : Consumer(
-                        builder: (context, ref, _) {
-                          final txnStream = ref.watch(
-                            transactionsWithCategoryProvider(_selectedAccountId!),
-                          );
+                child: AnimatedBuilder(
+                  animation: _tabController,
+                  builder: (context, _) {
+                    final filter = [
+                      'All',
+                      'Expense',
+                      'Income',
+                    ][_tabController.index];
+
+                    if (_selectedAccountId == null) {
+                      return const SizedBox.shrink();
+                    }
+
+                    final txnStream = ref.watch(
+                      transactionsWithCategoryProvider(_selectedAccountId!),
+                    );
+
+                    return AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      transitionBuilder: (child, animation) =>
+                          FadeTransition(opacity: animation, child: child),
+                      child: Builder(
+                        key: ValueKey(_currentFilter),
+                        // important for AnimatedSwitcher
+                        builder: (context) {
                           return txnStream.when(
                             data: (transactions) {
-                              if (transactions.isEmpty) {
+                              final filteredTxns = transactions.where((t) {
+                                switch (_currentFilter) {
+                                  case TransactionTypeFilter.all:
+                                    return true;
+                                  case TransactionTypeFilter.expense:
+                                    return t.transaction.type ==
+                                        TransactionType.expense;
+                                  case TransactionTypeFilter.income:
+                                    return t.transaction.type ==
+                                        TransactionType.income;
+                                }
+                              }).toList();
+
+                              if (filteredTxns.isEmpty) {
                                 return const Center(
                                   child: Text("No transactions"),
                                 );
                               }
-                              return ListView.separated(
-                                itemCount: transactions.length,
-                                separatorBuilder: (_, _) => const Divider(),
-                                itemBuilder: (context, index) {
-                                  final data = transactions[index];
-                                  final tx = data.transaction;
-                                  final categoryName = data.categoryName ?? 'Uncategorized';
-                                  final formattedDate = DateFormat('dd-MM-yyyy HH:mm').format(tx.date);
 
-                                  return ListTile(
-                                    leading: Icon(
-                                      tx.type == TransactionType.income
-                                          ? Icons.arrow_downward
-                                          : Icons.arrow_upward,
-                                      color: tx.type == TransactionType.income ? Colors.green : Colors.red,
+                              return ListView.builder(
+                                key: ValueKey<String>(filter),
+                                itemCount: filteredTxns.length,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                itemBuilder: (context, index) {
+                                  final data = filteredTxns[index];
+                                  final tx = data.transaction;
+                                  final categoryName =
+                                      data.categoryName ?? 'Uncategorized';
+                                  final formattedDate = DateFormat(
+                                    'dd-MM-yyyy HH:mm',
+                                  ).format(tx.date);
+
+                                  final isIncome =
+                                      tx.type == TransactionType.income;
+
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 4,
                                     ),
-                                    title: Text(tx.description ?? 'No description'),
-                                    subtitle: Text('$categoryName • $formattedDate'),
-                                    trailing: Text(
-                                      '${tx.amount.toStringAsFixed(2)} ${tx.currency}',
-                                      style: TextStyle(
-                                        color: tx.type == TransactionType.income ? Colors.green : Colors.red,
-                                        fontWeight: FontWeight.bold,
+                                    // vertical spacing between pills
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 12,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: isIncome
+                                            ? Colors.green.shade50
+                                            : Colors.red.shade50,
+                                        borderRadius: BorderRadius.circular(8),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Color.fromRGBO(
+                                              0,
+                                              0,
+                                              0,
+                                              0.05,
+                                            ),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            isIncome
+                                                ? Icons.arrow_upward
+                                                : Icons.arrow_downward,
+                                            color: isIncome
+                                                ? Colors.green
+                                                : Colors.red,
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  tx.description ??
+                                                      'No description',
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: AppColors.darkGreen,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  '$categoryName • $formattedDate',
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Text(
+                                            '${tx.amount.toStringAsFixed(2)} ${tx.currency}',
+                                            style: TextStyle(
+                                              color: isIncome
+                                                  ? Colors.green
+                                                  : Colors.red,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   );
@@ -122,6 +281,9 @@ class _TransactionHistoryScreenState
                           );
                         },
                       ),
+                    );
+                  },
+                ),
               ),
             ],
           );
@@ -130,18 +292,15 @@ class _TransactionHistoryScreenState
         error: (e, st) => Center(child: Text("Error loading accounts: $e")),
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.lightGreen,
         onPressed: () {
           final accountsAsync = ref.read(accountsListProvider);
           final accounts = accountsAsync.asData?.value;
           if (accounts == null || accounts.isEmpty) return;
-
-          final firstAccountId = accounts.first.id;
-
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) =>
-                  TransactionFormScreen(initialAccountId: firstAccountId),
-            ),
+          showDialog(
+            context: context,
+            builder: (_) =>
+                TransactionFormScreen(initialAccountId: accounts.first.id),
           );
         },
         child: const Icon(Icons.add),

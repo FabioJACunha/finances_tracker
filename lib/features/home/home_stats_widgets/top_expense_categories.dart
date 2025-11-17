@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../home_stats_provider.dart';
+import '../../../helpers/app_colors.dart';
 
 class TopExpenseCategories extends ConsumerWidget {
   final int accountId;
@@ -28,7 +29,9 @@ class TopExpenseCategories extends ConsumerWidget {
     );
 
     return Card(
+      color: AppColors.lightGrey,
       margin: const EdgeInsets.all(8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: dataAsync.when(
@@ -39,13 +42,20 @@ class TopExpenseCategories extends ConsumerWidget {
               children: [
                 const Text(
                   'Top 3 Expense Categories',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.darkGreen,
+                    fontSize: 20
+                  ),
                 ),
                 const SizedBox(height: 8),
                 ...data.map(
                   (e) => Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Text('${e.key}: €${e.value.toStringAsFixed(2)}'),
+                    child: Text(
+                      '${e.key}: €${e.value.toStringAsFixed(2)}',
+                      style: TextStyle(color: AppColors.darkGreen),
+                    ),
                   ),
                 ),
               ],
