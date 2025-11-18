@@ -26,8 +26,8 @@ class BalanceEvolutionChart extends ConsumerWidget {
     );
 
     return Card(
-      color: AppColors.lightGrey,
-      margin: const EdgeInsets.all(8),
+      color: AppColors.bgTerciary,
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -46,7 +46,11 @@ class BalanceEvolutionChart extends ConsumerWidget {
               children: [
                 const Text(
                   'Balance Evolution',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.darkGreen, fontSize: 20),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textDark,
+                    fontSize: 20,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 SizedBox(

@@ -26,7 +26,7 @@ class SelectFormField<T> extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.lightGrey,
+              color: AppColors.bgPrimary,
               borderRadius: BorderRadius.circular(8),
             ),
             child: ConstrainedBox(
@@ -42,13 +42,13 @@ class SelectFormField<T> extends StatelessWidget {
                   final selected = item == value;
 
                   return Material(
-                    color: selected ? AppColors.green : AppColors.lightGreen,
+                    color: selected ? AppColors.bgTerciary : AppColors.bgSecondary,
                     borderRadius: BorderRadius.circular(8),
                     child: ListTile(
                       title: Text(
                         itemAsString(item),
                         style: TextStyle(
-                          color: selected ? Colors.white : AppColors.green,
+                          color: selected ? AppColors.textDark : AppColors.secondary,
                           fontWeight: selected
                               ? FontWeight.bold
                               : FontWeight.normal,
@@ -91,7 +91,7 @@ class SelectFormField<T> extends StatelessWidget {
             text: value != null ? itemAsString(value as T) : "",
           ),
           readOnly: true,
-          style: TextStyle(color: AppColors.green),
+          style: TextStyle(color: AppColors.textDark),
         ),
       ),
     );

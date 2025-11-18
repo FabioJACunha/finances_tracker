@@ -21,9 +21,13 @@ class AccountsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        foregroundColor: Colors.white,
-        title: const Text("Accounts"),
+        backgroundColor: AppColors.bgPrimary,
+        scrolledUnderElevation: 0.0,  // Prevents the color change when scrolled
+        surfaceTintColor: Colors.transparent, // Prevents tinting on scroll
+        title: const Text(
+          "Accounts",
+          style: TextStyle(color: AppColors.textDark),
+        ),
       ),
       body: accountsAsync.when(
         data: (accounts) {
@@ -56,7 +60,7 @@ class AccountsScreen extends ConsumerWidget {
                     return GestureDetector(
                       onTap: () => _openForm(context, ref, acc),
                       child: Card(
-                        color: AppColors.lightGrey,
+                        color: AppColors.bgTerciary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -78,14 +82,14 @@ class AccountsScreen extends ConsumerWidget {
                                       acc.name,
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        color: AppColors.darkGreen,
+                                        color: AppColors.secondary,
                                       ),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
                                       'Balance: €${acc.balance.toStringAsFixed(2)}',
                                       style: const TextStyle(
-                                        color: Colors.grey,
+                                        color: AppColors.textDark,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 13,
                                       ),
@@ -93,7 +97,10 @@ class AccountsScreen extends ConsumerWidget {
                                   ],
                                 ),
                               ),
-                              const Icon(Icons.edit, color: AppColors.darkGreen),
+                              const Icon(
+                                Icons.edit,
+                                color: AppColors.secondary,
+                              ),
                             ],
                           ),
                         ),
@@ -109,7 +116,7 @@ class AccountsScreen extends ConsumerWidget {
         error: (e, st) => Center(child: Text('Error: $e')),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.lightGreen,
+        backgroundColor: AppColors.primary,
         onPressed: () => _openForm(context, ref),
         child: const Icon(Icons.add),
       ),

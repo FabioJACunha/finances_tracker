@@ -42,9 +42,13 @@ class _TransactionHistoryScreenState
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        foregroundColor: Colors.white,
-        title: const Text("Transaction History"),
+        backgroundColor: AppColors.bgPrimary,
+        scrolledUnderElevation: 0.0,  // Prevents the color change when scrolled
+        surfaceTintColor: Colors.transparent, // Prevents tinting on scroll
+        title: const Text(
+          "Transaction History",
+          style: TextStyle(color: AppColors.textDark),
+        ),
       ),
       body: accountsAsync.when(
         data: (accounts) {
@@ -60,7 +64,7 @@ class _TransactionHistoryScreenState
                 height: 50,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: accounts.length,
                   separatorBuilder: (_, _) => const SizedBox(width: 8),
                   itemBuilder: (context, index) {
@@ -76,17 +80,17 @@ class _TransactionHistoryScreenState
                         ),
                         decoration: BoxDecoration(
                           color: selected
-                              ? AppColors.lightGreen
+                              ? AppColors.bgTerciary
                               : Colors.transparent,
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(100),
                         ),
                         child: Center(
                           child: Text(
                             account.name,
                             style: TextStyle(
                               color: selected
-                                  ? AppColors.darkGreen
-                                  : Colors.white,
+                                  ? AppColors.secondary
+                                  : AppColors.textDark,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -101,14 +105,14 @@ class _TransactionHistoryScreenState
               // Tabs
               TabBar(
                 controller: _tabController,
-                labelColor: AppColors.lightGreen,
-                unselectedLabelColor: Colors.white,
+                labelColor: AppColors.secondary,
+                unselectedLabelColor: AppColors.textDark,
                 dividerHeight: 0,
                 splashFactory: NoSplash.splashFactory,
                 overlayColor: WidgetStateProperty.all(Colors.transparent),
                 indicator: BoxDecoration(
                   border: Border(
-                    bottom: BorderSide(color: AppColors.lightGreen, width: 2),
+                    bottom: BorderSide(color: AppColors.secondary, width: 2),
                   ),
                 ),
                 indicatorColor: Colors.transparent,
@@ -207,8 +211,8 @@ class _TransactionHistoryScreenState
                                       ),
                                       decoration: BoxDecoration(
                                         color: isIncome
-                                            ? Colors.green.shade50
-                                            : Colors.red.shade50,
+                                            ? AppColors.bgGreen
+                                            : AppColors.bgRed,
                                         borderRadius: BorderRadius.circular(8),
                                         boxShadow: [
                                           BoxShadow(
@@ -230,8 +234,8 @@ class _TransactionHistoryScreenState
                                                 ? Icons.arrow_upward
                                                 : Icons.arrow_downward,
                                             color: isIncome
-                                                ? Colors.green
-                                                : Colors.red,
+                                                ? AppColors.green
+                                                : AppColors.red,
                                           ),
                                           const SizedBox(width: 12),
                                           Expanded(
@@ -244,7 +248,7 @@ class _TransactionHistoryScreenState
                                                       'No description',
                                                   style: const TextStyle(
                                                     fontWeight: FontWeight.bold,
-                                                    color: AppColors.darkGreen,
+                                                    color: AppColors.secondary,
                                                   ),
                                                 ),
                                                 const SizedBox(height: 2),
@@ -252,7 +256,7 @@ class _TransactionHistoryScreenState
                                                   '$categoryName • $formattedDate',
                                                   style: const TextStyle(
                                                     fontWeight: FontWeight.bold,
-                                                    color: Colors.grey,
+                                                    color: AppColors.textMuted,
                                                   ),
                                                 ),
                                               ],
@@ -262,8 +266,8 @@ class _TransactionHistoryScreenState
                                             '${tx.amount.toStringAsFixed(2)} ${tx.currency}',
                                             style: TextStyle(
                                               color: isIncome
-                                                  ? Colors.green
-                                                  : Colors.red,
+                                                  ? AppColors.green
+                                                  : AppColors.red,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
@@ -292,7 +296,7 @@ class _TransactionHistoryScreenState
         error: (e, st) => Center(child: Text("Error loading accounts: $e")),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.lightGreen,
+        backgroundColor: AppColors.primary,
         onPressed: () {
           final accountsAsync = ref.read(accountsListProvider);
           final accounts = accountsAsync.asData?.value;

@@ -25,8 +25,8 @@ class IncomeVsExpenseBar extends ConsumerWidget {
     );
 
     return Card(
-      color: AppColors.lightGrey,
-      margin: const EdgeInsets.all(8),
+      color: AppColors.bgTerciary,
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -41,7 +41,7 @@ class IncomeVsExpenseBar extends ConsumerWidget {
                   'Income vs Expense',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: AppColors.darkGreen,
+                    color: AppColors.textDark,
                     fontSize: 20,
                   ),
                 ),

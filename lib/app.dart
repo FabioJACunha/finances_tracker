@@ -32,14 +32,12 @@ class _MyAppState extends ConsumerState<MyApp> {
         if (locale == null) {
           return supportedLocales.first; // Fallback to 'en'
         }
-
         // 1. Check for an exact match (e.g., pt_BR, en_US)
         for (var supportedLocale in supportedLocales) {
           if (supportedLocale == locale) {
             return supportedLocale;
           }
         }
-
         // 2. Check for a language code match (e.g., device is 'pt_AO', use generic 'pt')
         for (var supportedLocale in supportedLocales) {
           if (supportedLocale.languageCode == locale.languageCode) {
@@ -52,29 +50,25 @@ class _MyAppState extends ConsumerState<MyApp> {
             }
           }
         }
-
         // 3. Final Fallback: Use English
         return supportedLocales.first;
       },
       theme: ThemeData(
         useMaterial3: true,
-        colorSchemeSeed: Colors.white,
-        scaffoldBackgroundColor: AppColors.darkGreen,
-        textTheme: Theme.of(
-          context,
-        ).textTheme.apply(bodyColor: Colors.white, displayColor: Colors.white),
+        // colorSchemeSeed: Color.fromRGBO(68, 38, 32, 1.0),
+        scaffoldBackgroundColor: AppColors.bgPrimary,
         iconTheme: const IconThemeData(
-          color: Colors.white, // default color for most icons
+          color: AppColors.textDark, // default color for most icons
         ),
         // Cursor, selection, and highlight color
         textSelectionTheme: const TextSelectionThemeData(
-          cursorColor: AppColors.green,
-          selectionColor: AppColors.lightGrey,
-          selectionHandleColor: AppColors.green,
+          cursorColor: AppColors.textDark,
+          selectionColor: AppColors.bgPrimary,
+          selectionHandleColor: AppColors.textDark,
         ),
         inputDecorationTheme: InputDecorationTheme(
-          labelStyle: const TextStyle(color: AppColors.green),
-          floatingLabelStyle: const TextStyle(color: AppColors.darkGreen, fontWeight: FontWeight.bold),
+          labelStyle: const TextStyle(color: AppColors.secondary),
+          floatingLabelStyle: const TextStyle(color: AppColors.secondary, fontWeight: FontWeight.bold),
           enabledBorder: OutlineInputBorder(
             borderSide: const BorderSide(color: Colors.transparent),
             borderRadius: BorderRadius.circular(8),
@@ -84,7 +78,7 @@ class _MyAppState extends ConsumerState<MyApp> {
             borderRadius: BorderRadius.circular(8),
           ),
           errorBorder: OutlineInputBorder(
-            borderSide: const BorderSide(color: Colors.red),
+            borderSide: const BorderSide(color: AppColors.red),
             borderRadius: BorderRadius.circular(8),
           ),
           focusedErrorBorder: OutlineInputBorder(
@@ -92,7 +86,7 @@ class _MyAppState extends ConsumerState<MyApp> {
             borderRadius: BorderRadius.circular(8),
           ),
           filled: true,
-          fillColor: AppColors.lightGreen, // background color
+          fillColor: AppColors.bgSecondary, // background color
         ),
       ),
       home: Builder(
@@ -103,9 +97,9 @@ class _MyAppState extends ConsumerState<MyApp> {
           return Scaffold(
             body: screens[_currentIndex],
             bottomNavigationBar: BottomNavigationBar(
-              backgroundColor: AppColors.darkGreen,
-              selectedItemColor: AppColors.lightGreen,
-              unselectedItemColor: Colors.white,
+              backgroundColor: AppColors.bgPrimary,
+              selectedItemColor: AppColors.secondary,
+              unselectedItemColor: AppColors.textDark,
               currentIndex: _currentIndex,
               // These now correctly use the localizations variable defined above
               items: [

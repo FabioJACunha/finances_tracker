@@ -17,11 +17,15 @@ class NetBalanceChangeCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final dataAsync = ref.watch(netBalanceChangeProvider(PeriodArgs(accountId: accountId, start: start, end: end)));
+    final dataAsync = ref.watch(
+      netBalanceChangeProvider(
+        PeriodArgs(accountId: accountId, start: start, end: end),
+      ),
+    );
 
     return Card(
-      color: AppColors.lightGrey,
-      margin: const EdgeInsets.all(8),
+      color: AppColors.bgTerciary,
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -31,7 +35,11 @@ class NetBalanceChangeCard extends ConsumerWidget {
             children: [
               const Text(
                 'Net Balance Change',
-                style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.darkGreen, fontSize: 20),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textDark,
+                  fontSize: 20,
+                ),
               ),
               const SizedBox(height: 8),
               Text(

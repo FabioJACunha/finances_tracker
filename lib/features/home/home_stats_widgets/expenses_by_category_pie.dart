@@ -50,8 +50,8 @@ class ExpensesByCategoryPie extends ConsumerWidget {
         }).toList();
 
         return Card(
-          color: AppColors.lightGrey,
-          margin: const EdgeInsets.all(8),
+          color: AppColors.bgTerciary,
+          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -64,7 +64,7 @@ class ExpensesByCategoryPie extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.darkGreen,
+                    color: AppColors.textDark,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -88,7 +88,7 @@ class ExpensesByCategoryPie extends ConsumerWidget {
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.darkGreen,
+                              color: AppColors.secondary,
                             ),
                           ),
                         ],

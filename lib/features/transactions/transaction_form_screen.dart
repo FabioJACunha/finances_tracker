@@ -63,11 +63,15 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     final newCategoryName = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
+        titlePadding: EdgeInsets.all(16),
+        contentPadding: EdgeInsets.all(16),
+        actionsPadding: EdgeInsets.all(16),
+        backgroundColor: AppColors.bgPrimary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         title: const Text(
           "Add New Category",
           style: TextStyle(
-            color: AppColors.darkGreen,
+            color: AppColors.textDark,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -79,18 +83,34 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         ),
         actions: [
           TextButton(
+            style: ButtonStyle(
+              backgroundColor:
+              WidgetStateProperty.resolveWith<Color?>((
+                  Set<WidgetState> states,
+                  ) {
+                return AppColors.bgTerciary;
+              }),
+            ),
             onPressed: () => Navigator.pop(context),
             child: const Text(
               "Cancel",
-              style: TextStyle(color: AppColors.darkGreen),
+              style: TextStyle(color: AppColors.textDark),
             ),
           ),
           ElevatedButton(
+            style: ButtonStyle(
+              backgroundColor:
+              WidgetStateProperty.resolveWith<Color?>((
+                  Set<WidgetState> states,
+                  ) {
+                return AppColors.primary;
+              }),
+            ),
             onPressed: () =>
                 Navigator.pop(context, _newCategoryController.text),
             child: const Text(
               "Add",
-              style: TextStyle(color: AppColors.darkGreen),
+              style: TextStyle(color: AppColors.textDark),
             ),
           ),
         ],
@@ -123,7 +143,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         width: screenWidth - 2 * horizontalPadding,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.lightGrey,
+          color: AppColors.bgPrimary,
           borderRadius: BorderRadius.circular(8),
         ),
         child: accountsAsync.when(
@@ -142,7 +162,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.darkGreen,
+                            color: AppColors.textDark,
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -203,7 +223,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                         ),
                         const SizedBox(height: 12),
                         Material(
-                          color: AppColors.lightGreen,
+                          color: AppColors.bgSecondary,
                           borderRadius: BorderRadius.circular(8),
                           child: ListTile(
                             title: Text(
@@ -212,11 +232,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                               "${_date.year} "
                               "${_date.hour.toString().padLeft(2, '0')}:"
                               "${_date.minute.toString().padLeft(2, '0')}",
-                              style: TextStyle(color: AppColors.green),
+                              style: TextStyle(color: AppColors.textDark),
                             ),
                             trailing: const Icon(
                               Icons.calendar_today,
-                              color: AppColors.green,
+                              color: AppColors.textDark,
                             ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
@@ -236,19 +256,20 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                                 builder: (context, child) => Theme(
                                   data: theme.copyWith(
                                     colorScheme: ColorScheme.light(
-                                      primary: AppColors.green,
-                                      onPrimary: Colors.white,
-                                      onSurface: AppColors.darkGreen,
+                                      primary: AppColors.secondary,
+                                      onPrimary: AppColors.bgPrimary,
+                                      onSurface: AppColors.textDark,
+                                      surface: AppColors.bgPrimary
                                     ),
                                     dialogTheme: DialogThemeData(
-                                      backgroundColor: AppColors.lightGrey,
+                                      backgroundColor: AppColors.bgPrimary,
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(16),
+                                        borderRadius: BorderRadius.circular(8),
                                       ),
                                     ),
                                     textButtonTheme: TextButtonThemeData(
                                       style: TextButton.styleFrom(
-                                        foregroundColor: AppColors.green,
+                                        foregroundColor: AppColors.textDark,
                                       ),
                                     ),
                                   ),
@@ -284,18 +305,34 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             TextButton(
+                              style: ButtonStyle(
+                                backgroundColor:
+                                WidgetStateProperty.resolveWith<Color?>((
+                                    Set<WidgetState> states,
+                                    ) {
+                                  return AppColors.bgTerciary;
+                                }),
+                              ),
                               onPressed: () => Navigator.pop(context),
                               child: const Text(
                                 "Cancel",
-                                style: TextStyle(color: AppColors.darkGreen),
+                                style: TextStyle(color: AppColors.textDark),
                               ),
                             ),
                             const SizedBox(width: 8),
                             ElevatedButton(
+                              style: ButtonStyle(
+                                backgroundColor:
+                                WidgetStateProperty.resolveWith<Color?>((
+                                    Set<WidgetState> states,
+                                    ) {
+                                  return AppColors.primary;
+                                }),
+                              ),
                               onPressed: _submit,
                               child: const Text(
                                 "Add Transaction",
-                                style: TextStyle(color: AppColors.darkGreen),
+                                style: TextStyle(color: AppColors.textDark),
                               ),
                             ),
                           ],

@@ -62,7 +62,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
       insetPadding: const EdgeInsets.symmetric(horizontal: horizontalPadding),
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.lightGrey,
+          color: AppColors.bgPrimary,
           borderRadius: BorderRadius.circular(8),
         ),
         width: screenWidth - 2 * horizontalPadding,
@@ -81,12 +81,12 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
-                    color: AppColors.darkGreen,
+                    color: AppColors.textDark,
                   ),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
-                  style: TextStyle(color: AppColors.green),
+                  style: TextStyle(color: AppColors.textDark),
                   initialValue: _name,
                   decoration: const InputDecoration(labelText: 'Account Name'),
                   validator: (val) =>
@@ -95,7 +95,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  style: TextStyle(color: AppColors.green),
+                  style: TextStyle(color: AppColors.textDark),
                   initialValue: _balance.toStringAsFixed(2),
                   decoration: const InputDecoration(labelText: 'Balance'),
                   keyboardType: const TextInputType.numberWithOptions(
@@ -116,16 +116,17 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                         'Exclude from total balance',
                         style: TextStyle(
                           fontSize: 14,
-                          color: AppColors.darkGreen,
+                          color: AppColors.secondary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                     Switch(
                       value: _excludeFromTotal,
-                      activeThumbColor: AppColors.green,
-                      activeTrackColor: AppColors.lightGreen,
-                      inactiveThumbColor: Colors.grey,
+                      activeThumbColor: AppColors.textDark,
+                      activeTrackColor: AppColors.primary,
+                      inactiveThumbColor: AppColors.bgSecondary,
+                      inactiveTrackColor: AppColors.bgTerciary,
                       trackOutlineColor:
                           WidgetStateProperty.resolveWith<Color?>((
                             Set<WidgetState> states,
@@ -142,18 +143,34 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
+                      style: ButtonStyle(
+                        backgroundColor:
+                        WidgetStateProperty.resolveWith<Color?>((
+                            Set<WidgetState> states,
+                            ) {
+                          return AppColors.bgTerciary;
+                        }),
+                      ),
                       onPressed: () => Navigator.pop(context),
                       child: const Text(
                         'Cancel',
-                        style: TextStyle(color: AppColors.darkGreen),
+                        style: TextStyle(color: AppColors.textDark),
                       ),
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton(
+                      style: ButtonStyle(
+                        backgroundColor:
+                            WidgetStateProperty.resolveWith<Color?>((
+                              Set<WidgetState> states,
+                            ) {
+                              return AppColors.primary;
+                            }),
+                      ),
                       onPressed: _submit,
                       child: const Text(
                         'Save',
-                        style: TextStyle(color: AppColors.darkGreen),
+                        style: TextStyle(color: AppColors.textDark),
                       ),
                     ),
                   ],

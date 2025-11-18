@@ -29,8 +29,8 @@ class TopExpenseCategories extends ConsumerWidget {
     );
 
     return Card(
-      color: AppColors.lightGrey,
-      margin: const EdgeInsets.all(8),
+      color: AppColors.bgTerciary,
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -44,7 +44,7 @@ class TopExpenseCategories extends ConsumerWidget {
                   'Top 3 Expense Categories',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: AppColors.darkGreen,
+                    color: AppColors.textDark,
                     fontSize: 20
                   ),
                 ),
@@ -54,7 +54,7 @@ class TopExpenseCategories extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Text(
                       '${e.key}: €${e.value.toStringAsFixed(2)}',
-                      style: TextStyle(color: AppColors.darkGreen),
+                      style: TextStyle(color: AppColors.secondary),
                     ),
                   ),
                 ),

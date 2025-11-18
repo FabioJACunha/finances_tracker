@@ -83,8 +83,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
         return Scaffold(
           appBar: AppBar(
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            title: const Text("Home", style: TextStyle(color: Colors.white)),
+            backgroundColor: AppColors.bgPrimary,
+            scrolledUnderElevation: 0.0,  // Prevents the color change when scrolled
+            surfaceTintColor: Colors.transparent, // Prevents tinting on scroll
+            title: const Text(
+              "Home",
+              style: TextStyle(color: AppColors.textDark),
+            ),
           ),
           body: Column(
             children: [
@@ -93,7 +98,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 height: 50,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: accounts.length,
                   separatorBuilder: (_, _) => const SizedBox(width: 8),
                   itemBuilder: (context, index) {
@@ -111,17 +116,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         ),
                         decoration: BoxDecoration(
                           color: selected
-                              ? AppColors.lightGreen
+                              ? AppColors.bgTerciary
                               : Colors.transparent,
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(100),
                         ),
                         child: Center(
                           child: Text(
                             account.name,
                             style: TextStyle(
                               color: selected
-                                  ? AppColors.darkGreen
-                                  : Colors.white,
+                                  ? AppColors.secondary
+                                  : AppColors.textDark,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -137,13 +142,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               /// Tabs: Week / Month / Year ----------------------------------------
               TabBar(
                 controller: _tabController,
-                labelColor: AppColors.lightGreen,
-                unselectedLabelColor: Colors.white,
+                labelColor: AppColors.secondary,
+                unselectedLabelColor: AppColors.textDark,
                 dividerHeight: 0,
                 indicatorSize: TabBarIndicatorSize.tab,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 indicator: BoxDecoration(
                   border: Border(
-                    bottom: BorderSide(color: AppColors.lightGreen, width: 2),
+                    bottom: BorderSide(color: AppColors.secondary, width: 2),
                   ),
                 ),
                 splashFactory: NoSplash.splashFactory,
@@ -186,11 +192,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           end: range.end,
                         ),
                         if (_currentFilter != DatePeriodFilter.week)
-                        SavingsRateCard(
-                          accountId: _selectedAccountId!,
-                          start: range.start,
-                          end: range.end,
-                        ),
+                          SavingsRateCard(
+                            accountId: _selectedAccountId!,
+                            start: range.start,
+                            end: range.end,
+                          ),
                         TopExpenseCategories(
                           accountId: _selectedAccountId!,
                           start: range.start,
@@ -202,11 +208,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           end: range.end,
                         ),
                         if (_currentFilter == DatePeriodFilter.year)
-                        BalanceEvolutionChart(
-                          accountId: _selectedAccountId!,
-                          start: range.start,
-                          end: range.end,
-                        ),
+                          BalanceEvolutionChart(
+                            accountId: _selectedAccountId!,
+                            start: range.start,
+                            end: range.end,
+                          ),
                       ],
                     ),
                   ),
@@ -216,15 +222,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           ),
 
           floatingActionButton: FloatingActionButton(
-            backgroundColor: AppColors.lightGreen,
+            backgroundColor: AppColors.primary,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(18),
             ),
             onPressed: () {
               showDialog(
                 context: context,
-                builder: (_) =>
-                    TransactionFormScreen(initialAccountId: _selectedAccountId!),
+                builder: (_) => TransactionFormScreen(
+                  initialAccountId: _selectedAccountId!,
+                ),
               );
             },
             child: const Icon(Icons.add),
