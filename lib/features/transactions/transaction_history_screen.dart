@@ -80,7 +80,7 @@ class _TransactionHistoryScreenState
                         ),
                         decoration: BoxDecoration(
                           color: selected
-                              ? AppColors.bgTerciary
+                              ? AppColors.terciary
                               : Colors.transparent,
                           borderRadius: BorderRadius.circular(100),
                         ),
@@ -193,7 +193,7 @@ class _TransactionHistoryScreenState
                                   final categoryName =
                                       data.categoryName ?? 'Uncategorized';
                                   final formattedDate = DateFormat(
-                                    'dd-MM-yyyy HH:mm',
+                                    'dd-MM-yyyy',
                                   ).format(tx.date);
 
                                   final isIncome =
@@ -248,7 +248,7 @@ class _TransactionHistoryScreenState
                                                       'No description',
                                                   style: const TextStyle(
                                                     fontWeight: FontWeight.bold,
-                                                    color: AppColors.secondary,
+                                                    color: AppColors.textDark,
                                                   ),
                                                 ),
                                                 const SizedBox(height: 2),
@@ -263,7 +263,7 @@ class _TransactionHistoryScreenState
                                             ),
                                           ),
                                           Text(
-                                            '${tx.amount.toStringAsFixed(2)} ${tx.currency}',
+                                            '${tx.amount.toStringAsFixed(2)} €', //${tx.currency} for multiple currencies
                                             style: TextStyle(
                                               color: isIncome
                                                   ? AppColors.green
@@ -297,6 +297,7 @@ class _TransactionHistoryScreenState
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.textDark,
         onPressed: () {
           final accountsAsync = ref.read(accountsListProvider);
           final accounts = accountsAsync.asData?.value;

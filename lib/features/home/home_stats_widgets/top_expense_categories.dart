@@ -53,7 +53,7 @@ class TopExpenseCategories extends ConsumerWidget {
                   (e) => Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Text(
-                      '${e.key}: €${e.value.toStringAsFixed(2)}',
+                      '${e.key}: ${e.value.toStringAsFixed(2)} €',
                       style: TextStyle(color: AppColors.secondary),
                     ),
                   ),

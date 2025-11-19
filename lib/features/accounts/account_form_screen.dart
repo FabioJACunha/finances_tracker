@@ -126,7 +126,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                       activeThumbColor: AppColors.textDark,
                       activeTrackColor: AppColors.primary,
                       inactiveThumbColor: AppColors.bgSecondary,
-                      inactiveTrackColor: AppColors.bgTerciary,
+                      inactiveTrackColor: AppColors.terciary,
                       trackOutlineColor:
                           WidgetStateProperty.resolveWith<Color?>((
                             Set<WidgetState> states,
@@ -148,7 +148,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                         WidgetStateProperty.resolveWith<Color?>((
                             Set<WidgetState> states,
                             ) {
-                          return AppColors.bgTerciary;
+                          return AppColors.terciary;
                         }),
                       ),
                       onPressed: () => Navigator.pop(context),

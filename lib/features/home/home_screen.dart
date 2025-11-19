@@ -116,7 +116,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         ),
                         decoration: BoxDecoration(
                           color: selected
-                              ? AppColors.bgTerciary
+                              ? AppColors.terciary
                               : Colors.transparent,
                           borderRadius: BorderRadius.circular(100),
                         ),
@@ -223,6 +223,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
           floatingActionButton: FloatingActionButton(
             backgroundColor: AppColors.primary,
+            foregroundColor: AppColors.textDark,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(18),
             ),

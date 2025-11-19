@@ -38,7 +38,7 @@ class ExpensesByCategoryPie extends ConsumerWidget {
 
           return PieChartSectionData(
             value: e.value,
-            title: '${e.key}\n${e.value.toStringAsFixed(2)}€',
+            title: '${e.key}\n${e.value.toStringAsFixed(2)} €',
             color: color,
             radius: 50,
             titleStyle: const TextStyle(
@@ -84,7 +84,7 @@ class ExpensesByCategoryPie extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "${total.toStringAsFixed(2)}€",
+                            "${total.toStringAsFixed(2)} €",
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,

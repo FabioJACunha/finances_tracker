@@ -39,12 +39,13 @@ class AccountsScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
-                  'Total Balance: €${totalBalance.toStringAsFixed(2)}',
+                  'Total Balance: ${totalBalance.toStringAsFixed(2)} €',
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
+                    color: AppColors.textDark
                   ),
                 ),
               ),
@@ -82,14 +83,14 @@ class AccountsScreen extends ConsumerWidget {
                                       acc.name,
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        color: AppColors.secondary,
+                                        color: AppColors.textDark,
                                       ),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      'Balance: €${acc.balance.toStringAsFixed(2)}',
+                                      'Balance: ${acc.balance.toStringAsFixed(2)} €',
                                       style: const TextStyle(
-                                        color: AppColors.textDark,
+                                        color: AppColors.secondary,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 13,
                                       ),
@@ -99,7 +100,7 @@ class AccountsScreen extends ConsumerWidget {
                               ),
                               const Icon(
                                 Icons.edit,
-                                color: AppColors.secondary,
+                                color: AppColors.textDark,
                               ),
                             ],
                           ),
@@ -117,6 +118,7 @@ class AccountsScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.textDark,
         onPressed: () => _openForm(context, ref),
         child: const Icon(Icons.add),
       ),

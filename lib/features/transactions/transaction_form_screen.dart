@@ -66,6 +66,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         titlePadding: EdgeInsets.all(16),
         contentPadding: EdgeInsets.all(16),
         actionsPadding: EdgeInsets.all(16),
+        insetPadding: EdgeInsets.symmetric(horizontal: 32),
+        constraints: BoxConstraints(
+          maxWidth: double.infinity,
+          minWidth: double.infinity,
+        ),
         backgroundColor: AppColors.bgPrimary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         title: const Text(
@@ -88,7 +93,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
               WidgetStateProperty.resolveWith<Color?>((
                   Set<WidgetState> states,
                   ) {
-                return AppColors.bgTerciary;
+                return AppColors.terciary;
               }),
             ),
             onPressed: () => Navigator.pop(context),
@@ -225,22 +230,9 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                         Material(
                           color: AppColors.bgSecondary,
                           borderRadius: BorderRadius.circular(8),
-                          child: ListTile(
-                            title: Text(
-                              "Date: ${_date.day.toString().padLeft(2, '0')}/"
-                              "${_date.month.toString().padLeft(2, '0')}/"
-                              "${_date.year} "
-                              "${_date.hour.toString().padLeft(2, '0')}:"
-                              "${_date.minute.toString().padLeft(2, '0')}",
-                              style: TextStyle(color: AppColors.textDark),
-                            ),
-                            trailing: const Icon(
-                              Icons.calendar_today,
-                              color: AppColors.textDark,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
+                          clipBehavior: Clip.none,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(8),
                             onTap: () async {
                               final navigator = Navigator.of(context);
                               final theme = Theme.of(context);
@@ -251,15 +243,14 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                                 initialDate: _date,
                                 firstDate: DateTime(2025),
                                 lastDate: DateTime.now(),
-                                initialEntryMode:
-                                    DatePickerEntryMode.calendarOnly,
+                                initialEntryMode: DatePickerEntryMode.calendarOnly,
                                 builder: (context, child) => Theme(
                                   data: theme.copyWith(
                                     colorScheme: ColorScheme.light(
-                                      primary: AppColors.secondary,
-                                      onPrimary: AppColors.bgPrimary,
-                                      onSurface: AppColors.textDark,
-                                      surface: AppColors.bgPrimary
+                                        primary: AppColors.secondary,
+                                        onPrimary: AppColors.bgPrimary,
+                                        onSurface: AppColors.textDark,
+                                        surface: AppColors.bgPrimary
                                     ),
                                     dialogTheme: DialogThemeData(
                                       backgroundColor: AppColors.bgPrimary,
@@ -280,7 +271,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                               if (pickedDate == null) return;
                               if (!mounted) return;
 
-                              // show time picker - DON'T use context here
+                              // show time picker
                               final pickedTime = await showTimePicker(
                                 context: navigator.context,
                                 initialTime: TimeOfDay.fromDateTime(_date),
@@ -298,6 +289,52 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                                 );
                               });
                             },
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(12, 16, 12, 16),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          "${_date.day.toString().padLeft(2, '0')}/"
+                                              "${_date.month.toString().padLeft(2, '0')}/"
+                                              "${_date.year} "
+                                              "${_date.hour.toString().padLeft(2, '0')}:"
+                                              "${_date.minute.toString().padLeft(2, '0')}",
+                                          style: TextStyle(
+                                            color: AppColors.textDark,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ),
+                                      Icon(
+                                        Icons.calendar_today,
+                                        color: AppColors.textDark,
+                                        size: 20,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 8,
+                                  top: -8,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal:8),
+                                    color: Colors.transparent,
+                                    child: Text(
+                                      "Date",
+                                      style: TextStyle(
+                                        color: AppColors.secondary,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                         const SizedBox(height: 24),
@@ -310,7 +347,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                                 WidgetStateProperty.resolveWith<Color?>((
                                     Set<WidgetState> states,
                                     ) {
-                                  return AppColors.bgTerciary;
+                                  return AppColors.terciary;
                                 }),
                               ),
                               onPressed: () => Navigator.pop(context),

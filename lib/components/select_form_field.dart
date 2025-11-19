@@ -22,6 +22,11 @@ class SelectFormField<T> extends StatelessWidget {
       context: context,
       builder: (context) {
         return Dialog(
+          insetPadding: EdgeInsets.symmetric(horizontal: 32),
+          constraints: BoxConstraints(
+            maxWidth: double.infinity,
+            minWidth: double.infinity,
+          ),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           child: Container(
             padding: const EdgeInsets.all(16),
@@ -42,16 +47,16 @@ class SelectFormField<T> extends StatelessWidget {
                   final selected = item == value;
 
                   return Material(
-                    color: selected ? AppColors.bgTerciary : AppColors.bgSecondary,
+                    color: selected ? AppColors.terciary : AppColors.bgSecondary,
                     borderRadius: BorderRadius.circular(8),
                     child: ListTile(
                       title: Text(
                         itemAsString(item),
                         style: TextStyle(
-                          color: selected ? AppColors.textDark : AppColors.secondary,
-                          fontWeight: selected
-                              ? FontWeight.bold
-                              : FontWeight.normal,
+                          color: selected ? AppColors.secondary : AppColors.textDark,
+                          // fontWeight: selected
+                          //     ? FontWeight.bold
+                          //     : FontWeight.normal,
                         ),
                       ),
                       shape: RoundedRectangleBorder(

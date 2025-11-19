@@ -43,7 +43,7 @@ class NetBalanceChangeCard extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                '€${value.toStringAsFixed(2)}',
+                '${value.toStringAsFixed(2)} €',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
