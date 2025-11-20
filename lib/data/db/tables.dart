@@ -28,6 +28,8 @@ class Transactions extends Table {
 
   DateTimeColumn get date => dateTime()();
 
+  TextColumn get title => text().nullable()();
+
   TextColumn get description => text().nullable()();
 
   IntColumn get type => intEnum<TransactionType>()();

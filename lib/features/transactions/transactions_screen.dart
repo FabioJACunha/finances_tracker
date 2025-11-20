@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/accounts_provider.dart';
 import '../../providers/transactions_provider.dart';
+import '../../providers/services_provider.dart';
 import '../../data/db/tables.dart';
 import 'package:intl/intl.dart';
 import 'transaction_form_screen.dart';
@@ -26,7 +27,6 @@ class _TransactionHistoryScreenState
   @override
   void initState() {
     super.initState();
-    // Initialize TabController here
     _tabController = TabController(length: 3, vsync: this);
   }
 
@@ -43,8 +43,8 @@ class _TransactionHistoryScreenState
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.bgPrimary,
-        scrolledUnderElevation: 0.0,  // Prevents the color change when scrolled
-        surfaceTintColor: Colors.transparent, // Prevents tinting on scroll
+        scrolledUnderElevation: 0.0,
+        surfaceTintColor: Colors.transparent,
         title: const Text(
           "Transaction History",
           style: TextStyle(color: AppColors.textDark),
@@ -157,19 +157,18 @@ class _TransactionHistoryScreenState
                           FadeTransition(opacity: animation, child: child),
                       child: Builder(
                         key: ValueKey(_currentFilter),
-                        // important for AnimatedSwitcher
                         builder: (context) {
                           return txnStream.when(
                             data: (transactions) {
-                              final filteredTxns = transactions.where((t) {
+                              final filteredTxns = transactions.where((data) {
                                 switch (_currentFilter) {
                                   case TransactionTypeFilter.all:
                                     return true;
                                   case TransactionTypeFilter.expense:
-                                    return t.transaction.type ==
+                                    return data.transaction.type ==
                                         TransactionType.expense;
                                   case TransactionTypeFilter.income:
-                                    return t.transaction.type ==
+                                    return data.transaction.type ==
                                         TransactionType.income;
                                 }
                               }).toList();
@@ -191,7 +190,7 @@ class _TransactionHistoryScreenState
                                   final data = filteredTxns[index];
                                   final tx = data.transaction;
                                   final categoryName =
-                                      data.categoryName ?? 'Uncategorized';
+                                      data.category?.name ?? 'Uncategorized';
                                   final formattedDate = DateFormat(
                                     'dd-MM-yyyy',
                                   ).format(tx.date);
@@ -199,79 +198,160 @@ class _TransactionHistoryScreenState
                                   final isIncome =
                                       tx.type == TransactionType.income;
 
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 4,
-                                    ),
-                                    // vertical spacing between pills
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 12,
+                                  return Dismissible(
+                                    key: Key('transaction_${tx.id}'),
+                                    direction: DismissDirection.endToStart,
+                                    background: Container(
+                                      alignment: Alignment.centerRight,
+                                      padding: const EdgeInsets.only(right: 20),
+                                      margin: const EdgeInsets.symmetric(
+                                        vertical: 4,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: isIncome
-                                            ? AppColors.bgGreen
-                                            : AppColors.bgRed,
+                                        color: Colors.red,
                                         borderRadius: BorderRadius.circular(8),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Color.fromRGBO(
-                                              0,
-                                              0,
-                                              0,
-                                              0.05,
-                                            ),
-                                            blurRadius: 4,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ],
                                       ),
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            isIncome
-                                                ? Icons.arrow_upward
-                                                : Icons.arrow_downward,
-                                            color: isIncome
-                                                ? AppColors.green
-                                                : AppColors.red,
+                                      child: const Icon(
+                                        Icons.delete,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    confirmDismiss: (direction) async {
+                                      return await showDialog<bool>(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title: const Text(
+                                            'Delete Transaction',
                                           ),
-                                          const SizedBox(width: 12),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  tx.description ??
-                                                      'No description',
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: AppColors.textDark,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 2),
-                                                Text(
-                                                  '$categoryName • $formattedDate',
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: AppColors.textMuted,
-                                                  ),
-                                                ),
-                                              ],
+                                          content: Text(
+                                            'Are you sure you want to delete "${tx.title ?? 'this transaction'}"?',
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(context, false),
+                                              child: const Text('Cancel'),
                                             ),
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(context, true),
+                                              style: TextButton.styleFrom(
+                                                foregroundColor: Colors.red,
+                                              ),
+                                              child: const Text('Delete'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                    onDismissed: (direction) async {
+                                      try {
+                                        final transactionService = ref.read(
+                                          transactionServiceProvider,
+                                        );
+                                        await transactionService
+                                            .deleteTransaction(tx.id);
+
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                'Transaction deleted',
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      } catch (e) {
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text('Error: $e'),
+                                            ),
+                                          );
+                                        }
+                                      }
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 4,
+                                      ),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 12,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: isIncome
+                                              ? AppColors.bgGreen
+                                              : AppColors.bgRed,
+                                          borderRadius: BorderRadius.circular(
+                                            8,
                                           ),
-                                          Text(
-                                            '${tx.amount.toStringAsFixed(2)} €', //${tx.currency} for multiple currencies
-                                            style: TextStyle(
+                                          boxShadow: const [
+                                            BoxShadow(
+                                              color: Color.fromRGBO(
+                                                0,
+                                                0,
+                                                0,
+                                                0.05,
+                                              ),
+                                              blurRadius: 4,
+                                              offset: Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              isIncome
+                                                  ? Icons.arrow_upward
+                                                  : Icons.arrow_downward,
                                               color: isIncome
                                                   ? AppColors.green
                                                   : AppColors.red,
-                                              fontWeight: FontWeight.bold,
                                             ),
-                                          ),
-                                        ],
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    tx.title ?? 'No title',
+                                                    style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: AppColors.textDark,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 2),
+                                                  Text(
+                                                    '$categoryName • $formattedDate',
+                                                    style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color:
+                                                          AppColors.textMuted,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            Text(
+                                              '${tx.amount.toStringAsFixed(2)} €',
+                                              style: TextStyle(
+                                                color: isIncome
+                                                    ? AppColors.green
+                                                    : AppColors.red,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   );

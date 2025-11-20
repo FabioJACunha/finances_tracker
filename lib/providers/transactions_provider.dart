@@ -1,23 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/db/database.dart';
+import '../data/db/daos/transactions_dao.dart';
 import 'db_provider.dart';
 
+// DAO provider (direct access to data layer)
 final transactionsDaoProvider = Provider<TransactionsDao>((ref) {
   final db = ref.watch(databaseProvider);
   return db.transactionsDao;
 });
 
-final transactionsForAccountProvider =
-    StreamProvider.family<List<Transaction>, int>((ref, accountId) {
-      final dao = ref.watch(transactionsDaoProvider);
-      return dao.watchByAccount(accountId);
-    });
-
+// Stream provider for READ operations (watching data with category info)
 final transactionsWithCategoryProvider =
-    StreamProvider.family<
-      List<({Transaction transaction, String? categoryName})>,
-      int
-    >((ref, accountId) {
+    StreamProvider.family<List<TransactionWithCategory>, int>((ref, accountId) {
       final dao = ref.watch(transactionsDaoProvider);
-      return dao.watchWithCategoryNameByAccount(accountId);
+      return dao.watchByAccountWithCategory(accountId);
     });

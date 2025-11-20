@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../providers/accounts_provider.dart';
+import '../../providers/services_provider.dart';
 import '../../data/db/database.dart';
-import 'package:drift/drift.dart' hide Column;
 import '../../helpers/app_colors.dart';
 
 class AccountFormScreen extends ConsumerStatefulWidget {
@@ -32,31 +31,43 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
 
-    final dao = ref.read(accountsDaoProvider);
+    try {
+      final accountService = ref.read(accountServiceProvider);
 
-    final accountCompanion = AccountsCompanion(
-      id: widget.initialAccount != null
-          ? Value(widget.initialAccount!.id)
-          : const Value.absent(),
-      name: Value(_name),
-      balance: Value(_balance),
-      excludeFromTotal: Value(_excludeFromTotal),
-    );
+      if (widget.initialAccount != null) {
+        // Update existing account
+        await accountService.updateAccount(
+          id: widget.initialAccount!.id,
+          name: _name,
+          excludeFromTotal: _excludeFromTotal,
+        );
 
-    if (widget.initialAccount != null) {
-      await dao.updateAccountData(accountCompanion);
-    } else {
-      await dao.insertAccount(accountCompanion);
+        // Note: Balance is not updated here - it should only change through transactions
+        // If you want to allow manual balance adjustments, you need a separate method
+      } else {
+        // Create new account
+        await accountService.createAccount(
+          name: _name,
+          initialBalance: _balance,
+          excludeFromTotal: _excludeFromTotal,
+        );
+      }
+
+      if (!mounted) return;
+      Navigator.of(context).pop();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
-
-    if (!mounted) return;
-    Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     const horizontalPadding = 16.0;
+    final isEditing = widget.initialAccount != null;
 
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: horizontalPadding),
@@ -75,9 +86,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.initialAccount != null
-                      ? 'Edit Account'
-                      : 'Add Account',
+                  isEditing ? 'Edit Account' : 'Add Account',
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
@@ -86,7 +95,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
-                  style: TextStyle(color: AppColors.textDark),
+                  style: const TextStyle(color: AppColors.textDark),
                   initialValue: _name,
                   decoration: const InputDecoration(labelText: 'Account Name'),
                   validator: (val) =>
@@ -94,19 +103,61 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                   onSaved: (val) => _name = val!,
                 ),
                 const SizedBox(height: 12),
-                TextFormField(
-                  style: TextStyle(color: AppColors.textDark),
-                  initialValue: _balance.toStringAsFixed(2),
-                  decoration: const InputDecoration(labelText: 'Balance'),
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
+                // Only show balance field when creating new account
+                if (!isEditing) ...[
+                  TextFormField(
+                    style: const TextStyle(color: AppColors.textDark),
+                    initialValue: _balance.toStringAsFixed(2),
+                    decoration: const InputDecoration(
+                      labelText: 'Initial Balance',
+                      helperText:
+                          'Balance can only be changed through transactions after creation',
+                      helperMaxLines: 2,
+                    ),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    validator: (val) =>
+                        val == null || double.tryParse(val) == null
+                        ? 'Enter a valid number'
+                        : null,
+                    onSaved: (val) => _balance = double.parse(val!),
                   ),
-                  validator: (val) =>
-                      val == null || double.tryParse(val) == null
-                      ? 'Enter a valid number'
-                      : null,
-                  onSaved: (val) => _balance = double.parse(val!),
-                ),
+                  const SizedBox(height: 12),
+                ] else ...[
+                  // Show current balance as read-only when editing
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Current Balance',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.secondary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${_balance.toStringAsFixed(2)} €',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textDark,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Use transactions to change balance',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.secondary,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -145,11 +196,11 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                     TextButton(
                       style: ButtonStyle(
                         backgroundColor:
-                        WidgetStateProperty.resolveWith<Color?>((
-                            Set<WidgetState> states,
+                            WidgetStateProperty.resolveWith<Color?>((
+                              Set<WidgetState> states,
                             ) {
-                          return AppColors.terciary;
-                        }),
+                              return AppColors.terciary;
+                            }),
                       ),
                       onPressed: () => Navigator.pop(context),
                       child: const Text(

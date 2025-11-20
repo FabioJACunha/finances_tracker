@@ -84,8 +84,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         return Scaffold(
           appBar: AppBar(
             backgroundColor: AppColors.bgPrimary,
-            scrolledUnderElevation: 0.0,  // Prevents the color change when scrolled
-            surfaceTintColor: Colors.transparent, // Prevents tinting on scroll
+            scrolledUnderElevation: 0.0,
+            // Prevents the color change when scrolled
+            surfaceTintColor: Colors.transparent,
+            // Prevents tinting on scroll
             title: const Text(
               "Home",
               style: TextStyle(color: AppColors.textDark),
@@ -186,11 +188,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             start: range.start,
                             end: range.end,
                           ),
-                        NetBalanceChangeCard(
-                          accountId: _selectedAccountId!,
-                          start: range.start,
-                          end: range.end,
-                        ),
+                        if (_currentFilter == DatePeriodFilter.week)
+                          NetBalanceChangeCard(
+                            accountId: _selectedAccountId!,
+                            start: range.start,
+                            end: range.end,
+                          ),
                         if (_currentFilter != DatePeriodFilter.week)
                           SavingsRateCard(
                             accountId: _selectedAccountId!,

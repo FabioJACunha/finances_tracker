@@ -54,9 +54,6 @@ class SelectFormField<T> extends StatelessWidget {
                         itemAsString(item),
                         style: TextStyle(
                           color: selected ? AppColors.secondary : AppColors.textDark,
-                          // fontWeight: selected
-                          //     ? FontWeight.bold
-                          //     : FontWeight.normal,
                         ),
                       ),
                       shape: RoundedRectangleBorder(

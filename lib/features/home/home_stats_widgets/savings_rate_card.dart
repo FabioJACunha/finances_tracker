@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../home_stats_provider.dart';
+import '../../../providers/analytics_provider.dart';
 import '../../../helpers/app_colors.dart';
+import '../../../models/period_args.dart';
 
 class SavingsRateCard extends ConsumerWidget {
   final int accountId;

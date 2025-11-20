@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/accounts_provider.dart';
-import '../../providers/transactions_provider.dart';
+import '../../providers/services_provider.dart';
 import '../../providers/categories_provider.dart';
 import '../../data/db/tables.dart';
-import '../../data/db/database.dart';
 import '../../helpers/app_colors.dart';
-import 'package:drift/drift.dart' hide Column;
 import '../../components/select_form_field.dart';
 
 class TransactionFormScreen extends ConsumerStatefulWidget {
@@ -24,6 +22,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   late int _accountId;
   TransactionType _type = TransactionType.expense;
   String? _category;
+  String? _title;
   String? _description;
   double? _amount;
   DateTime _date = DateTime.now();
@@ -37,6 +36,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 
   @override
   void dispose() {
+    _newCategoryController.dispose();
     super.dispose();
   }
 
@@ -44,30 +44,39 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
 
-    await ref
-        .read(transactionsDaoProvider)
-        .insertTransactionAndUpdateBalance(
-          accountId: _accountId,
-          amount: _amount!,
-          type: _type,
-          description: _description,
-          categoryName: _category ?? "Uncategorized",
-          date: _date,
-        );
+    try {
+      final transactionService = ref.read(transactionServiceProvider);
 
-    if (!mounted) return;
-    Navigator.of(context).pop();
+      await transactionService.createTransaction(
+        accountId: _accountId,
+        amount: _amount!,
+        type: _type,
+        title: _title,
+        description: _description,
+        categoryName: _category,
+        // Can be null for uncategorized
+        date: _date,
+      );
+
+      if (!mounted) return;
+      Navigator.of(context).pop();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
   }
 
   Future<void> _addNewCategory() async {
     final newCategoryName = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        titlePadding: EdgeInsets.all(16),
-        contentPadding: EdgeInsets.all(16),
-        actionsPadding: EdgeInsets.all(16),
-        insetPadding: EdgeInsets.symmetric(horizontal: 32),
-        constraints: BoxConstraints(
+        titlePadding: const EdgeInsets.all(16),
+        contentPadding: const EdgeInsets.all(16),
+        actionsPadding: const EdgeInsets.all(16),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 32),
+        constraints: const BoxConstraints(
           maxWidth: double.infinity,
           minWidth: double.infinity,
         ),
@@ -89,10 +98,9 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         actions: [
           TextButton(
             style: ButtonStyle(
-              backgroundColor:
-              WidgetStateProperty.resolveWith<Color?>((
-                  Set<WidgetState> states,
-                  ) {
+              backgroundColor: WidgetStateProperty.resolveWith<Color?>((
+                Set<WidgetState> states,
+              ) {
                 return AppColors.terciary;
               }),
             ),
@@ -104,15 +112,14 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
           ),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor:
-              WidgetStateProperty.resolveWith<Color?>((
-                  Set<WidgetState> states,
-                  ) {
+              backgroundColor: WidgetStateProperty.resolveWith<Color?>((
+                Set<WidgetState> states,
+              ) {
                 return AppColors.primary;
               }),
             ),
             onPressed: () =>
-                Navigator.pop(context, _newCategoryController.text),
+                Navigator.pop(context, _newCategoryController.text.trim()),
             child: const Text(
               "Add",
               style: TextStyle(color: AppColors.textDark),
@@ -123,14 +130,20 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     );
 
     if (newCategoryName != null && newCategoryName.isNotEmpty) {
-      final dao = ref.read(categoriesDaoProvider);
-      await dao.insertCategory(
-        CategoriesCompanion(name: Value(newCategoryName)),
-      );
-      setState(() {
-        _category = newCategoryName;
-        _newCategoryController.clear();
-      });
+      try {
+        final categoryService = ref.read(categoryServiceProvider);
+        await categoryService.createCategory(newCategoryName);
+
+        setState(() {
+          _category = newCategoryName;
+          _newCategoryController.clear();
+        });
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
     }
   }
 
@@ -162,9 +175,9 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           "Add Transaction",
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: AppColors.textDark,
@@ -178,6 +191,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                           itemAsString: (id) =>
                               accounts.firstWhere((a) => a.id == id).name,
                           onChanged: (val) => setState(() => _accountId = val!),
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          decoration: const InputDecoration(labelText: "Title"),
+                          onSaved: (val) => _title = val?.trim(),
                         ),
                         const SizedBox(height: 12),
                         SelectFormField<TransactionType>(
@@ -210,7 +228,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                           decoration: const InputDecoration(
                             labelText: "Description",
                           ),
-                          onSaved: (val) => _description = val,
+                          onSaved: (val) => _description = val?.trim(),
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
@@ -241,16 +259,17 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                               final pickedDate = await showDatePicker(
                                 context: context,
                                 initialDate: _date,
-                                firstDate: DateTime(2025),
+                                firstDate: DateTime(2020),
                                 lastDate: DateTime.now(),
-                                initialEntryMode: DatePickerEntryMode.calendarOnly,
+                                initialEntryMode:
+                                    DatePickerEntryMode.calendarOnly,
                                 builder: (context, child) => Theme(
                                   data: theme.copyWith(
-                                    colorScheme: ColorScheme.light(
-                                        primary: AppColors.secondary,
-                                        onPrimary: AppColors.bgPrimary,
-                                        onSurface: AppColors.textDark,
-                                        surface: AppColors.bgPrimary
+                                    colorScheme: const ColorScheme.light(
+                                      primary: AppColors.secondary,
+                                      onPrimary: AppColors.bgPrimary,
+                                      onSurface: AppColors.textDark,
+                                      surface: AppColors.bgPrimary,
                                     ),
                                     dialogTheme: DialogThemeData(
                                       backgroundColor: AppColors.bgPrimary,
@@ -293,23 +312,28 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                               clipBehavior: Clip.none,
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.fromLTRB(12, 16, 12, 16),
+                                  padding: const EdgeInsets.fromLTRB(
+                                    12,
+                                    16,
+                                    12,
+                                    16,
+                                  ),
                                   child: Row(
                                     children: [
                                       Expanded(
                                         child: Text(
                                           "${_date.day.toString().padLeft(2, '0')}/"
-                                              "${_date.month.toString().padLeft(2, '0')}/"
-                                              "${_date.year} "
-                                              "${_date.hour.toString().padLeft(2, '0')}:"
-                                              "${_date.minute.toString().padLeft(2, '0')}",
-                                          style: TextStyle(
+                                          "${_date.month.toString().padLeft(2, '0')}/"
+                                          "${_date.year} "
+                                          "${_date.hour.toString().padLeft(2, '0')}:"
+                                          "${_date.minute.toString().padLeft(2, '0')}",
+                                          style: const TextStyle(
                                             color: AppColors.textDark,
                                             fontSize: 16,
                                           ),
                                         ),
                                       ),
-                                      Icon(
+                                      const Icon(
                                         Icons.calendar_today,
                                         color: AppColors.textDark,
                                         size: 20,
@@ -321,14 +345,16 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                                   left: 8,
                                   top: -8,
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal:8),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                    ),
                                     color: Colors.transparent,
-                                    child: Text(
+                                    child: const Text(
                                       "Date",
                                       style: TextStyle(
                                         color: AppColors.secondary,
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 12
+                                        fontSize: 12,
                                       ),
                                     ),
                                   ),
@@ -344,11 +370,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                             TextButton(
                               style: ButtonStyle(
                                 backgroundColor:
-                                WidgetStateProperty.resolveWith<Color?>((
-                                    Set<WidgetState> states,
+                                    WidgetStateProperty.resolveWith<Color?>((
+                                      Set<WidgetState> states,
                                     ) {
-                                  return AppColors.terciary;
-                                }),
+                                      return AppColors.terciary;
+                                    }),
                               ),
                               onPressed: () => Navigator.pop(context),
                               child: const Text(
@@ -360,11 +386,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                             ElevatedButton(
                               style: ButtonStyle(
                                 backgroundColor:
-                                WidgetStateProperty.resolveWith<Color?>((
-                                    Set<WidgetState> states,
+                                    WidgetStateProperty.resolveWith<Color?>((
+                                      Set<WidgetState> states,
                                     ) {
-                                  return AppColors.primary;
-                                }),
+                                      return AppColors.primary;
+                                    }),
                               ),
                               onPressed: _submit,
                               child: const Text(

@@ -546,6 +546,15 @@ class $TransactionsTable extends Transactions
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _descriptionMeta = const VerificationMeta(
     'description',
   );
@@ -598,6 +607,7 @@ class $TransactionsTable extends Transactions
     accountId,
     amount,
     date,
+    title,
     description,
     type,
     currency,
@@ -641,6 +651,12 @@ class $TransactionsTable extends Transactions
       );
     } else if (isInserting) {
       context.missing(_dateMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
     }
     if (data.containsKey('description')) {
       context.handle(
@@ -688,6 +704,10 @@ class $TransactionsTable extends Transactions
         DriftSqlType.dateTime,
         data['${effectivePrefix}date'],
       )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      ),
       description: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}description'],
@@ -723,6 +743,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   final int accountId;
   final double amount;
   final DateTime date;
+  final String? title;
   final String? description;
   final TransactionType type;
   final String currency;
@@ -732,6 +753,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     required this.accountId,
     required this.amount,
     required this.date,
+    this.title,
     this.description,
     required this.type,
     required this.currency,
@@ -744,6 +766,9 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     map['account_id'] = Variable<int>(accountId);
     map['amount'] = Variable<double>(amount);
     map['date'] = Variable<DateTime>(date);
+    if (!nullToAbsent || title != null) {
+      map['title'] = Variable<String>(title);
+    }
     if (!nullToAbsent || description != null) {
       map['description'] = Variable<String>(description);
     }
@@ -765,6 +790,9 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       accountId: Value(accountId),
       amount: Value(amount),
       date: Value(date),
+      title: title == null && nullToAbsent
+          ? const Value.absent()
+          : Value(title),
       description: description == null && nullToAbsent
           ? const Value.absent()
           : Value(description),
@@ -786,6 +814,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       accountId: serializer.fromJson<int>(json['accountId']),
       amount: serializer.fromJson<double>(json['amount']),
       date: serializer.fromJson<DateTime>(json['date']),
+      title: serializer.fromJson<String?>(json['title']),
       description: serializer.fromJson<String?>(json['description']),
       type: $TransactionsTable.$convertertype.fromJson(
         serializer.fromJson<int>(json['type']),
@@ -802,6 +831,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       'accountId': serializer.toJson<int>(accountId),
       'amount': serializer.toJson<double>(amount),
       'date': serializer.toJson<DateTime>(date),
+      'title': serializer.toJson<String?>(title),
       'description': serializer.toJson<String?>(description),
       'type': serializer.toJson<int>(
         $TransactionsTable.$convertertype.toJson(type),
@@ -816,6 +846,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     int? accountId,
     double? amount,
     DateTime? date,
+    Value<String?> title = const Value.absent(),
     Value<String?> description = const Value.absent(),
     TransactionType? type,
     String? currency,
@@ -825,6 +856,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     accountId: accountId ?? this.accountId,
     amount: amount ?? this.amount,
     date: date ?? this.date,
+    title: title.present ? title.value : this.title,
     description: description.present ? description.value : this.description,
     type: type ?? this.type,
     currency: currency ?? this.currency,
@@ -836,6 +868,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       accountId: data.accountId.present ? data.accountId.value : this.accountId,
       amount: data.amount.present ? data.amount.value : this.amount,
       date: data.date.present ? data.date.value : this.date,
+      title: data.title.present ? data.title.value : this.title,
       description: data.description.present
           ? data.description.value
           : this.description,
@@ -854,6 +887,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           ..write('accountId: $accountId, ')
           ..write('amount: $amount, ')
           ..write('date: $date, ')
+          ..write('title: $title, ')
           ..write('description: $description, ')
           ..write('type: $type, ')
           ..write('currency: $currency, ')
@@ -868,6 +902,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     accountId,
     amount,
     date,
+    title,
     description,
     type,
     currency,
@@ -881,6 +916,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           other.accountId == this.accountId &&
           other.amount == this.amount &&
           other.date == this.date &&
+          other.title == this.title &&
           other.description == this.description &&
           other.type == this.type &&
           other.currency == this.currency &&
@@ -892,6 +928,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
   final Value<int> accountId;
   final Value<double> amount;
   final Value<DateTime> date;
+  final Value<String?> title;
   final Value<String?> description;
   final Value<TransactionType> type;
   final Value<String> currency;
@@ -901,6 +938,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     this.accountId = const Value.absent(),
     this.amount = const Value.absent(),
     this.date = const Value.absent(),
+    this.title = const Value.absent(),
     this.description = const Value.absent(),
     this.type = const Value.absent(),
     this.currency = const Value.absent(),
@@ -911,6 +949,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     required int accountId,
     required double amount,
     required DateTime date,
+    this.title = const Value.absent(),
     this.description = const Value.absent(),
     required TransactionType type,
     this.currency = const Value.absent(),
@@ -924,6 +963,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     Expression<int>? accountId,
     Expression<double>? amount,
     Expression<DateTime>? date,
+    Expression<String>? title,
     Expression<String>? description,
     Expression<int>? type,
     Expression<String>? currency,
@@ -934,6 +974,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       if (accountId != null) 'account_id': accountId,
       if (amount != null) 'amount': amount,
       if (date != null) 'date': date,
+      if (title != null) 'title': title,
       if (description != null) 'description': description,
       if (type != null) 'type': type,
       if (currency != null) 'currency': currency,
@@ -946,6 +987,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     Value<int>? accountId,
     Value<double>? amount,
     Value<DateTime>? date,
+    Value<String?>? title,
     Value<String?>? description,
     Value<TransactionType>? type,
     Value<String>? currency,
@@ -956,6 +998,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       accountId: accountId ?? this.accountId,
       amount: amount ?? this.amount,
       date: date ?? this.date,
+      title: title ?? this.title,
       description: description ?? this.description,
       type: type ?? this.type,
       currency: currency ?? this.currency,
@@ -977,6 +1020,9 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     }
     if (date.present) {
       map['date'] = Variable<DateTime>(date.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
     }
     if (description.present) {
       map['description'] = Variable<String>(description.value);
@@ -1002,6 +1048,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
           ..write('accountId: $accountId, ')
           ..write('amount: $amount, ')
           ..write('date: $date, ')
+          ..write('title: $title, ')
           ..write('description: $description, ')
           ..write('type: $type, ')
           ..write('currency: $currency, ')
@@ -1543,6 +1590,7 @@ typedef $$TransactionsTableCreateCompanionBuilder =
       required int accountId,
       required double amount,
       required DateTime date,
+      Value<String?> title,
       Value<String?> description,
       required TransactionType type,
       Value<String> currency,
@@ -1554,6 +1602,7 @@ typedef $$TransactionsTableUpdateCompanionBuilder =
       Value<int> accountId,
       Value<double> amount,
       Value<DateTime> date,
+      Value<String?> title,
       Value<String?> description,
       Value<TransactionType> type,
       Value<String> currency,
@@ -1624,6 +1673,11 @@ class $$TransactionsTableFilterComposer
 
   ColumnFilters<DateTime> get date => $composableBuilder(
     column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1714,6 +1768,11 @@ class $$TransactionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get description => $composableBuilder(
     column: $table.description,
     builder: (column) => ColumnOrderings(column),
@@ -1793,6 +1852,9 @@ class $$TransactionsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get date =>
       $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
 
   GeneratedColumn<String> get description => $composableBuilder(
     column: $table.description,
@@ -1884,6 +1946,7 @@ class $$TransactionsTableTableManager
                 Value<int> accountId = const Value.absent(),
                 Value<double> amount = const Value.absent(),
                 Value<DateTime> date = const Value.absent(),
+                Value<String?> title = const Value.absent(),
                 Value<String?> description = const Value.absent(),
                 Value<TransactionType> type = const Value.absent(),
                 Value<String> currency = const Value.absent(),
@@ -1893,6 +1956,7 @@ class $$TransactionsTableTableManager
                 accountId: accountId,
                 amount: amount,
                 date: date,
+                title: title,
                 description: description,
                 type: type,
                 currency: currency,
@@ -1904,6 +1968,7 @@ class $$TransactionsTableTableManager
                 required int accountId,
                 required double amount,
                 required DateTime date,
+                Value<String?> title = const Value.absent(),
                 Value<String?> description = const Value.absent(),
                 required TransactionType type,
                 Value<String> currency = const Value.absent(),
@@ -1913,6 +1978,7 @@ class $$TransactionsTableTableManager
                 accountId: accountId,
                 amount: amount,
                 date: date,
+                title: title,
                 description: description,
                 type: type,
                 currency: currency,

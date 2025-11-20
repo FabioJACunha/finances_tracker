@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'features/home/home_screen.dart';
 import 'features/accounts/accounts_screen.dart';
-import 'features/transactions/transaction_history_screen.dart';
+import 'features/transactions/transactions_screen.dart';
 import 'helpers/app_colors.dart';
 import 'l10n/app_localizations.dart';
 

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
-import '../home_stats_provider.dart';
+import '../../../providers/analytics_provider.dart';
+import '../../../models/period_args.dart';
 import '../../../helpers/app_colors.dart';
 
 class ExpensesByCategoryPie extends ConsumerWidget {
@@ -27,18 +28,59 @@ class ExpensesByCategoryPie extends ConsumerWidget {
 
     return dataAsync.when(
       data: (data) {
-        if (data.isEmpty) return const Text('No expenses');
+        if (data.isEmpty) {
+          return Card(
+            color: AppColors.bgTerciary,
+            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Expenses by category",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Center(
+                    child: Text(
+                      'No expenses in this period',
+                      style: TextStyle(
+                        color: AppColors.textMuted,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
 
-        final total = data.values.fold<double>(0.0, (p, c) => p + c);
+        final total = data.values.fold<double>(
+          0.0,
+          (sum, value) => sum + value,
+        );
 
-        final sections = data.entries.map((e) {
+        final sections = data.entries.map((entry) {
           final color =
-              categoryColors[e.key] ??
-              Colors.primaries[e.key.hashCode % Colors.primaries.length];
+              categoryColors[entry.key] ??
+              Colors.primaries[entry.key.hashCode % Colors.primaries.length];
+
+          final percentage = (entry.value / total * 100).toStringAsFixed(1);
 
           return PieChartSectionData(
-            value: e.value,
-            title: '${e.key}\n${e.value.toStringAsFixed(2)} €',
+            value: entry.value,
+            title:
+                '${entry.key}\n$percentage%\n${entry.value.toStringAsFixed(2)} €',
             color: color,
             radius: 50,
             titleStyle: const TextStyle(
@@ -83,6 +125,14 @@ class ExpensesByCategoryPie extends ConsumerWidget {
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          const Text(
+                            'Total',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
                           Text(
                             "${total.toStringAsFixed(2)} €",
                             style: const TextStyle(
@@ -101,8 +151,59 @@ class ExpensesByCategoryPie extends ConsumerWidget {
           ),
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, st) => Text('Error: $e'),
+      loading: () => Card(
+        color: AppColors.bgTerciary,
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        child: const Padding(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Expenses by category",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textDark,
+                ),
+              ),
+              SizedBox(height: 20),
+              Center(child: CircularProgressIndicator()),
+              SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+      error: (err, stack) => Card(
+        color: AppColors.bgTerciary,
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Expenses by category",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textDark,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Center(
+                child: Text(
+                  'Error loading data: $err',
+                  style: const TextStyle(color: Colors.red, fontSize: 14),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

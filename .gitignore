@@ -46,3 +46,4 @@ app.*.map.json
 /android/
 /test/
 /web/
+/.todo/tasks.json
