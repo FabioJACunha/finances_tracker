@@ -1,16 +1,23 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/accounts_provider.dart';
 import '../../providers/services_provider.dart';
 import '../../providers/categories_provider.dart';
 import '../../data/db/tables.dart';
+import '../../data/db/database.dart';
 import '../../helpers/app_colors.dart';
 import '../../components/select_form_field.dart';
 
 class TransactionFormScreen extends ConsumerStatefulWidget {
   final int initialAccountId;
+  final TransactionWithCategory? transactionToEdit;
 
-  const TransactionFormScreen({required this.initialAccountId, super.key});
+  const TransactionFormScreen({
+    required this.initialAccountId,
+    this.transactionToEdit,
+    super.key,
+  });
 
   @override
   ConsumerState<TransactionFormScreen> createState() =>
@@ -20,18 +27,34 @@ class TransactionFormScreen extends ConsumerStatefulWidget {
 class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   final _formKey = GlobalKey<FormState>();
   late int _accountId;
-  TransactionType _type = TransactionType.expense;
+  late TransactionType _type;
   String? _category;
   String? _title;
   String? _description;
   double? _amount;
-  DateTime _date = DateTime.now();
+  late DateTime _date;
   final TextEditingController _newCategoryController = TextEditingController();
+
+  bool get isEditing => widget.transactionToEdit != null;
 
   @override
   void initState() {
     super.initState();
-    _accountId = widget.initialAccountId;
+
+    if (isEditing) {
+      final tx = widget.transactionToEdit!.transaction;
+      _accountId = tx.accountId;
+      _type = tx.type;
+      _category = widget.transactionToEdit!.category?.name;
+      _title = tx.title;
+      _description = tx.description;
+      _amount = tx.amount;
+      _date = tx.date;
+    } else {
+      _accountId = widget.initialAccountId;
+      _type = TransactionType.expense;
+      _date = DateTime.now();
+    }
   }
 
   @override
@@ -47,24 +70,51 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     try {
       final transactionService = ref.read(transactionServiceProvider);
 
-      await transactionService.createTransaction(
-        accountId: _accountId,
-        amount: _amount!,
-        type: _type,
-        title: _title,
-        description: _description,
-        categoryName: _category,
-        // Can be null for uncategorized
-        date: _date,
-      );
+      if (isEditing) {
+        // Update existing transaction
+        await transactionService.updateTransaction(
+          transactionId: widget.transactionToEdit!.transaction.id,
+          accountId: _accountId,
+          amount: _amount!,
+          type: _type,
+          title: _title,
+          description: _description,
+          categoryName: _category,
+          date: _date,
+        );
+      } else {
+        // Create new transaction
+        await transactionService.createTransaction(
+          accountId: _accountId,
+          amount: _amount!,
+          type: _type,
+          title: _title,
+          description: _description,
+          categoryName: _category,
+          date: _date,
+        );
+      }
 
       if (!mounted) return;
       Navigator.of(context).pop();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isEditing
+                ? 'Transaction updated successfully'
+                : 'Transaction added successfully',
+            style: TextStyle(color: AppColors.green),
+          ),
+
+          backgroundColor: AppColors.bgGreen,
+        ),
+      );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+      );
     }
   }
 
@@ -75,7 +125,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         titlePadding: const EdgeInsets.all(16),
         contentPadding: const EdgeInsets.all(16),
         actionsPadding: const EdgeInsets.all(16),
-        insetPadding: const EdgeInsets.symmetric(horizontal: 32),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16),
         constraints: const BoxConstraints(
           maxWidth: double.infinity,
           minWidth: double.infinity,
@@ -149,39 +199,99 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    const horizontalPadding = 16.0;
-
     final accountsAsync = ref.watch(accountsListProvider);
     final categoriesAsync = ref.watch(categoriesListProvider);
 
-    return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: horizontalPadding),
-      child: Container(
-        width: screenWidth - 2 * horizontalPadding,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.bgPrimary,
-          borderRadius: BorderRadius.circular(8),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: AppColors.bgPrimary,
+        scrolledUnderElevation: 0.0,
+        surfaceTintColor: Colors.transparent,
+        titleSpacing: 0.0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
+          onPressed: () => Navigator.pop(context),
         ),
+        title: Text(
+          isEditing ? "Edit Transaction" : "Add Transaction",
+          style: const TextStyle(color: AppColors.textDark),
+        ),
+      ),
+      body: SafeArea(
         child: accountsAsync.when(
           data: (accounts) {
             return categoriesAsync.when(
               data: (categories) {
                 return SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Form(
                     key: _formKey,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          "Add Transaction",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textDark,
-                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: double.infinity,
+                              child: ToggleButtons(
+                                isSelected: TransactionType.values
+                                    .map((t) => t == _type)
+                                    .toList(),
+                                onPressed: (index) {
+                                  setState(() {
+                                    _type = TransactionType.values[index];
+                                  });
+                                },
+                                renderBorder: false,
+                                borderRadius: BorderRadius.circular(100),
+                                fillColor: Colors.transparent,
+                                children: TransactionType.values.mapIndexed((
+                                  index,
+                                  t,
+                                ) {
+                                  final bool selected = (t == _type);
+                                  final bool isLast =
+                                      index ==
+                                      TransactionType.values.length - 1;
+                                  return Padding(
+                                    padding: EdgeInsets.only(
+                                      right: isLast ? 0 : 8.0,
+                                    ),
+                                    // Add 8.0 spacing to the right of every button except the last one
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 24,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: selected
+                                            ? AppColors.terciary
+                                            : AppColors.bgSecondary,
+                                        borderRadius: BorderRadius.circular(
+                                          100,
+                                        ),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          t.name.capitalize(),
+                                          style: TextStyle(
+                                            color: selected
+                                                ? AppColors.secondary
+                                                : AppColors.textDark,
+                                            fontWeight: selected
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 16),
                         SelectFormField<int>(
@@ -194,16 +304,9 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
+                          initialValue: _title,
                           decoration: const InputDecoration(labelText: "Title"),
                           onSaved: (val) => _title = val?.trim(),
-                        ),
-                        const SizedBox(height: 12),
-                        SelectFormField<TransactionType>(
-                          label: "Type",
-                          value: _type,
-                          items: TransactionType.values,
-                          itemAsString: (t) => t.name.capitalize(),
-                          onChanged: (val) => setState(() => _type = val!),
                         ),
                         const SizedBox(height: 12),
                         SelectFormField<String>(
@@ -225,6 +328,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
+                          initialValue: _description,
                           decoration: const InputDecoration(
                             labelText: "Description",
                           ),
@@ -232,6 +336,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
+                          initialValue: _amount?.toString(),
                           decoration: const InputDecoration(
                             labelText: "Amount",
                           ),
@@ -255,7 +360,6 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                               final navigator = Navigator.of(context);
                               final theme = Theme.of(context);
 
-                              // show date picker first
                               final pickedDate = await showDatePicker(
                                 context: context,
                                 initialDate: _date,
@@ -290,7 +394,6 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                               if (pickedDate == null) return;
                               if (!mounted) return;
 
-                              // show time picker
                               final pickedTime = await showTimePicker(
                                 context: navigator.context,
                                 initialTime: TimeOfDay.fromDateTime(_date),
@@ -365,37 +468,21 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                         ),
                         const SizedBox(height: 24),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            TextButton(
-                              style: ButtonStyle(
-                                backgroundColor:
-                                    WidgetStateProperty.resolveWith<Color?>((
-                                      Set<WidgetState> states,
-                                    ) {
-                                      return AppColors.terciary;
-                                    }),
-                              ),
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text(
-                                "Cancel",
-                                style: TextStyle(color: AppColors.textDark),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            ElevatedButton(
-                              style: ButtonStyle(
-                                backgroundColor:
-                                    WidgetStateProperty.resolveWith<Color?>((
-                                      Set<WidgetState> states,
-                                    ) {
-                                      return AppColors.primary;
-                                    }),
-                              ),
+                            ElevatedButton.icon(
                               onPressed: _submit,
-                              child: const Text(
-                                "Add Transaction",
-                                style: TextStyle(color: AppColors.textDark),
+                              icon: const Icon(Icons.add),
+                              label: Text(
+                                isEditing ? "Save Changes" : "Add Transaction",
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: AppColors.textDark,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                  horizontal: 24,
+                                ),
                               ),
                             ),
                           ],

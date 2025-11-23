@@ -22,7 +22,7 @@ class SelectFormField<T> extends StatelessWidget {
       context: context,
       builder: (context) {
         return Dialog(
-          insetPadding: EdgeInsets.symmetric(horizontal: 32),
+          insetPadding: EdgeInsets.symmetric(horizontal: 16),
           constraints: BoxConstraints(
             maxWidth: double.infinity,
             minWidth: double.infinity,

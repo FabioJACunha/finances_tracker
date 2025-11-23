@@ -31,8 +31,12 @@ LazyDatabase _openConnection() {
     final dir = await getApplicationDocumentsDirectory();
     final dbPath = p.join(dir.path, 'app.sqlite');
 
-    // Ensure the file exists (optional)
     final file = File(dbPath);
+
+    // Delete file for testing porpuses
+    await file.delete();
+
+    // Ensure the file exists (optional)
     if (!await file.exists()) {
       await file.create(recursive: true);
     }

@@ -88,8 +88,8 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                 Text(
                   isEditing ? 'Edit Account' : 'Add Account',
                   style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 20,
                     color: AppColors.textDark,
                   ),
                 ),

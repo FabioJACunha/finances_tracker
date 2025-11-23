@@ -112,14 +112,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         _selectedAccountId = account.id;
                       }),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
                         decoration: BoxDecoration(
                           color: selected
                               ? AppColors.terciary
-                              : Colors.transparent,
+                              : AppColors.bgSecondary,
                           borderRadius: BorderRadius.circular(100),
                         ),
                         child: Center(
@@ -129,7 +126,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                               color: selected
                                   ? AppColors.secondary
                                   : AppColors.textDark,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: selected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
                             ),
                           ),
                         ),
@@ -231,10 +230,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               borderRadius: BorderRadius.circular(18),
             ),
             onPressed: () {
-              showDialog(
-                context: context,
-                builder: (_) => TransactionFormScreen(
-                  initialAccountId: _selectedAccountId!,
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      TransactionFormScreen(initialAccountId: _selectedAccountId!),
                 ),
               );
             },

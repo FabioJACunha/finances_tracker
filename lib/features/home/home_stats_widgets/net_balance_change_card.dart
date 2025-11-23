@@ -30,31 +30,89 @@ class NetBalanceChangeCard extends ConsumerWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: dataAsync.when(
-          data: (value) => Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Net Balance Change',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textDark,
-                  fontSize: 20,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Net Balance Change',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: AppColors.textDark,
+                fontSize: 20,
+              ),
+            ),
+            const SizedBox(height: 8),
+            dataAsync.when(
+              data: (value) {
+                final isPositive = value >= 0;
+                final color = isPositive ? AppColors.green : AppColors.red;
+                final icon = isPositive ? Icons.trending_up : Icons
+                    .trending_down;
+
+                return Row(
+                  children: [
+                    Icon(
+                      icon,
+                      color: color,
+                      size: 32,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${value >= 0 ? '+' : ''}${value.toStringAsFixed(
+                                2)} €',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: color,
+                            ),
+                          ),
+                          Text(
+                            isPositive ? 'Surplus' : 'Deficit',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: color,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
+              loading: () =>
+              const SizedBox(
+                height: 60,
+                child: Center(
+                  child: CircularProgressIndicator(),
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                '${value.toStringAsFixed(2)} €',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: value >= 0 ? Colors.green : Colors.red,
-                ),
-              ),
-            ],
-          ),
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, st) => Text('Error: $e'),
+              error: (err, stack) =>
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Error loading data',
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+            ),
+          ],
         ),
       ),
     );

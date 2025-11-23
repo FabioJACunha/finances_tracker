@@ -7,10 +7,7 @@ class TransactionService {
 
   TransactionService(this._db);
 
-  /// Creates a transaction with proper business logic:
-  /// - Ensures category exists (creates if needed)
-  /// - Updates account balance
-  /// - All wrapped in a database transaction
+  /// Creates a transaction and updates resultant balances
   Future<int> createTransaction({
     required int accountId,
     required double amount,
@@ -21,14 +18,24 @@ class TransactionService {
     DateTime? date,
   }) async {
     return _db.transaction(() async {
-      // 1. Handle category (if provided)
+      // 1. Handle category
       int? categoryId;
       if (categoryName != null && categoryName.trim().isNotEmpty) {
         categoryId = await _ensureCategory(categoryName.trim());
       }
 
-      // 2. Insert transaction
-      final transactionId = await _db.transactionsDao.insert(
+      final transactionDate = date ?? DateTime.now();
+
+      // 2. Calculate the resultant balance for this transaction
+      final resultantBalance = await _calculateResultantBalance(
+        accountId: accountId,
+        date: transactionDate,
+        amount: amount,
+        type: type,
+      );
+
+      // 3. Insert transaction with resultant balance
+      final transactionId = await _db.transactionsDao.insertTransaction(
         TransactionsCompanion.insert(
           accountId: accountId,
           amount: amount,
@@ -36,42 +43,43 @@ class TransactionService {
           title: Value(title),
           description: Value(description),
           categoryId: Value(categoryId),
-          date: date ?? DateTime.now(),
+          date: transactionDate,
           currency: const Value('EUR'),
+          resultantBalance: Value(resultantBalance),
         ),
       );
 
-      // 3. Update account balance
-      await _updateAccountBalance(accountId, amount, type);
+      // 4. Update resultant balances for all transactions after this one
+      await _recalculateBalancesAfter(accountId, transactionDate);
+
+      // 5. Update account balance (final balance = last transaction's resultant balance)
+      await _updateAccountBalance(accountId);
 
       return transactionId;
     });
   }
 
-  /// Deletes a transaction and reverses the account balance change
+  /// Deletes a transaction and recalculates affected balances
   Future<void> deleteTransaction(int transactionId) async {
     return _db.transaction(() async {
       final transaction = await _db.transactionsDao.getById(transactionId);
       if (transaction == null) return;
 
-      // Reverse the balance change
-      final reverseAmount = transaction.amount;
-      final reverseType = transaction.type == TransactionType.income
-          ? TransactionType.expense
-          : TransactionType.income;
-
-      await _updateAccountBalance(
-        transaction.accountId,
-        reverseAmount,
-        reverseType,
-      );
+      final accountId = transaction.accountId;
+      final transactionDate = transaction.date;
 
       // Delete the transaction
       await _db.transactionsDao.deleteTransaction(transactionId);
+
+      // Recalculate balances for all transactions after this one
+      await _recalculateBalancesAfter(accountId, transactionDate);
+
+      // Update account balance
+      await _updateAccountBalance(accountId);
     });
   }
 
-  /// Updates a transaction and adjusts account balance accordingly
+  /// Updates a transaction and recalculates affected balances
   Future<void> updateTransaction({
     required int transactionId,
     required int accountId,
@@ -83,19 +91,8 @@ class TransactionService {
     DateTime? date,
   }) async {
     return _db.transaction(() async {
-      // Get old transaction to reverse its balance effect
       final oldTransaction = await _db.transactionsDao.getById(transactionId);
       if (oldTransaction == null) return;
-
-      // Reverse old balance change
-      final reverseType = oldTransaction.type == TransactionType.income
-          ? TransactionType.expense
-          : TransactionType.income;
-      await _updateAccountBalance(
-        oldTransaction.accountId,
-        oldTransaction.amount,
-        reverseType,
-      );
 
       // Handle category
       int? categoryId;
@@ -103,7 +100,23 @@ class TransactionService {
         categoryId = await _ensureCategory(categoryName.trim());
       }
 
-      // Update transaction
+      final transactionDate = date ?? DateTime.now();
+
+      // Determine the earliest affected date
+      final earliestDate = oldTransaction.date.isBefore(transactionDate)
+          ? oldTransaction.date
+          : transactionDate;
+
+      // Calculate resultant balance for the updated transaction
+      final resultantBalance = await _calculateResultantBalanceExcluding(
+        accountId: accountId,
+        date: transactionDate,
+        amount: amount,
+        type: type,
+        excludeTransactionId: transactionId,
+      );
+
+      // Update the transaction
       await _db.transactionsDao.updateTransaction(
         TransactionsCompanion(
           id: Value(transactionId),
@@ -113,17 +126,113 @@ class TransactionService {
           title: Value(title),
           description: Value(description),
           categoryId: Value(categoryId),
-          date: Value(date ?? DateTime.now()),
+          date: Value(transactionDate),
           currency: const Value('EUR'),
+          resultantBalance: Value(resultantBalance),
         ),
       );
 
-      // Apply new balance change
-      await _updateAccountBalance(accountId, amount, type);
+      // Recalculate balances from the earliest affected date
+      await _recalculateBalancesAfter(accountId, earliestDate);
+
+      // If account changed, also update the old account
+      if (oldTransaction.accountId != accountId) {
+        await _recalculateBalancesAfter(
+          oldTransaction.accountId,
+          oldTransaction.date,
+        );
+        await _updateAccountBalance(oldTransaction.accountId);
+      }
+
+      // Update account balance
+      await _updateAccountBalance(accountId);
     });
   }
 
-  // Private helper methods
+  /// Calculate what the resultant balance should be for a new transaction
+  Future<double> _calculateResultantBalance({
+    required int accountId,
+    required DateTime date,
+    required double amount,
+    required TransactionType type,
+  }) async {
+    // Get the transaction immediately before this date
+    final previousTransaction =
+    await _db.transactionsDao.getLastTransactionBefore(accountId, date);
+
+    // Starting balance is either previous transaction's resultant balance or 0
+    final startingBalance = previousTransaction?.resultantBalance ?? 0.0;
+
+    // Calculate new balance
+    return type == TransactionType.income
+        ? startingBalance + amount
+        : startingBalance - amount;
+  }
+
+  /// Calculate resultant balance excluding a specific transaction (for updates)
+  Future<double> _calculateResultantBalanceExcluding({
+    required int accountId,
+    required DateTime date,
+    required double amount,
+    required TransactionType type,
+    required int excludeTransactionId,
+  }) async {
+    // Get all transactions before this date, excluding the one being updated
+    final allTransactions =
+    await _db.transactionsDao.getByAccountIdOrderedByDate(accountId);
+
+    double balance = 0.0;
+    for (final tx in allTransactions) {
+      if (tx.id == excludeTransactionId) continue;
+      if (!tx.date.isBefore(date)) break;
+
+      balance += tx.type == TransactionType.income ? tx.amount : -tx.amount;
+    }
+
+    // Add the current transaction's effect
+    return type == TransactionType.income ? balance + amount : balance - amount;
+  }
+
+  /// Recalculate resultant balances for all transactions after a given date
+  Future<void> _recalculateBalancesAfter(
+      int accountId,
+      DateTime afterDate,
+      ) async {
+    // Get the balance right before afterDate
+    final previousTransaction =
+    await _db.transactionsDao.getLastTransactionBefore(accountId, afterDate);
+    double runningBalance = previousTransaction?.resultantBalance ?? 0.0;
+
+    // Get all transactions from afterDate onwards, ordered by date
+    final transactionsToUpdate = await _db.transactionsDao
+        .getTransactionsAfterDate(accountId, afterDate.subtract(const Duration(seconds: 1)));
+
+    // Update each transaction's resultant balance
+    for (final tx in transactionsToUpdate) {
+      runningBalance +=
+      tx.type == TransactionType.income ? tx.amount : -tx.amount;
+
+      await _db.transactionsDao.updateResultantBalance(tx.id, runningBalance);
+    }
+  }
+
+  /// Update account balance to match the latest transaction's resultant balance
+  Future<void> _updateAccountBalance(int accountId) async {
+    final allTransactions =
+    await _db.transactionsDao.getByAccountIdOrderedByDate(accountId);
+
+    if (allTransactions.isEmpty) {
+      await _db.accountsDao.updateBalance(accountId, 0.0);
+    } else {
+      // The last transaction's resultant balance is the current account balance
+      final lastTransaction = allTransactions.last;
+      await _db.accountsDao.updateBalance(
+        accountId,
+        lastTransaction.resultantBalance,
+      );
+    }
+  }
+
   Future<int> _ensureCategory(String name) async {
     final existing = await _db.categoriesDao.getByName(name);
     if (existing != null) return existing.id;
@@ -131,17 +240,5 @@ class TransactionService {
     return await _db.categoriesDao.insert(
       CategoriesCompanion.insert(name: name),
     );
-  }
-
-  Future<void> _updateAccountBalance(
-    int accountId,
-    double amount,
-    TransactionType type,
-  ) async {
-    final account = await _db.accountsDao.getById(accountId);
-    final delta = type == TransactionType.income ? amount : -amount;
-    final newBalance = account.balance + delta;
-
-    await _db.accountsDao.updateBalance(accountId, newBalance);
   }
 }

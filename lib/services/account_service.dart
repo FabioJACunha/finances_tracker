@@ -61,7 +61,7 @@ class AccountService {
   }) async {
     return _db.transaction(() async {
       // Create expense in source account
-      await _db.transactionsDao.insert(
+      await _db.transactionsDao.insertTransaction(
         TransactionsCompanion.insert(
           accountId: fromAccountId,
           amount: amount,
@@ -81,7 +81,7 @@ class AccountService {
       );
 
       // Create income in destination account
-      await _db.transactionsDao.insert(
+      await _db.transactionsDao.insertTransaction(
         TransactionsCompanion.insert(
           accountId: toAccountId,
           amount: amount,

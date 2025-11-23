@@ -601,6 +601,18 @@ class $TransactionsTable extends Transactions
       'REFERENCES categories (id)',
     ),
   );
+  static const VerificationMeta _resultantBalanceMeta = const VerificationMeta(
+    'resultantBalance',
+  );
+  @override
+  late final GeneratedColumn<double> resultantBalance = GeneratedColumn<double>(
+    'resultant_balance',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -612,6 +624,7 @@ class $TransactionsTable extends Transactions
     type,
     currency,
     categoryId,
+    resultantBalance,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -679,6 +692,15 @@ class $TransactionsTable extends Transactions
         categoryId.isAcceptableOrUnknown(data['category_id']!, _categoryIdMeta),
       );
     }
+    if (data.containsKey('resultant_balance')) {
+      context.handle(
+        _resultantBalanceMeta,
+        resultantBalance.isAcceptableOrUnknown(
+          data['resultant_balance']!,
+          _resultantBalanceMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -726,6 +748,10 @@ class $TransactionsTable extends Transactions
         DriftSqlType.int,
         data['${effectivePrefix}category_id'],
       ),
+      resultantBalance: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}resultant_balance'],
+      )!,
     );
   }
 
@@ -748,6 +774,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   final TransactionType type;
   final String currency;
   final int? categoryId;
+  final double resultantBalance;
   const Transaction({
     required this.id,
     required this.accountId,
@@ -758,6 +785,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     required this.type,
     required this.currency,
     this.categoryId,
+    required this.resultantBalance,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -781,6 +809,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     if (!nullToAbsent || categoryId != null) {
       map['category_id'] = Variable<int>(categoryId);
     }
+    map['resultant_balance'] = Variable<double>(resultantBalance);
     return map;
   }
 
@@ -801,6 +830,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       categoryId: categoryId == null && nullToAbsent
           ? const Value.absent()
           : Value(categoryId),
+      resultantBalance: Value(resultantBalance),
     );
   }
 
@@ -821,6 +851,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       ),
       currency: serializer.fromJson<String>(json['currency']),
       categoryId: serializer.fromJson<int?>(json['categoryId']),
+      resultantBalance: serializer.fromJson<double>(json['resultantBalance']),
     );
   }
   @override
@@ -838,6 +869,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       ),
       'currency': serializer.toJson<String>(currency),
       'categoryId': serializer.toJson<int?>(categoryId),
+      'resultantBalance': serializer.toJson<double>(resultantBalance),
     };
   }
 
@@ -851,6 +883,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     TransactionType? type,
     String? currency,
     Value<int?> categoryId = const Value.absent(),
+    double? resultantBalance,
   }) => Transaction(
     id: id ?? this.id,
     accountId: accountId ?? this.accountId,
@@ -861,6 +894,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     type: type ?? this.type,
     currency: currency ?? this.currency,
     categoryId: categoryId.present ? categoryId.value : this.categoryId,
+    resultantBalance: resultantBalance ?? this.resultantBalance,
   );
   Transaction copyWithCompanion(TransactionsCompanion data) {
     return Transaction(
@@ -877,6 +911,9 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       categoryId: data.categoryId.present
           ? data.categoryId.value
           : this.categoryId,
+      resultantBalance: data.resultantBalance.present
+          ? data.resultantBalance.value
+          : this.resultantBalance,
     );
   }
 
@@ -891,7 +928,8 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           ..write('description: $description, ')
           ..write('type: $type, ')
           ..write('currency: $currency, ')
-          ..write('categoryId: $categoryId')
+          ..write('categoryId: $categoryId, ')
+          ..write('resultantBalance: $resultantBalance')
           ..write(')'))
         .toString();
   }
@@ -907,6 +945,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     type,
     currency,
     categoryId,
+    resultantBalance,
   );
   @override
   bool operator ==(Object other) =>
@@ -920,7 +959,8 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           other.description == this.description &&
           other.type == this.type &&
           other.currency == this.currency &&
-          other.categoryId == this.categoryId);
+          other.categoryId == this.categoryId &&
+          other.resultantBalance == this.resultantBalance);
 }
 
 class TransactionsCompanion extends UpdateCompanion<Transaction> {
@@ -933,6 +973,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
   final Value<TransactionType> type;
   final Value<String> currency;
   final Value<int?> categoryId;
+  final Value<double> resultantBalance;
   const TransactionsCompanion({
     this.id = const Value.absent(),
     this.accountId = const Value.absent(),
@@ -943,6 +984,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     this.type = const Value.absent(),
     this.currency = const Value.absent(),
     this.categoryId = const Value.absent(),
+    this.resultantBalance = const Value.absent(),
   });
   TransactionsCompanion.insert({
     this.id = const Value.absent(),
@@ -954,6 +996,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     required TransactionType type,
     this.currency = const Value.absent(),
     this.categoryId = const Value.absent(),
+    this.resultantBalance = const Value.absent(),
   }) : accountId = Value(accountId),
        amount = Value(amount),
        date = Value(date),
@@ -968,6 +1011,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     Expression<int>? type,
     Expression<String>? currency,
     Expression<int>? categoryId,
+    Expression<double>? resultantBalance,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -979,6 +1023,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       if (type != null) 'type': type,
       if (currency != null) 'currency': currency,
       if (categoryId != null) 'category_id': categoryId,
+      if (resultantBalance != null) 'resultant_balance': resultantBalance,
     });
   }
 
@@ -992,6 +1037,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     Value<TransactionType>? type,
     Value<String>? currency,
     Value<int?>? categoryId,
+    Value<double>? resultantBalance,
   }) {
     return TransactionsCompanion(
       id: id ?? this.id,
@@ -1003,6 +1049,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       type: type ?? this.type,
       currency: currency ?? this.currency,
       categoryId: categoryId ?? this.categoryId,
+      resultantBalance: resultantBalance ?? this.resultantBalance,
     );
   }
 
@@ -1038,6 +1085,9 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     if (categoryId.present) {
       map['category_id'] = Variable<int>(categoryId.value);
     }
+    if (resultantBalance.present) {
+      map['resultant_balance'] = Variable<double>(resultantBalance.value);
+    }
     return map;
   }
 
@@ -1052,7 +1102,8 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
           ..write('description: $description, ')
           ..write('type: $type, ')
           ..write('currency: $currency, ')
-          ..write('categoryId: $categoryId')
+          ..write('categoryId: $categoryId, ')
+          ..write('resultantBalance: $resultantBalance')
           ..write(')'))
         .toString();
   }
@@ -1595,6 +1646,7 @@ typedef $$TransactionsTableCreateCompanionBuilder =
       required TransactionType type,
       Value<String> currency,
       Value<int?> categoryId,
+      Value<double> resultantBalance,
     });
 typedef $$TransactionsTableUpdateCompanionBuilder =
     TransactionsCompanion Function({
@@ -1607,6 +1659,7 @@ typedef $$TransactionsTableUpdateCompanionBuilder =
       Value<TransactionType> type,
       Value<String> currency,
       Value<int?> categoryId,
+      Value<double> resultantBalance,
     });
 
 final class $$TransactionsTableReferences
@@ -1694,6 +1747,11 @@ class $$TransactionsTableFilterComposer
 
   ColumnFilters<String> get currency => $composableBuilder(
     column: $table.currency,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get resultantBalance => $composableBuilder(
+    column: $table.resultantBalance,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1788,6 +1846,11 @@ class $$TransactionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get resultantBalance => $composableBuilder(
+    column: $table.resultantBalance,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$AccountsTableOrderingComposer get accountId {
     final $$AccountsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -1866,6 +1929,11 @@ class $$TransactionsTableAnnotationComposer
 
   GeneratedColumn<String> get currency =>
       $composableBuilder(column: $table.currency, builder: (column) => column);
+
+  GeneratedColumn<double> get resultantBalance => $composableBuilder(
+    column: $table.resultantBalance,
+    builder: (column) => column,
+  );
 
   $$AccountsTableAnnotationComposer get accountId {
     final $$AccountsTableAnnotationComposer composer = $composerBuilder(
@@ -1951,6 +2019,7 @@ class $$TransactionsTableTableManager
                 Value<TransactionType> type = const Value.absent(),
                 Value<String> currency = const Value.absent(),
                 Value<int?> categoryId = const Value.absent(),
+                Value<double> resultantBalance = const Value.absent(),
               }) => TransactionsCompanion(
                 id: id,
                 accountId: accountId,
@@ -1961,6 +2030,7 @@ class $$TransactionsTableTableManager
                 type: type,
                 currency: currency,
                 categoryId: categoryId,
+                resultantBalance: resultantBalance,
               ),
           createCompanionCallback:
               ({
@@ -1973,6 +2043,7 @@ class $$TransactionsTableTableManager
                 required TransactionType type,
                 Value<String> currency = const Value.absent(),
                 Value<int?> categoryId = const Value.absent(),
+                Value<double> resultantBalance = const Value.absent(),
               }) => TransactionsCompanion.insert(
                 id: id,
                 accountId: accountId,
@@ -1983,6 +2054,7 @@ class $$TransactionsTableTableManager
                 type: type,
                 currency: currency,
                 categoryId: categoryId,
+                resultantBalance: resultantBalance,
               ),
           withReferenceMapper: (p0) => p0
               .map(

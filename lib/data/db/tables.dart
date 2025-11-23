@@ -38,4 +38,6 @@ class Transactions extends Table {
 
   IntColumn get categoryId =>
       integer().nullable().references(Categories, #id)();
+
+  RealColumn get resultantBalance => real().withDefault(const Constant(0.0))();
 }

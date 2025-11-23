@@ -88,6 +88,17 @@ class _MyAppState extends ConsumerState<MyApp> {
           filled: true,
           fillColor: AppColors.bgSecondary, // background color
         ),
+        snackBarTheme: SnackBarThemeData(
+          behavior: SnackBarBehavior.floating,
+          insetPadding: EdgeInsets.all(16),
+          // margin: const EdgeInsets.only(
+          //   bottom: 16,
+          //   left: 16,
+          //   right: 16,
+          // ),
+          elevation: 2,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        )
       ),
       home: Builder(
         // Builder gives a context that is under the Navigator
