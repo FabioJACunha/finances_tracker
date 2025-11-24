@@ -14,19 +14,18 @@ class TransactionService {
     required TransactionType type,
     String? title,
     String? description,
-    String? categoryName,
+    int? categoryId,
     DateTime? date,
   }) async {
     return _db.transaction(() async {
-      // 1. Handle category
-      int? categoryId;
-      if (categoryName != null && categoryName.trim().isNotEmpty) {
-        categoryId = await _ensureCategory(categoryName.trim());
+      // Validate category usage type if provided
+      if (categoryId != null) {
+        await _validateCategoryUsage(categoryId, type);
       }
 
       final transactionDate = date ?? DateTime.now();
 
-      // 2. Calculate the resultant balance for this transaction
+      // Calculate the resultant balance for this transaction
       final resultantBalance = await _calculateResultantBalance(
         accountId: accountId,
         date: transactionDate,
@@ -34,7 +33,7 @@ class TransactionService {
         type: type,
       );
 
-      // 3. Insert transaction with resultant balance
+      // Insert transaction with resultant balance
       final transactionId = await _db.transactionsDao.insertTransaction(
         TransactionsCompanion.insert(
           accountId: accountId,
@@ -49,10 +48,10 @@ class TransactionService {
         ),
       );
 
-      // 4. Update resultant balances for all transactions after this one
+      // Update resultant balances for all transactions after this one
       await _recalculateBalancesAfter(accountId, transactionDate);
 
-      // 5. Update account balance (final balance = last transaction's resultant balance)
+      // Update account balance (final balance = last transaction's resultant balance)
       await _updateAccountBalance(accountId);
 
       return transactionId;
@@ -87,17 +86,16 @@ class TransactionService {
     required TransactionType type,
     String? title,
     String? description,
-    String? categoryName,
+    int? categoryId,
     DateTime? date,
   }) async {
     return _db.transaction(() async {
       final oldTransaction = await _db.transactionsDao.getById(transactionId);
       if (oldTransaction == null) return;
 
-      // Handle category
-      int? categoryId;
-      if (categoryName != null && categoryName.trim().isNotEmpty) {
-        categoryId = await _ensureCategory(categoryName.trim());
+      // Validate category usage type if provided
+      if (categoryId != null) {
+        await _validateCategoryUsage(categoryId, type);
       }
 
       final transactionDate = date ?? DateTime.now();
@@ -147,6 +145,31 @@ class TransactionService {
       // Update account balance
       await _updateAccountBalance(accountId);
     });
+  }
+
+  /// Validates that a category can be used with a transaction type
+  Future<void> _validateCategoryUsage(
+      int categoryId, TransactionType type) async {
+    final category = await _db.categoriesDao.getById(categoryId);
+
+    if (category == null) {
+      throw Exception('Category not found');
+    }
+
+    // Check if category usage type is compatible
+    if (category.usageType == CategoryUsageType.both) {
+      // 'both' is always compatible
+      return;
+    }
+
+    final isExpense = type == TransactionType.expense;
+    final categoryIsForExpense = category.usageType == CategoryUsageType.expense;
+
+    if (isExpense != categoryIsForExpense) {
+      final typeName = isExpense ? 'expense' : 'income';
+      throw Exception(
+          'Category "${category.name}" cannot be used for $typeName transactions');
+    }
   }
 
   /// Calculate what the resultant balance should be for a new transaction
@@ -205,7 +228,8 @@ class TransactionService {
 
     // Get all transactions from afterDate onwards, ordered by date
     final transactionsToUpdate = await _db.transactionsDao
-        .getTransactionsAfterDate(accountId, afterDate.subtract(const Duration(seconds: 1)));
+        .getTransactionsAfterDate(
+        accountId, afterDate.subtract(const Duration(seconds: 1)));
 
     // Update each transaction's resultant balance
     for (final tx in transactionsToUpdate) {
@@ -231,14 +255,5 @@ class TransactionService {
         lastTransaction.resultantBalance,
       );
     }
-  }
-
-  Future<int> _ensureCategory(String name) async {
-    final existing = await _db.categoriesDao.getByName(name);
-    if (existing != null) return existing.id;
-
-    return await _db.categoriesDao.insert(
-      CategoriesCompanion.insert(name: name),
-    );
   }
 }

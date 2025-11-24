@@ -6,9 +6,10 @@ import '../../data/db/tables.dart';
 import 'package:intl/intl.dart';
 import 'transaction_form_screen.dart';
 import 'transaction_details_dialog.dart';
-import '../../helpers/app_colors.dart';
+import '../../theme/app_colors.dart';
 import '../../models/transaction_type_filter.dart';
-import 'package:collection/collection.dart'; // Add this if not present
+import 'package:collection/collection.dart';
+import '../../widgets/custom_app_bar.dart';
 
 class TransactionHistoryScreen extends ConsumerStatefulWidget {
   const TransactionHistoryScreen({super.key});
@@ -42,14 +43,9 @@ class _TransactionHistoryScreenState
     final accountsAsync = ref.watch(accountsListProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.bgPrimary,
-        scrolledUnderElevation: 0.0,
-        surfaceTintColor: Colors.transparent,
-        title: const Text(
-          "Transaction History",
-          style: TextStyle(color: AppColors.textDark),
-        ),
+      appBar: CustomAppBar(
+        title: 'Transactions',
+        leading: Icon(Icons.history, color: AppColors.textDark),
       ),
       body: accountsAsync.when(
         data: (accounts) {
@@ -79,7 +75,7 @@ class _TransactionHistoryScreenState
                         decoration: BoxDecoration(
                           color: selected
                               ? AppColors.terciary
-                              : AppColors.bgSecondary,
+                              : AppColors.bgTerciary,
                           borderRadius: BorderRadius.circular(100),
                         ),
                         child: Center(
@@ -208,9 +204,11 @@ class _TransactionHistoryScreenState
                               return ListView.builder(
                                 key: ValueKey<String>(filter),
                                 itemCount: listItems.length,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 8,
+                                padding: const EdgeInsets.only(
+                                  left: 16,
+                                  right: 16,
+                                  top: 8,
+                                  bottom: 80,
                                 ),
                                 itemBuilder: (context, index) {
                                   final item = listItems[index];
@@ -279,8 +277,8 @@ class _TransactionHistoryScreenState
                                             children: [
                                               Icon(
                                                 isIncome
-                                                    ? Icons.arrow_upward
-                                                    : Icons.arrow_downward,
+                                                    ? Icons.south_west
+                                                    : Icons.north_east,
                                                 color: isIncome
                                                     ? AppColors.green
                                                     : AppColors.red,

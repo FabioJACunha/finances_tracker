@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/services_provider.dart';
 import '../../data/db/database.dart';
-import '../../helpers/app_colors.dart';
+import '../../theme/app_colors.dart';
 
 class AccountFormScreen extends ConsumerStatefulWidget {
   final Account? initialAccount;
@@ -176,7 +176,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                       value: _excludeFromTotal,
                       activeThumbColor: AppColors.textDark,
                       activeTrackColor: AppColors.primary,
-                      inactiveThumbColor: AppColors.bgSecondary,
+                      inactiveThumbColor: AppColors.bgTerciary,
                       inactiveTrackColor: AppColors.terciary,
                       trackOutlineColor:
                           WidgetStateProperty.resolveWith<Color?>((

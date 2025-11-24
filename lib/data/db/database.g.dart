@@ -336,8 +336,45 @@ class $CategoriesTable extends Categories
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _iconCodePointMeta = const VerificationMeta(
+    'iconCodePoint',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, name];
+  late final GeneratedColumn<int> iconCodePoint = GeneratedColumn<int>(
+    'icon_code_point',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _colorValueMeta = const VerificationMeta(
+    'colorValue',
+  );
+  @override
+  late final GeneratedColumn<int> colorValue = GeneratedColumn<int>(
+    'color_value',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<CategoryUsageType, int>
+  usageType = GeneratedColumn<int>(
+    'usage_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  ).withConverter<CategoryUsageType>($CategoriesTable.$converterusageType);
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    iconCodePoint,
+    colorValue,
+    usageType,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -361,6 +398,25 @@ class $CategoriesTable extends Categories
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
+    if (data.containsKey('icon_code_point')) {
+      context.handle(
+        _iconCodePointMeta,
+        iconCodePoint.isAcceptableOrUnknown(
+          data['icon_code_point']!,
+          _iconCodePointMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_iconCodePointMeta);
+    }
+    if (data.containsKey('color_value')) {
+      context.handle(
+        _colorValueMeta,
+        colorValue.isAcceptableOrUnknown(data['color_value']!, _colorValueMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_colorValueMeta);
+    }
     return context;
   }
 
@@ -378,6 +434,20 @@ class $CategoriesTable extends Categories
         DriftSqlType.string,
         data['${effectivePrefix}name'],
       )!,
+      iconCodePoint: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}icon_code_point'],
+      )!,
+      colorValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}color_value'],
+      )!,
+      usageType: $CategoriesTable.$converterusageType.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}usage_type'],
+        )!,
+      ),
     );
   }
 
@@ -385,22 +455,47 @@ class $CategoriesTable extends Categories
   $CategoriesTable createAlias(String alias) {
     return $CategoriesTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<CategoryUsageType, int, int> $converterusageType =
+      const EnumIndexConverter<CategoryUsageType>(CategoryUsageType.values);
 }
 
 class Category extends DataClass implements Insertable<Category> {
   final int id;
   final String name;
-  const Category({required this.id, required this.name});
+  final int iconCodePoint;
+  final int colorValue;
+  final CategoryUsageType usageType;
+  const Category({
+    required this.id,
+    required this.name,
+    required this.iconCodePoint,
+    required this.colorValue,
+    required this.usageType,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
+    map['icon_code_point'] = Variable<int>(iconCodePoint);
+    map['color_value'] = Variable<int>(colorValue);
+    {
+      map['usage_type'] = Variable<int>(
+        $CategoriesTable.$converterusageType.toSql(usageType),
+      );
+    }
     return map;
   }
 
   CategoriesCompanion toCompanion(bool nullToAbsent) {
-    return CategoriesCompanion(id: Value(id), name: Value(name));
+    return CategoriesCompanion(
+      id: Value(id),
+      name: Value(name),
+      iconCodePoint: Value(iconCodePoint),
+      colorValue: Value(colorValue),
+      usageType: Value(usageType),
+    );
   }
 
   factory Category.fromJson(
@@ -411,6 +506,11 @@ class Category extends DataClass implements Insertable<Category> {
     return Category(
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
+      iconCodePoint: serializer.fromJson<int>(json['iconCodePoint']),
+      colorValue: serializer.fromJson<int>(json['colorValue']),
+      usageType: $CategoriesTable.$converterusageType.fromJson(
+        serializer.fromJson<int>(json['usageType']),
+      ),
     );
   }
   @override
@@ -419,15 +519,38 @@ class Category extends DataClass implements Insertable<Category> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
+      'iconCodePoint': serializer.toJson<int>(iconCodePoint),
+      'colorValue': serializer.toJson<int>(colorValue),
+      'usageType': serializer.toJson<int>(
+        $CategoriesTable.$converterusageType.toJson(usageType),
+      ),
     };
   }
 
-  Category copyWith({int? id, String? name}) =>
-      Category(id: id ?? this.id, name: name ?? this.name);
+  Category copyWith({
+    int? id,
+    String? name,
+    int? iconCodePoint,
+    int? colorValue,
+    CategoryUsageType? usageType,
+  }) => Category(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    iconCodePoint: iconCodePoint ?? this.iconCodePoint,
+    colorValue: colorValue ?? this.colorValue,
+    usageType: usageType ?? this.usageType,
+  );
   Category copyWithCompanion(CategoriesCompanion data) {
     return Category(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
+      iconCodePoint: data.iconCodePoint.present
+          ? data.iconCodePoint.value
+          : this.iconCodePoint,
+      colorValue: data.colorValue.present
+          ? data.colorValue.value
+          : this.colorValue,
+      usageType: data.usageType.present ? data.usageType.value : this.usageType,
     );
   }
 
@@ -435,42 +558,81 @@ class Category extends DataClass implements Insertable<Category> {
   String toString() {
     return (StringBuffer('Category(')
           ..write('id: $id, ')
-          ..write('name: $name')
+          ..write('name: $name, ')
+          ..write('iconCodePoint: $iconCodePoint, ')
+          ..write('colorValue: $colorValue, ')
+          ..write('usageType: $usageType')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name);
+  int get hashCode =>
+      Object.hash(id, name, iconCodePoint, colorValue, usageType);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Category && other.id == this.id && other.name == this.name);
+      (other is Category &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.iconCodePoint == this.iconCodePoint &&
+          other.colorValue == this.colorValue &&
+          other.usageType == this.usageType);
 }
 
 class CategoriesCompanion extends UpdateCompanion<Category> {
   final Value<int> id;
   final Value<String> name;
+  final Value<int> iconCodePoint;
+  final Value<int> colorValue;
+  final Value<CategoryUsageType> usageType;
   const CategoriesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
+    this.iconCodePoint = const Value.absent(),
+    this.colorValue = const Value.absent(),
+    this.usageType = const Value.absent(),
   });
   CategoriesCompanion.insert({
     this.id = const Value.absent(),
     required String name,
-  }) : name = Value(name);
+    required int iconCodePoint,
+    required int colorValue,
+    required CategoryUsageType usageType,
+  }) : name = Value(name),
+       iconCodePoint = Value(iconCodePoint),
+       colorValue = Value(colorValue),
+       usageType = Value(usageType);
   static Insertable<Category> custom({
     Expression<int>? id,
     Expression<String>? name,
+    Expression<int>? iconCodePoint,
+    Expression<int>? colorValue,
+    Expression<int>? usageType,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
+      if (iconCodePoint != null) 'icon_code_point': iconCodePoint,
+      if (colorValue != null) 'color_value': colorValue,
+      if (usageType != null) 'usage_type': usageType,
     });
   }
 
-  CategoriesCompanion copyWith({Value<int>? id, Value<String>? name}) {
-    return CategoriesCompanion(id: id ?? this.id, name: name ?? this.name);
+  CategoriesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<int>? iconCodePoint,
+    Value<int>? colorValue,
+    Value<CategoryUsageType>? usageType,
+  }) {
+    return CategoriesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      iconCodePoint: iconCodePoint ?? this.iconCodePoint,
+      colorValue: colorValue ?? this.colorValue,
+      usageType: usageType ?? this.usageType,
+    );
   }
 
   @override
@@ -482,6 +644,17 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
+    if (iconCodePoint.present) {
+      map['icon_code_point'] = Variable<int>(iconCodePoint.value);
+    }
+    if (colorValue.present) {
+      map['color_value'] = Variable<int>(colorValue.value);
+    }
+    if (usageType.present) {
+      map['usage_type'] = Variable<int>(
+        $CategoriesTable.$converterusageType.toSql(usageType.value),
+      );
+    }
     return map;
   }
 
@@ -489,7 +662,10 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
   String toString() {
     return (StringBuffer('CategoriesCompanion(')
           ..write('id: $id, ')
-          ..write('name: $name')
+          ..write('name: $name, ')
+          ..write('iconCodePoint: $iconCodePoint, ')
+          ..write('colorValue: $colorValue, ')
+          ..write('usageType: $usageType')
           ..write(')'))
         .toString();
   }
@@ -1409,9 +1585,21 @@ typedef $$AccountsTableProcessedTableManager =
       PrefetchHooks Function({bool transactionsRefs})
     >;
 typedef $$CategoriesTableCreateCompanionBuilder =
-    CategoriesCompanion Function({Value<int> id, required String name});
+    CategoriesCompanion Function({
+      Value<int> id,
+      required String name,
+      required int iconCodePoint,
+      required int colorValue,
+      required CategoryUsageType usageType,
+    });
 typedef $$CategoriesTableUpdateCompanionBuilder =
-    CategoriesCompanion Function({Value<int> id, Value<String> name});
+    CategoriesCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<int> iconCodePoint,
+      Value<int> colorValue,
+      Value<CategoryUsageType> usageType,
+    });
 
 final class $$CategoriesTableReferences
     extends BaseReferences<_$AppDatabase, $CategoriesTable, Category> {
@@ -1458,6 +1646,22 @@ class $$CategoriesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get iconCodePoint => $composableBuilder(
+    column: $table.iconCodePoint,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get colorValue => $composableBuilder(
+    column: $table.colorValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<CategoryUsageType, CategoryUsageType, int>
+  get usageType => $composableBuilder(
+    column: $table.usageType,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
   Expression<bool> transactionsRefs(
     Expression<bool> Function($$TransactionsTableFilterComposer f) f,
   ) {
@@ -1502,6 +1706,21 @@ class $$CategoriesTableOrderingComposer
     column: $table.name,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get iconCodePoint => $composableBuilder(
+    column: $table.iconCodePoint,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get colorValue => $composableBuilder(
+    column: $table.colorValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get usageType => $composableBuilder(
+    column: $table.usageType,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CategoriesTableAnnotationComposer
@@ -1518,6 +1737,19 @@ class $$CategoriesTableAnnotationComposer
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get iconCodePoint => $composableBuilder(
+    column: $table.iconCodePoint,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get colorValue => $composableBuilder(
+    column: $table.colorValue,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<CategoryUsageType, int> get usageType =>
+      $composableBuilder(column: $table.usageType, builder: (column) => column);
 
   Expression<T> transactionsRefs<T extends Object>(
     Expression<T> Function($$TransactionsTableAnnotationComposer a) f,
@@ -1575,10 +1807,30 @@ class $$CategoriesTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
-              }) => CategoriesCompanion(id: id, name: name),
+                Value<int> iconCodePoint = const Value.absent(),
+                Value<int> colorValue = const Value.absent(),
+                Value<CategoryUsageType> usageType = const Value.absent(),
+              }) => CategoriesCompanion(
+                id: id,
+                name: name,
+                iconCodePoint: iconCodePoint,
+                colorValue: colorValue,
+                usageType: usageType,
+              ),
           createCompanionCallback:
-              ({Value<int> id = const Value.absent(), required String name}) =>
-                  CategoriesCompanion.insert(id: id, name: name),
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                required int iconCodePoint,
+                required int colorValue,
+                required CategoryUsageType usageType,
+              }) => CategoriesCompanion.insert(
+                id: id,
+                name: name,
+                iconCodePoint: iconCodePoint,
+                colorValue: colorValue,
+                usageType: usageType,
+              ),
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (

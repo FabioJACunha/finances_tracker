@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/accounts_provider.dart';
 import '../../data/db/database.dart';
 import 'account_form_screen.dart';
-import '../../helpers/app_colors.dart';
+import '../../theme/app_colors.dart';
+import '../../widgets/custom_app_bar.dart';
 
 class AccountsScreen extends ConsumerWidget {
   const AccountsScreen({super.key});
@@ -21,14 +22,9 @@ class AccountsScreen extends ConsumerWidget {
     final totalBalanceAsync = ref.watch(totalBalanceProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.bgPrimary,
-        scrolledUnderElevation: 0.0,
-        surfaceTintColor: Colors.transparent,
-        title: const Text(
-          "Accounts",
-          style: TextStyle(color: AppColors.textDark),
-        ),
+      appBar: CustomAppBar(
+        title: 'Accounts',
+        leading: Icon(Icons.account_balance_wallet_outlined, color: AppColors.textDark),
       ),
       body: accountsAsync.when(
         data: (accounts) {
@@ -49,9 +45,11 @@ class AccountsScreen extends ConsumerWidget {
               Expanded(
                 child: ListView.builder(
                   itemCount: accounts.length,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+                  padding: const EdgeInsets.only(
+                    left: 16,
+                    right: 16,
+                    top: 8,
+                    bottom: 80,
                   ),
                   itemBuilder: (context, index) {
                     final acc = accounts[index];

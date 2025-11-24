@@ -7,7 +7,7 @@ class AppColors {
   static const textDark = Color.fromRGBO(101, 56, 47, 1.0); //
   static const textMuted = Color.fromRGBO(133, 130, 129, 1.0);
   static const bgPrimary = Color.fromRGBO(241, 229, 204, 1.0); //
-  static const bgSecondary = Color.fromRGBO(241, 225, 193, 1.0); //
+  // static const bgTerciary = Color.fromRGBO(241, 225, 193, 1.0); 
   static const bgTerciary = Color.fromRGBO(241, 233, 231, 1.0); //
   static const bgGreen = Color.fromRGBO(214, 234, 215, 1.0); //
   static const bgRed = Color.fromRGBO(246, 225, 229, 1.0); //

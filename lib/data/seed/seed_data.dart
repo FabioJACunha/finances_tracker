@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:flutter/material.dart';
 import '../db/tables.dart';
 import '../db/database.dart';
 import '../../services/transaction_service.dart';
@@ -17,19 +18,66 @@ Future<void> seedDatabase(AppDatabase db) async {
     ),
   );
 
-  // Seed categories
-  final categories = [
-    'Food',
-    'Transport',
-    'Salary',
-    'Shopping',
-    'Entertainment',
-    'Bills',
-    'Health',
-    'Freelance',
-  ];
-  for (final name in categories) {
-    await db.categoriesDao.insert(CategoriesCompanion(name: Value(name)));
+  // Seed categories with icons, colors, and usage types
+  final categories = {
+    'Food': _CategorySeed(
+      icon: Icons.restaurant,
+      color: Colors.orange,
+      usageType: CategoryUsageType.expense,
+    ),
+    'Transport': _CategorySeed(
+      icon: Icons.directions_car_filled,
+      color: Colors.blue,
+      usageType: CategoryUsageType.expense,
+    ),
+    'Salary': _CategorySeed(
+      icon: Icons.euro,
+      color: Colors.green,
+      usageType: CategoryUsageType.income,
+    ),
+    'Shopping': _CategorySeed(
+      icon: Icons.shopping_bag_outlined,
+      color: Colors.purple,
+      usageType: CategoryUsageType.expense,
+    ),
+    'Entertainment': _CategorySeed(
+      icon: Icons.movie,
+      color: Colors.pink,
+      usageType: CategoryUsageType.expense,
+    ),
+    'Bills': _CategorySeed(
+      icon: Icons.receipt_outlined,
+      color: Colors.red,
+      usageType: CategoryUsageType.expense,
+    ),
+    'Health': _CategorySeed(
+      icon: Icons.local_hospital_outlined,
+      color: Colors.teal,
+      usageType: CategoryUsageType.expense,
+    ),
+    'Freelance': _CategorySeed(
+      icon: Icons.card_travel_outlined,
+      color: Colors.indigo,
+      usageType: CategoryUsageType.income,
+    ),
+    'Other': _CategorySeed(
+      icon: Icons.more_horiz,
+      color: Colors.grey,
+      usageType: CategoryUsageType.both,
+    ),
+  };
+
+  final categoryIds = <String, int>{};
+  for (final entry in categories.entries) {
+    final id = await db.categoriesDao.insert(
+      CategoriesCompanion.insert(
+        name: entry.key,
+        iconCodePoint: entry.value.icon.codePoint,
+        colorValue: entry.value.color.toARGB32(),
+        usageType: entry.value.usageType,
+      ),
+    );
+    categoryIds[entry.key] = id;
   }
 
   final transactionService = TransactionService(db);
@@ -52,7 +100,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Morning Coffee',
     description: 'Starbucks',
-    categoryName: 'Food',
+    categoryId: categoryIds['Food'],
     date: date(0, 8, 30),
   );
   await transactionService.createTransaction(
@@ -61,7 +109,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Lunch',
     description: 'Sandwich shop',
-    categoryName: 'Food',
+    categoryId: categoryIds['Food'],
     date: date(0, 13, 15),
   );
 
@@ -72,7 +120,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Gas',
     description: 'Shell station',
-    categoryName: 'Transport',
+    categoryId: categoryIds['Transport'],
     date: date(1, 18, 45),
   );
 
@@ -83,7 +131,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.income,
     title: 'Monthly Salary',
     description: 'Company XYZ',
-    categoryName: 'Salary',
+    categoryId: categoryIds['Salary'],
     date: date(2, 9, 0),
   );
   await transactionService.createTransaction(
@@ -92,7 +140,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'New Shoes',
     description: 'Nike store',
-    categoryName: 'Shopping',
+    categoryId: categoryIds['Shopping'],
     date: date(2, 15, 30),
   );
 
@@ -103,7 +151,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Electricity Bill',
     description: 'Monthly bill',
-    categoryName: 'Bills',
+    categoryId: categoryIds['Bills'],
     date: date(4, 10, 0),
   );
   await transactionService.createTransaction(
@@ -112,7 +160,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Internet',
     description: 'Monthly subscription',
-    categoryName: 'Bills',
+    categoryId: categoryIds['Bills'],
     date: date(4, 10, 5),
   );
 
@@ -123,7 +171,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Weekly Groceries',
     description: 'Supermarket',
-    categoryName: 'Food',
+    categoryId: categoryIds['Food'],
     date: date(6, 11, 20),
   );
   await transactionService.createTransaction(
@@ -132,7 +180,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Netflix',
     description: 'Monthly subscription',
-    categoryName: 'Entertainment',
+    categoryId: categoryIds['Entertainment'],
     date: date(6, 12, 0),
   );
 
@@ -143,7 +191,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.income,
     title: 'Freelance Project',
     description: 'Website design',
-    categoryName: 'Freelance',
+    categoryId: categoryIds['Freelance'],
     date: date(9, 14, 30),
   );
   await transactionService.createTransaction(
@@ -152,7 +200,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Cinema',
     description: 'Movie night',
-    categoryName: 'Entertainment',
+    categoryId: categoryIds['Entertainment'],
     date: date(9, 20, 0),
   );
 
@@ -163,7 +211,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Pharmacy',
     description: 'Medicine',
-    categoryName: 'Health',
+    categoryId: categoryIds['Health'],
     date: date(11, 16, 45),
   );
 
@@ -174,7 +222,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Weekly Groceries',
     description: 'Supermarket',
-    categoryName: 'Food',
+    categoryId: categoryIds['Food'],
     date: date(13, 10, 30),
   );
   await transactionService.createTransaction(
@@ -183,7 +231,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Uber rides',
     description: 'Weekly transport',
-    categoryName: 'Transport',
+    categoryId: categoryIds['Transport'],
     date: date(13, 22, 15),
   );
 
@@ -194,7 +242,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Headphones',
     description: 'Sony WH-1000XM5',
-    categoryName: 'Shopping',
+    categoryId: categoryIds['Shopping'],
     date: date(16, 13, 0),
   );
 
@@ -205,7 +253,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Dinner out',
     description: 'Italian restaurant',
-    categoryName: 'Food',
+    categoryId: categoryIds['Food'],
     date: date(19, 20, 30),
   );
   await transactionService.createTransaction(
@@ -214,7 +262,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.income,
     title: 'Birthday gift',
     description: 'From grandma',
-    categoryName: 'Other',
+    categoryId: categoryIds['Other'],
     date: date(19, 12, 0),
   );
 
@@ -225,7 +273,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Doctor visit',
     description: 'Annual checkup',
-    categoryName: 'Health',
+    categoryId: categoryIds['Health'],
     date: date(21, 9, 30),
   );
 
@@ -236,7 +284,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Weekly Groceries',
     description: 'Supermarket',
-    categoryName: 'Food',
+    categoryId: categoryIds['Food'],
     date: date(24, 11, 0),
   );
   await transactionService.createTransaction(
@@ -245,7 +293,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Spotify',
     description: 'Monthly subscription',
-    categoryName: 'Entertainment',
+    categoryId: categoryIds['Entertainment'],
     date: date(24, 11, 5),
   );
 
@@ -256,7 +304,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Concert tickets',
     description: 'Live music event',
-    categoryName: 'Entertainment',
+    categoryId: categoryIds['Entertainment'],
     date: date(27, 19, 0),
   );
 
@@ -271,7 +319,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.income,
     title: 'Monthly Salary',
     description: 'Company XYZ',
-    categoryName: 'Salary',
+    categoryId: categoryIds['Salary'],
     date: date(31, 9, 0),
   );
 
@@ -282,7 +330,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Electricity Bill',
     description: 'Monthly bill',
-    categoryName: 'Bills',
+    categoryId: categoryIds['Bills'],
     date: date(32, 10, 0),
   );
   await transactionService.createTransaction(
@@ -291,7 +339,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Internet',
     description: 'Monthly subscription',
-    categoryName: 'Bills',
+    categoryId: categoryIds['Bills'],
     date: date(32, 10, 10),
   );
   await transactionService.createTransaction(
@@ -300,7 +348,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Phone bill',
     description: 'Monthly plan',
-    categoryName: 'Bills',
+    categoryId: categoryIds['Bills'],
     date: date(32, 10, 15),
   );
 
@@ -311,7 +359,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Weekly Groceries',
     description: 'Supermarket',
-    categoryName: 'Food',
+    categoryId: categoryIds['Food'],
     date: date(34, 12, 30),
   );
 
@@ -322,7 +370,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.income,
     title: 'Freelance Project',
     description: 'Logo design',
-    categoryName: 'Freelance',
+    categoryId: categoryIds['Freelance'],
     date: date(37, 15, 0),
   );
   await transactionService.createTransaction(
@@ -331,7 +379,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Gas',
     description: 'BP station',
-    categoryName: 'Transport',
+    categoryId: categoryIds['Transport'],
     date: date(37, 17, 30),
   );
 
@@ -342,7 +390,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Winter Jacket',
     description: 'Zara',
-    categoryName: 'Shopping',
+    categoryId: categoryIds['Shopping'],
     date: date(39, 14, 0),
   );
 
@@ -353,7 +401,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Weekly Groceries',
     description: 'Supermarket',
-    categoryName: 'Food',
+    categoryId: categoryIds['Food'],
     date: date(41, 10, 45),
   );
   await transactionService.createTransaction(
@@ -362,7 +410,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Netflix',
     description: 'Monthly subscription',
-    categoryName: 'Entertainment',
+    categoryId: categoryIds['Entertainment'],
     date: date(41, 11, 0),
   );
 
@@ -373,7 +421,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Dentist',
     description: 'Cleaning',
-    categoryName: 'Health',
+    categoryId: categoryIds['Health'],
     date: date(44, 11, 30),
   );
   await transactionService.createTransaction(
@@ -382,7 +430,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Books',
     description: 'Amazon order',
-    categoryName: 'Entertainment',
+    categoryId: categoryIds['Entertainment'],
     date: date(44, 16, 0),
   );
 
@@ -393,7 +441,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Restaurant',
     description: 'Birthday dinner',
-    categoryName: 'Food',
+    categoryId: categoryIds['Food'],
     date: date(47, 20, 0),
   );
   await transactionService.createTransaction(
@@ -402,7 +450,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Taxi',
     description: 'Night out',
-    categoryName: 'Transport',
+    categoryId: categoryIds['Transport'],
     date: date(47, 23, 30),
   );
 
@@ -413,7 +461,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Weekly Groceries',
     description: 'Supermarket',
-    categoryName: 'Food',
+    categoryId: categoryIds['Food'],
     date: date(49, 11, 15),
   );
 
@@ -424,7 +472,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Spotify',
     description: 'Monthly subscription',
-    categoryName: 'Entertainment',
+    categoryId: categoryIds['Entertainment'],
     date: date(52, 12, 0),
   );
   await transactionService.createTransaction(
@@ -433,7 +481,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Gym membership',
     description: 'Monthly fee',
-    categoryName: 'Health',
+    categoryId: categoryIds['Health'],
     date: date(52, 12, 10),
   );
 
@@ -444,7 +492,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.income,
     title: 'Sold old phone',
     description: 'OLX sale',
-    categoryName: 'Other',
+    categoryId: categoryIds['Other'],
     date: date(54, 14, 0),
   );
 
@@ -455,7 +503,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Weekly Groceries',
     description: 'Supermarket',
-    categoryName: 'Food',
+    categoryId: categoryIds['Food'],
     date: date(56, 10, 30),
   );
   await transactionService.createTransaction(
@@ -464,7 +512,7 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'Gas',
     description: 'Shell station',
-    categoryName: 'Transport',
+    categoryId: categoryIds['Transport'],
     date: date(56, 18, 0),
   );
 
@@ -475,7 +523,20 @@ Future<void> seedDatabase(AppDatabase db) async {
     type: TransactionType.expense,
     title: 'New game',
     description: 'PlayStation store',
-    categoryName: 'Entertainment',
+    categoryId: categoryIds['Entertainment'],
     date: date(59, 21, 0),
   );
+}
+
+// Helper class for category seed data
+class _CategorySeed {
+  final IconData icon;
+  final Color color;
+  final CategoryUsageType usageType;
+
+  _CategorySeed({
+    required this.icon,
+    required this.color,
+    required this.usageType,
+  });
 }

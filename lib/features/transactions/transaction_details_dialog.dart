@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import '../../data/db/daos/transactions_dao.dart';
 import '../../data/db/tables.dart';
 import '../../providers/services_provider.dart';
-import '../../helpers/app_colors.dart';
+import '../../theme/app_colors.dart';
 import 'transaction_form_screen.dart';
 
 class TransactionDetailsDialog extends ConsumerWidget {
@@ -57,7 +57,7 @@ class TransactionDetailsDialog extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  isIncome ? Icons.arrow_upward : Icons.arrow_downward,
+                  isIncome ? Icons.south_west: Icons.north_east,
                   color: isIncome ? AppColors.green : AppColors.red,
                   size: 36,
                 ),
@@ -77,7 +77,7 @@ class TransactionDetailsDialog extends ConsumerWidget {
 
             // Details
             _buildDetailRow(
-              icon: Icons.label_outlined,
+              icon: Icons.label_outline,
               value: transaction.title ?? 'No title',
             ),
             const SizedBox(height: 12),
@@ -87,7 +87,7 @@ class TransactionDetailsDialog extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             _buildDetailRow(
-              icon: Icons.calendar_today,
+              icon: Icons.calendar_today_outlined,
               value:
                   '${DateFormat('HH:mm').format(transaction.date)}h ${DateFormat('EEEE, MMM d, yyyy').format(transaction.date)}',
             ),

@@ -1,10 +1,11 @@
-import '../../helpers/app_colors.dart';
+import '../../theme/app_colors.dart';
 import '../../models/date_period_filter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/accounts_provider.dart';
 import '../transactions/transaction_form_screen.dart';
 import 'home_stats_widgets/home_stats_widgets.dart';
+import '../../widgets/custom_app_bar.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -82,16 +83,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         final range = _getSelectedDateRange();
 
         return Scaffold(
-          appBar: AppBar(
-            backgroundColor: AppColors.bgPrimary,
-            scrolledUnderElevation: 0.0,
-            // Prevents the color change when scrolled
-            surfaceTintColor: Colors.transparent,
-            // Prevents tinting on scroll
-            title: const Text(
-              "Home",
-              style: TextStyle(color: AppColors.textDark),
-            ),
+          appBar: CustomAppBar(
+            title: 'Home',
+            leading: Icon(Icons.home_outlined, color: AppColors.textDark),
           ),
           body: Column(
             children: [
@@ -116,7 +110,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         decoration: BoxDecoration(
                           color: selected
                               ? AppColors.terciary
-                              : AppColors.bgSecondary,
+                              : AppColors.bgTerciary,
                           borderRadius: BorderRadius.circular(100),
                         ),
                         child: Center(
@@ -171,6 +165,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   transitionBuilder: (child, animation) =>
                       FadeTransition(opacity: animation, child: child),
                   child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(
+                      bottom: 80,
+                    ),
                     key: ValueKey(_currentFilter),
                     // <- important for switching!
                     child: Column(
@@ -233,8 +230,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) =>
-                      TransactionFormScreen(initialAccountId: _selectedAccountId!),
+                  builder: (_) => TransactionFormScreen(
+                    initialAccountId: _selectedAccountId!,
+                  ),
                 ),
               );
             },

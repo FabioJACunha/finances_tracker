@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../providers/analytics_provider.dart';
-import '../../../helpers/app_colors.dart';
+import '../../../theme/app_colors.dart';
 import '../../../models/period_args.dart';
 
 class NetBalanceChangeCard extends ConsumerWidget {

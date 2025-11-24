@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../providers/analytics_provider.dart';
-import '../../../helpers/app_colors.dart';
+import '../../../theme/app_colors.dart';
 import '../../../models/period_args.dart';
 
 class SavingsRateCard extends ConsumerWidget {
@@ -85,7 +85,7 @@ class SavingsRateCard extends ConsumerWidget {
                       child: LinearProgressIndicator(
                         value: clampedValue / 100,
                         minHeight: 8,
-                        backgroundColor: AppColors.bgSecondary,
+                        backgroundColor: AppColors.bgTerciary,
                         valueColor: AlwaysStoppedAnimation<Color>(color),
                       ),
                     ),

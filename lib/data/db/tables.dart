@@ -2,6 +2,8 @@ import 'package:drift/drift.dart';
 
 enum TransactionType { expense, income }
 
+enum CategoryUsageType { expense, income, both }
+
 class Accounts extends Table {
   IntColumn get id => integer().autoIncrement()();
 
@@ -17,6 +19,12 @@ class Categories extends Table {
   IntColumn get id => integer().autoIncrement()();
 
   TextColumn get name => text().withLength(min: 1, max: 255)();
+
+  IntColumn get iconCodePoint => integer()();
+
+  IntColumn get colorValue => integer()();
+
+  IntColumn get usageType => intEnum<CategoryUsageType>()();
 }
 
 class Transactions extends Table {

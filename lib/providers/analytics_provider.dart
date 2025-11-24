@@ -1,8 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/material.dart';
 import '../services/analytics_service.dart';
 import '../models/period_args.dart';
-import '../helpers/category_colors.dart';
 import 'db_provider.dart';
 
 // Service provider
@@ -10,11 +8,6 @@ final analyticsServiceProvider = Provider<AnalyticsService>((ref) {
   final db = ref.watch(databaseProvider);
   return AnalyticsService(db);
 });
-
-// Category colors provider
-final categoryColorProvider = Provider<Map<String, Color>>(
-  (ref) => categoryColors,
-);
 
 // Stream providers for reactive data
 final expensesByCategoryProvider =

@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/accounts_provider.dart';
@@ -6,8 +5,10 @@ import '../../providers/services_provider.dart';
 import '../../providers/categories_provider.dart';
 import '../../data/db/tables.dart';
 import '../../data/db/database.dart';
-import '../../helpers/app_colors.dart';
-import '../../components/select_form_field.dart';
+import '../../theme/app_colors.dart';
+import '../../widgets/chip_selector.dart';
+import '../../widgets/custom_app_bar.dart';
+import '../categories/category_form_screen.dart';
 
 class TransactionFormScreen extends ConsumerStatefulWidget {
   final int initialAccountId;
@@ -28,12 +29,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   final _formKey = GlobalKey<FormState>();
   late int _accountId;
   late TransactionType _type;
-  String? _category;
+  int? _categoryId;
   String? _title;
   String? _description;
   double? _amount;
   late DateTime _date;
-  final TextEditingController _newCategoryController = TextEditingController();
 
   bool get isEditing => widget.transactionToEdit != null;
 
@@ -45,7 +45,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       final tx = widget.transactionToEdit!.transaction;
       _accountId = tx.accountId;
       _type = tx.type;
-      _category = widget.transactionToEdit!.category?.name;
+      _categoryId = tx.categoryId;
       _title = tx.title;
       _description = tx.description;
       _amount = tx.amount;
@@ -55,12 +55,6 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       _type = TransactionType.expense;
       _date = DateTime.now();
     }
-  }
-
-  @override
-  void dispose() {
-    _newCategoryController.dispose();
-    super.dispose();
   }
 
   void _submit() async {
@@ -79,7 +73,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
           type: _type,
           title: _title,
           description: _description,
-          categoryName: _category,
+          categoryId: _categoryId,
           date: _date,
         );
       } else {
@@ -90,7 +84,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
           type: _type,
           title: _title,
           description: _description,
-          categoryName: _category,
+          categoryId: _categoryId,
           date: _date,
         );
       }
@@ -104,9 +98,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
             isEditing
                 ? 'Transaction updated successfully'
                 : 'Transaction added successfully',
-            style: TextStyle(color: AppColors.green),
+            style: const TextStyle(color: AppColors.green),
           ),
-
           backgroundColor: AppColors.bgGreen,
         ),
       );
@@ -118,103 +111,31 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     }
   }
 
-  Future<void> _addNewCategory() async {
-    final newCategoryName = await showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        titlePadding: const EdgeInsets.all(16),
-        contentPadding: const EdgeInsets.all(16),
-        actionsPadding: const EdgeInsets.all(16),
-        insetPadding: const EdgeInsets.symmetric(horizontal: 16),
-        constraints: const BoxConstraints(
-          maxWidth: double.infinity,
-          minWidth: double.infinity,
-        ),
-        backgroundColor: AppColors.bgPrimary,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        title: const Text(
-          "Add New Category",
-          style: TextStyle(
-            color: AppColors.textDark,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: TextField(
-          controller: _newCategoryController,
-          decoration: const InputDecoration(labelText: "Category Name"),
-          maxLength: 20,
-        ),
-        actions: [
-          TextButton(
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.resolveWith<Color?>((
-                Set<WidgetState> states,
-              ) {
-                return AppColors.terciary;
-              }),
-            ),
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              "Cancel",
-              style: TextStyle(color: AppColors.textDark),
-            ),
-          ),
-          ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.resolveWith<Color?>((
-                Set<WidgetState> states,
-              ) {
-                return AppColors.primary;
-              }),
-            ),
-            onPressed: () =>
-                Navigator.pop(context, _newCategoryController.text.trim()),
-            child: const Text(
-              "Add",
-              style: TextStyle(color: AppColors.textDark),
-            ),
-          ),
-        ],
-      ),
+  Future<void> _navigateToAddCategory() async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (context) => const CategoryFormScreen()),
     );
 
-    if (newCategoryName != null && newCategoryName.isNotEmpty) {
-      try {
-        final categoryService = ref.read(categoryServiceProvider);
-        await categoryService.createCategory(newCategoryName);
-
-        setState(() {
-          _category = newCategoryName;
-          _newCategoryController.clear();
-        });
-      } catch (e) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
-      }
+    // If a category was added, the stream will update automatically
+    // We just need to wait a moment for the UI to refresh
+    if (result == true && mounted) {
+      // Optional: Show a message or handle the result
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final accountsAsync = ref.watch(accountsListProvider);
-    final categoriesAsync = ref.watch(categoriesListProvider);
+    final categoriesAsync = ref.watch(categoriesByTypeProvider(_type));
+    final title = isEditing ? "Edit Transaction" : "Add Transaction";
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.bgPrimary,
-        scrolledUnderElevation: 0.0,
-        surfaceTintColor: Colors.transparent,
-        titleSpacing: 0.0,
+      appBar: CustomAppBar(
+        title: title,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
           onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          isEditing ? "Edit Transaction" : "Add Transaction",
-          style: const TextStyle(color: AppColors.textDark),
         ),
       ),
       body: SafeArea(
@@ -230,103 +151,55 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(
-                              width: double.infinity,
-                              child: ToggleButtons(
-                                isSelected: TransactionType.values
-                                    .map((t) => t == _type)
-                                    .toList(),
-                                onPressed: (index) {
-                                  setState(() {
-                                    _type = TransactionType.values[index];
-                                  });
-                                },
-                                renderBorder: false,
-                                borderRadius: BorderRadius.circular(100),
-                                fillColor: Colors.transparent,
-                                children: TransactionType.values.mapIndexed((
-                                  index,
-                                  t,
-                                ) {
-                                  final bool selected = (t == _type);
-                                  final bool isLast =
-                                      index ==
-                                      TransactionType.values.length - 1;
-                                  return Padding(
-                                    padding: EdgeInsets.only(
-                                      right: isLast ? 0 : 8.0,
-                                    ),
-                                    // Add 8.0 spacing to the right of every button except the last one
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 24,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: selected
-                                            ? AppColors.terciary
-                                            : AppColors.bgSecondary,
-                                        borderRadius: BorderRadius.circular(
-                                          100,
-                                        ),
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          t.name.capitalize(),
-                                          style: TextStyle(
-                                            color: selected
-                                                ? AppColors.secondary
-                                                : AppColors.textDark,
-                                            fontWeight: selected
-                                                ? FontWeight.bold
-                                                : FontWeight.normal,
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                          ],
-                        ),
                         const SizedBox(height: 16),
-                        SelectFormField<int>(
-                          label: "Account",
-                          value: _accountId,
-                          items: accounts.map((a) => a.id).toList(),
-                          itemAsString: (id) =>
-                              accounts.firstWhere((a) => a.id == id).name,
-                          onChanged: (val) => setState(() => _accountId = val!),
-                        ),
-                        const SizedBox(height: 12),
+                        // Title field
                         TextFormField(
                           initialValue: _title,
                           decoration: const InputDecoration(labelText: "Title"),
                           onSaved: (val) => _title = val?.trim(),
                         ),
-                        const SizedBox(height: 12),
-                        SelectFormField<String>(
-                          label: "Category",
-                          value: _category,
-                          items: [
-                            "__add_new__",
-                            ...categories.map((c) => c.name),
-                          ],
-                          itemAsString: (val) =>
-                              val == "__add_new__" ? "Add new category" : val,
-                          onChanged: (val) {
-                            if (val == "__add_new__") {
-                              _addNewCategory();
-                            } else {
-                              setState(() => _category = val);
-                            }
-                          },
+                        const SizedBox(height: 8),
+
+                        // Account selector
+                        ChipSelector<int>(
+                          label: "Account",
+                          items: accounts.map((a) => a.id).toList(),
+                          selectedValue: _accountId,
+                          labelBuilder: (id) =>
+                              accounts.firstWhere((a) => a.id == id).name,
+                          onChanged: (id) => setState(() => _accountId = id),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 8),
+
+                        ChipSelector<TransactionType>(
+                          label: "Type",
+                          items: TransactionType.values,
+                          selectedValue: _type,
+                          labelBuilder: (t) => t.name.capitalize(),
+                          onChanged: (t) => setState(() {
+                            _type = t;
+                            _categoryId = null;
+                          }),
+                        ),
+                        const SizedBox(height: 6),
+
+                        // Category selector with icons
+                        ChipSelector<int>(
+                          label: "Category",
+                          items: categories.map((c) => c.id).toList(),
+                          selectedValue: _categoryId,
+                          allowAddNew: true,
+                          onAddNew: _navigateToAddCategory,
+                          labelBuilder: (id) =>
+                              categories.firstWhere((c) => c.id == id).name,
+                          onChanged: (id) => setState(() => _categoryId = id),
+                          getItemColor: (id) => Color(
+                            categories.firstWhere((c) => c.id == id).colorValue,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Description field
                         TextFormField(
                           initialValue: _description,
                           decoration: const InputDecoration(
@@ -334,24 +207,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                           ),
                           onSaved: (val) => _description = val?.trim(),
                         ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          initialValue: _amount?.toString(),
-                          decoration: const InputDecoration(
-                            labelText: "Amount",
-                          ),
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          validator: (val) =>
-                              val == null || double.tryParse(val) == null
-                              ? "Enter a valid number"
-                              : null,
-                          onSaved: (val) => _amount = double.tryParse(val!),
-                        ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
+
+                        // Date picker
                         Material(
-                          color: AppColors.bgSecondary,
+                          color: AppColors.bgTerciary,
                           borderRadius: BorderRadius.circular(8),
                           clipBehavior: Clip.none,
                           child: InkWell(
@@ -397,6 +257,36 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                               final pickedTime = await showTimePicker(
                                 context: navigator.context,
                                 initialTime: TimeOfDay.fromDateTime(_date),
+                                initialEntryMode: TimePickerEntryMode.dialOnly,
+                                builder: (context, child) => MediaQuery(
+                                  data: MediaQuery.of(
+                                    context,
+                                  ).copyWith(alwaysUse24HourFormat: true),
+                                  child: Theme(
+                                    data: theme.copyWith(
+                                      colorScheme: const ColorScheme.light(
+                                        primary: AppColors.secondary,
+                                        onPrimary: AppColors.bgPrimary,
+                                        onSurface: AppColors.textDark,
+                                        surface: AppColors.bgPrimary,
+                                      ),
+                                      dialogTheme: DialogThemeData(
+                                        backgroundColor: AppColors.bgPrimary,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                      ),
+                                      textButtonTheme: TextButtonThemeData(
+                                        style: TextButton.styleFrom(
+                                          foregroundColor: AppColors.textDark,
+                                        ),
+                                      ),
+                                    ),
+                                    child: child!,
+                                  ),
+                                ),
                               );
 
                               if (!mounted) return;
@@ -437,7 +327,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                                         ),
                                       ),
                                       const Icon(
-                                        Icons.calendar_today,
+                                        Icons.calendar_today_outlined,
                                         color: AppColors.textDark,
                                         size: 20,
                                       ),
@@ -466,7 +356,26 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                             ),
                           ),
                         ),
+                        const SizedBox(height: 16),
+
+                        // Amount field
+                        TextFormField(
+                          initialValue: _amount?.toString(),
+                          decoration: const InputDecoration(
+                            labelText: "Amount",
+                          ),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          validator: (val) =>
+                          val == null || double.tryParse(val) == null
+                              ? "Enter a valid number"
+                              : null,
+                          onSaved: (val) => _amount = double.tryParse(val!),
+                        ),
                         const SizedBox(height: 24),
+
+                        // Submit button
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [

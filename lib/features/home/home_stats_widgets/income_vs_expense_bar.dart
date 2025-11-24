@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../providers/analytics_provider.dart';
 import '../../../models/period_args.dart';
-import '../../../helpers/app_colors.dart';
+import '../../../theme/app_colors.dart';
 
 class IncomeVsExpenseBar extends ConsumerWidget {
   final int accountId;
