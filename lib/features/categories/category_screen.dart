@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/categories_provider.dart';
 import '../../data/db/database.dart';
-import '../../data/db/tables.dart';
 import '../../theme/app_colors.dart';
 import 'category_form_screen.dart';
 import '../../widgets/custom_app_bar.dart';

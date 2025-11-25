@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
-import '../db/tables.dart';
 import '../db/database.dart';
 import '../../services/transaction_service.dart';
 

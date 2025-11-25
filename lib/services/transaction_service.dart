@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
 import '../data/db/database.dart';
-import '../data/db/tables.dart';
 
 class TransactionService {
   final AppDatabase _db;

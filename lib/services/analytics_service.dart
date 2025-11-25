@@ -1,5 +1,4 @@
 import '../data/db/database.dart';
-import '../data/db/tables.dart';
 import '../models/period_args.dart';
 
 class AnalyticsService {

@@ -1,5 +1,4 @@
 import '../data/db/database.dart';
-import '../data/db/tables.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart' show Color, IconData, Icons;
 

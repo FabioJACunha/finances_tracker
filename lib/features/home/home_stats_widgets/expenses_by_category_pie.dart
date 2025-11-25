@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 import '../../../providers/analytics_provider.dart';
 import '../../../providers/categories_provider.dart';
 import '../../../models/period_args.dart';
@@ -69,20 +69,12 @@ class ExpensesByCategoryPie extends ConsumerWidget {
                           (sum, value) => sum + value,
                     );
 
-                    final sections = data.entries.map((entry) {
-                      final color =
-                          categoryColors[entry.key] ?? Colors.grey;
-
-                      return PieChartSectionData(
-                        value: entry.value,
-                        title: '${entry.value.toStringAsFixed(2)} €',
-                        titleStyle: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                    final chartData = data.entries.map((entry) {
+                      final color = categoryColors[entry.key] ?? Colors.grey;
+                      return _ChartData(
+                        category: entry.key,
+                        amount: entry.value,
                         color: color,
-                        radius: 60,
                       );
                     }).toList();
 
@@ -90,44 +82,56 @@ class ExpensesByCategoryPie extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         SizedBox(
-                          height: 220,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              PieChart(
-                                PieChartData(
-                                  sections: sections,
-                                  sectionsSpace: 2,
-                                  centerSpaceRadius: 50,
-                                ),
-                              ),
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "${total.toStringAsFixed(2)} €",
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.secondary,
-                                    ),
+                          height: 250,
+                          child: SfCircularChart(
+                            legend: Legend(isVisible: false),
+                            series: <CircularSeries>[
+                              DoughnutSeries<_ChartData, String>(
+                                dataSource: chartData,
+                                xValueMapper: (data, _) => data.category,
+                                yValueMapper: (data, _) => data.amount,
+                                pointColorMapper: (data, _) => data.color,
+                                dataLabelMapper: (data, _) =>
+                                '${data.amount.toStringAsFixed(0)}€',
+                                dataLabelSettings: const DataLabelSettings(
+                                  isVisible: true,
+                                  labelPosition:
+                                  ChartDataLabelPosition.outside,
+                                  textStyle: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textDark,
                                   ),
-                                ],
+                                ),
+                                innerRadius: '60%',
+                              ),
+                            ],
+                            annotations: <CircularChartAnnotation>[
+                              CircularChartAnnotation(
+                                widget: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      '${total.toStringAsFixed(2)}€',
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.secondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
                         ),
                         const SizedBox(height: 16),
-                        // Wrap for captions below, full width
+                        // Legend below
                         Wrap(
                           spacing: 12,
                           runSpacing: 8,
-                          children: data.entries.map((entry) {
-                            final color =
-                                categoryColors[entry.key] ?? Colors.grey;
-                            final percentage =
-                            (entry.value / total * 100).toStringAsFixed(1);
-
+                          alignment: WrapAlignment.center,
+                          children: chartData.map((data) {
                             return Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -135,13 +139,13 @@ class ExpensesByCategoryPie extends ConsumerWidget {
                                   width: 12,
                                   height: 12,
                                   decoration: BoxDecoration(
-                                    color: color,
+                                    color: data.color,
                                     shape: BoxShape.circle,
                                   ),
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
-                                  '${entry.key} ($percentage%)',
+                                  data.category,
                                   style: const TextStyle(
                                     fontSize: 12,
                                     color: AppColors.textDark,
@@ -183,4 +187,16 @@ class ExpensesByCategoryPie extends ConsumerWidget {
       ),
     );
   }
+}
+
+class _ChartData {
+  final String category;
+  final double amount;
+  final Color color;
+
+  _ChartData({
+    required this.category,
+    required this.amount,
+    required this.color,
+  });
 }

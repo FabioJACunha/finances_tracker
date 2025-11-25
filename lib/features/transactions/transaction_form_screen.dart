@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/accounts_provider.dart';
 import '../../providers/services_provider.dart';
 import '../../providers/categories_provider.dart';
-import '../../data/db/tables.dart';
 import '../../data/db/database.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/chip_selector.dart';

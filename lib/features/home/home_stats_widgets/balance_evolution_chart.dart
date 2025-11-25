@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:intl/intl.dart';
 import '../../../providers/analytics_provider.dart';
 import '../../../models/period_args.dart';
 import '../../../theme/app_colors.dart';
@@ -44,7 +45,7 @@ class BalanceEvolutionChart extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             SizedBox(
-              height: 200,
+              height: 250,
               child: dataAsync.when(
                 data: (points) {
                   if (points.isEmpty) {
@@ -59,123 +60,47 @@ class BalanceEvolutionChart extends ConsumerWidget {
                     );
                   }
 
-                  final flSpots = points
-                      .asMap()
-                      .entries
-                      .map(
-                        (entry) =>
-                            FlSpot(entry.key.toDouble(), entry.value.value),
-                      )
+                  final chartData = points
+                      .map((point) => _ChartData(point.key, point.value))
                       .toList();
 
-                  // Calculate min/max for better scaling
-                  final values = points.map((p) => p.value).toList();
-                  final minY = values.reduce((a, b) => a < b ? a : b);
-                  final maxY = values.reduce((a, b) => a > b ? a : b);
-                  final yPadding = (maxY - minY) * 0.1; // 10% padding
-
-                  return LineChart(
-                    LineChartData(
-                      minY: minY - yPadding,
-                      maxY: maxY + yPadding,
-                      lineBarsData: [
-                        LineChartBarData(
-                          spots: flSpots,
-                          isCurved: true,
-                          color: AppColors.secondary,
-                          barWidth: 3,
-                          dotData: const FlDotData(show: false),
-                          belowBarData: BarAreaData(
-                            show: true,
-                            color: AppColors.secondary,
-                          ),
-                        ),
-                      ],
-                      gridData: FlGridData(
-                        show: true,
-                        drawVerticalLine: false,
-                        horizontalInterval: (maxY - minY) <= 0
-                            ? 1 // fallback if no variation in values
-                            : (maxY - minY) / 5,
-                        getDrawingHorizontalLine: (value) {
-                          return FlLine(
-                            color: AppColors.textMuted,
-                            strokeWidth: 1,
-                          );
-                        },
+                  return SfCartesianChart(
+                    primaryXAxis: DateTimeAxis(
+                      dateFormat: DateFormat('dd/MM'),
+                      labelStyle: const TextStyle(
+                        color: AppColors.textMuted,
+                        fontSize: 10,
                       ),
-
-                      borderData: FlBorderData(show: false),
-                      titlesData: FlTitlesData(
-                        rightTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                        topTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                        leftTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            reservedSize: 50,
-                            getTitlesWidget: (value, meta) {
-                              return Text(
-                                '${value.toStringAsFixed(0)}€',
-                                style: const TextStyle(
-                                  color: AppColors.textMuted,
-                                  fontSize: 10,
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            reservedSize: 30,
-                            interval: points.length > 10
-                                ? (points.length / 5).ceilToDouble()
-                                : 1,
-                            getTitlesWidget: (value, meta) {
-                              final index = value.toInt();
-                              if (index < 0 || index >= points.length) {
-                                return const SizedBox.shrink();
-                              }
-                              final date = points[index].key;
-                              return Padding(
-                                padding: const EdgeInsets.only(top: 8),
-                                child: Text(
-                                  '${date.day}/${date.month}',
-                                  style: const TextStyle(
-                                    color: AppColors.textMuted,
-                                    fontSize: 10,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
+                      intervalType: DateTimeIntervalType.auto,
+                    ),
+                    primaryYAxis: NumericAxis(
+                      labelFormat: '{value}€',
+                      labelStyle: const TextStyle(
+                        color: AppColors.textMuted,
+                        fontSize: 10,
                       ),
-                      lineTouchData: LineTouchData(
-                        touchTooltipData: LineTouchTooltipData(
-                          getTooltipItems: (touchedSpots) {
-                            return touchedSpots.map((spot) {
-                              final index = spot.x.toInt();
-                              if (index < 0 || index >= points.length) {
-                                return null;
-                              }
-                              final date = points[index].key;
-                              final value = spot.y;
-                              return LineTooltipItem(
-                                '${date.day}/${date.month}/${date.year}\n${value.toStringAsFixed(2)}€',
-                                const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                ),
-                              );
-                            }).toList();
-                          },
-                        ),
+                    ),
+                    series: <CartesianSeries>[
+                      SplineAreaSeries<_ChartData, DateTime>(
+                        dataSource: chartData,
+                        xValueMapper: (data, _) => data.date,
+                        yValueMapper: (data, _) => data.balance,
+                        color: AppColors.secondary,
+                        borderColor: AppColors.secondary,
+                        borderWidth: 3,
+                        splineType: SplineType.natural,
+                      ),
+                    ],
+                    tooltipBehavior: TooltipBehavior(
+                      enable: true,
+                      format: 'point.x: point.y€',
+                      header: '',
+                    ),
+                    trackballBehavior: TrackballBehavior(
+                      enable: true,
+                      activationMode: ActivationMode.singleTap,
+                      tooltipSettings: const InteractiveTooltip(
+                        format: 'point.x: point.y€',
                       ),
                     ),
                   );
@@ -194,4 +119,11 @@ class BalanceEvolutionChart extends ConsumerWidget {
       ),
     );
   }
+}
+
+class _ChartData {
+  final DateTime date;
+  final double balance;
+
+  _ChartData(this.date, this.balance);
 }

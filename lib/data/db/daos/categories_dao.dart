@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
 import '../database.dart';
-import '../tables.dart';
 
 part 'categories_dao.g.dart';
 

@@ -171,7 +171,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     key: ValueKey(_currentFilter),
                     // <- important for switching!
                     child: Column(
-                      spacing: 20,
+                      spacing: 10,
                       children: [
                         ExpensesByCategoryPie(
                           accountId: _selectedAccountId!,
