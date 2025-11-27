@@ -4,6 +4,9 @@ enum TransactionType { expense, income }
 
 enum CategoryUsageType { expense, income, both }
 
+// Add new enum for Budget Period
+enum BudgetPeriod { weekly, monthly }
+
 class Accounts extends Table {
   IntColumn get id => integer().autoIncrement()();
 
@@ -48,4 +51,25 @@ class Transactions extends Table {
       integer().nullable().references(Categories, #id)();
 
   RealColumn get resultantBalance => real().withDefault(const Constant(0.0))();
+}
+
+class Budgets extends Table {
+  IntColumn get id => integer().autoIncrement()();
+
+  TextColumn get label => text()();
+
+  IntColumn get accountId => integer().references(Accounts, #id)();
+
+  RealColumn get limit => real()();
+
+  IntColumn get period => intEnum<BudgetPeriod>()();
+}
+
+class BudgetCategoryLinks extends Table {
+  IntColumn get budgetId => integer().references(Budgets, #id)();
+
+  IntColumn get categoryId => integer().references(Categories, #id)();
+
+  @override
+  Set<Column> get primaryKey => {budgetId, categoryId};
 }

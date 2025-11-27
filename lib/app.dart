@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'features/home/home_screen.dart';
-import 'features/accounts/accounts_screen.dart';
+import 'features/budgets/budgets_screen.dart';
 import 'features/transactions/transactions_screen.dart';
 import 'theme/app_colors.dart';
 import 'theme/app_theme.dart';
@@ -22,7 +22,7 @@ class _MyAppState extends ConsumerState<MyApp> {
     final screens = [
       const HomeScreen(),
       const TransactionHistoryScreen(),
-      const AccountsScreen(),
+      const BudgetsScreen(),
     ];
 
     return MaterialApp(
@@ -48,8 +48,8 @@ class _MyAppState extends ConsumerState<MyApp> {
                     icon: const Icon(Icons.history),
                     label: localizations.navTransactions),
                 BottomNavigationBarItem(
-                    icon: const Icon(Icons.account_balance_wallet_outlined),
-                    label: localizations.navAccounts),
+                    icon: const Icon(Icons.pie_chart_outline),
+                    label: "Budgets"),
               ],
               onTap: (index) => setState(() => _currentIndex = index),
             ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../features/categories/category_screen.dart';
+import '../features/accounts/accounts_screen.dart';
+import '../features/preferences/preferences_screen.dart';
 
 typedef SettingsBuilder = Widget Function(BuildContext context);
 
@@ -49,15 +51,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 8),
-                  const Text(
-                    'Settings',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textDark,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
                   ListTile(
                     leading: const Icon(Icons.category_outlined),
                     title: const Text('Categories'),
@@ -71,11 +64,27 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     },
                   ),
                   ListTile(
+                    leading: const Icon(Icons.account_balance_outlined),
+                    title: const Text('Accounts'),
+                    onTap: () {
+                      Navigator.of(ctx).pop();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => AccountsScreen()),
+                      );
+                    },
+                  ),
+                  ListTile(
                     leading: const Icon(Icons.tune),
                     title: const Text('Preferences'),
                     onTap: () {
                       Navigator.of(ctx).pop();
-                      // Add navigation or callback as needed
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const PreferencesScreen(),
+                        ),
+                      );
                     },
                   ),
                   ListTile(
@@ -109,7 +118,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         if (extraActions != null) ...extraActions!,
         IconButton(
           tooltip: 'Settings',
-          icon: const Icon(Icons.settings, color: AppColors.textDark),
+          icon: const Icon(Icons.menu, color: AppColors.textDark),
           onPressed: () => _openSettings(context),
         ),
       ],

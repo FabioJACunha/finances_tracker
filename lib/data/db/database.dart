@@ -8,16 +8,19 @@ import 'tables.dart';
 import 'daos/accounts_dao.dart';
 import 'daos/transactions_dao.dart';
 import 'daos/categories_dao.dart';
+import 'daos/budgets_dao.dart';
 
+export 'tables.dart';
 export 'daos/accounts_dao.dart';
 export 'daos/transactions_dao.dart';
 export 'daos/categories_dao.dart';
+export 'daos/budgets_dao.dart';
 
 part 'database.g.dart';
 
 @DriftDatabase(
-  tables: [Accounts, Transactions, Categories],
-  daos: [AccountsDao, TransactionsDao, CategoriesDao],
+  tables: [Accounts, Transactions, Categories, Budgets, BudgetCategoryLinks],
+  daos: [AccountsDao, TransactionsDao, CategoriesDao, BudgetsDao],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
@@ -34,7 +37,7 @@ LazyDatabase _openConnection() {
     final file = File(dbPath);
 
     // Delete file for testing porpuses
-    await file.delete();
+    // await file.delete();
 
     // Ensure the file exists (optional)
     if (!await file.exists()) {

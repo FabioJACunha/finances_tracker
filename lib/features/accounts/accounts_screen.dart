@@ -24,7 +24,10 @@ class AccountsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Accounts',
-        leading: Icon(Icons.account_balance_wallet_outlined, color: AppColors.textDark),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: accountsAsync.when(
         data: (accounts) {
