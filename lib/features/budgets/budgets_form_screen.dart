@@ -172,7 +172,7 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
         if (mounted) {
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text('Budget deleted'),
               backgroundColor: AppColors.green,
             ),
@@ -197,11 +197,13 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
   Widget build(BuildContext context) {
     final accountsAsync = ref.watch(accountsListProvider);
     final categoriesAsync = ref.watch(expenseCategoriesProvider);
+    final palette = currentPalette;
+
 
     // Show loading while initializing edit mode
     if (!_isInitialized) {
       return Dialog(
-        backgroundColor: AppColors.bgPrimary,
+        backgroundColor: palette.bgPrimary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: const Padding(
           padding: EdgeInsets.all(40),
@@ -218,7 +220,7 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
     }
 
     return Dialog(
-      backgroundColor: AppColors.bgPrimary,
+      backgroundColor: palette.bgPrimary,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       insetPadding: const EdgeInsets.all(16),
       child: SingleChildScrollView(
@@ -236,10 +238,10 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
                   children: [
                     Text(
                       _isEditing ? 'Edit Budget' : 'New Budget',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textDark,
+                        color: palette.textDark,
                       ),
                     ),
                     if (_isEditing)
@@ -355,7 +357,7 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
                       id: -1, // Special ID for global
                       name: 'Global',
                       iconCodePoint: Icons.all_inclusive.codePoint,
-                      colorValue: AppColors.secondary.toARGB32(),
+                      colorValue: palette.secondary.toARGB32(),
                       usageType: CategoryUsageType.expense,
                     );
 
@@ -446,9 +448,9 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
                             _selectedCategoryIds.isEmpty
                                 ? 'Global budget applies to all categories'
                                 : '${_selectedCategoryIds.length} ${_selectedCategoryIds.length == 1 ? 'category' : 'categories'} selected',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
-                              color: AppColors.textMuted,
+                              color: palette.textMuted,
                               fontStyle: FontStyle.italic,
                             ),
                           ),
@@ -470,17 +472,17 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _save,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.textDark,
+                      backgroundColor: palette.primary,
+                      foregroundColor: palette.textDark,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     child: _isLoading
-                        ? const SizedBox(
+                        ? SizedBox(
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: AppColors.textDark,
+                        color: palette.textDark,
                       ),
                     )
                         : Text(_isEditing ? 'Save Changes' : 'Create Budget'),

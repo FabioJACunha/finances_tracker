@@ -41,11 +41,12 @@ class _TransactionHistoryScreenState
   @override
   Widget build(BuildContext context) {
     final accountsAsync = ref.watch(accountsListProvider);
+    final palette = currentPalette;
 
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Transactions',
-        leading: Icon(Icons.history, color: AppColors.textDark),
+        leading: Icon(Icons.history, color: palette.textDark),
       ),
       body: accountsAsync.when(
         data: (accounts) {
@@ -74,8 +75,8 @@ class _TransactionHistoryScreenState
                         padding: const EdgeInsets.symmetric(horizontal: 24),
                         decoration: BoxDecoration(
                           color: selected
-                              ? AppColors.terciary
-                              : AppColors.bgTerciary,
+                              ? palette.terciary
+                              : palette.bgTerciary,
                           borderRadius: BorderRadius.circular(100),
                         ),
                         child: Center(
@@ -83,8 +84,8 @@ class _TransactionHistoryScreenState
                             account.name,
                             style: TextStyle(
                               color: selected
-                                  ? AppColors.secondary
-                                  : AppColors.textDark,
+                                  ? palette.secondary
+                                  : palette.textDark,
                               fontWeight: selected
                                   ? FontWeight.bold
                                   : FontWeight.normal,
@@ -101,14 +102,14 @@ class _TransactionHistoryScreenState
               // Tabs
               TabBar(
                 controller: _tabController,
-                labelColor: AppColors.secondary,
-                unselectedLabelColor: AppColors.textDark,
+                labelColor: palette.secondary,
+                unselectedLabelColor: palette.textDark,
                 dividerHeight: 0,
                 splashFactory: NoSplash.splashFactory,
                 overlayColor: WidgetStateProperty.all(Colors.transparent),
                 indicator: BoxDecoration(
                   border: Border(
-                    bottom: BorderSide(color: AppColors.secondary, width: 2),
+                    bottom: BorderSide(color: palette.secondary, width: 2),
                   ),
                 ),
                 indicatorColor: Colors.transparent,
@@ -224,18 +225,18 @@ class _TransactionHistoryScreenState
                                       margin: const EdgeInsets.only(
                                         bottom: 8.0,
                                       ),
-                                      decoration: const BoxDecoration(
+                                      decoration: BoxDecoration(
                                         border: Border(
                                           bottom: BorderSide(
-                                            color: AppColors.textMuted,
+                                            color: palette.textMuted,
                                             width: 0.5,
                                           ),
                                         ),
                                       ),
                                       child: Text(
                                         formattedDate,
-                                        style: const TextStyle(
-                                          color: AppColors.textMuted,
+                                        style: TextStyle(
+                                          color: palette.textMuted,
                                           fontSize: 14,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -268,8 +269,8 @@ class _TransactionHistoryScreenState
                                           ),
                                         ),
                                         color: isIncome
-                                            ? AppColors.bgGreen
-                                            : AppColors.bgRed,
+                                            ? palette.bgGreen
+                                            : palette.bgRed,
                                         elevation: 2,
                                         child: Padding(
                                           padding: const EdgeInsets.all(12),
@@ -280,16 +281,16 @@ class _TransactionHistoryScreenState
                                                     ? Icons.south_west
                                                     : Icons.north_east,
                                                 color: isIncome
-                                                    ? AppColors.green
-                                                    : AppColors.red,
+                                                    ? palette.green
+                                                    : palette.red,
                                               ),
                                               const SizedBox(width: 12),
                                               Expanded(
                                                 child: Text(
                                                   tx.title ?? 'No title',
-                                                  style: const TextStyle(
+                                                  style: TextStyle(
                                                     fontWeight: FontWeight.w500,
-                                                    color: AppColors.textDark,
+                                                    color: palette.textDark,
                                                   ),
                                                 ),
                                               ),
@@ -299,8 +300,8 @@ class _TransactionHistoryScreenState
                                                     '${tx.amount.toStringAsFixed(2)} €',
                                                     style: TextStyle(
                                                       color: isIncome
-                                                          ? AppColors.green
-                                                          : AppColors.red,
+                                                          ? palette.green
+                                                          : palette.red,
                                                       fontWeight:
                                                           FontWeight.bold,
                                                     ),
@@ -309,7 +310,7 @@ class _TransactionHistoryScreenState
                                                     '${tx.resultantBalance.toStringAsFixed(2)} €',
                                                     style: TextStyle(
                                                       color:
-                                                          AppColors.textMuted,
+                                                          palette.textMuted,
                                                       fontSize: 12
                                                     ),
                                                   ),
@@ -342,8 +343,8 @@ class _TransactionHistoryScreenState
         error: (e, st) => Center(child: Text("Error loading accounts: $e")),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.textDark,
+        backgroundColor: palette.primary,
+        foregroundColor: palette.textDark,
         onPressed: () {
           final accountsAsync = ref.read(accountsListProvider);
           final accounts = accountsAsync.asData?.value;

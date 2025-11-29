@@ -26,9 +26,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   void _openSettings(BuildContext context) {
+    // We access the current palette directly, relying on the
+    // parent MaterialApp (via app.dart) to rebuild when the palette changes.
+    final palette = currentPalette;
+
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.bgTerciary,
+      // Use palette colors for the modal background
+      backgroundColor: palette.bgTerciary,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -40,8 +45,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         // Default settings content — simple list of options
         return Container(
           decoration: BoxDecoration(
-            color: AppColors.bgPrimary,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            color: palette.bgPrimary,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: SafeArea(
             child: Padding(
@@ -52,22 +57,27 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 children: [
                   const SizedBox(height: 8),
                   ListTile(
-                    leading: const Icon(Icons.category_outlined),
-                    title: const Text('Categories'),
+                    leading: Icon(
+                        Icons.category_outlined, color: palette.textDark),
+                    title: Text('Categories',
+                        style: TextStyle(color: palette.textDark)),
                     onTap: () {
                       Navigator.of(ctx).pop();
+                      // Assuming CategoryScreen exists, otherwise this will fail
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => CategoryScreen()),
                       );
-                      // Add navigation or callback as needed
                     },
                   ),
                   ListTile(
-                    leading: const Icon(Icons.account_balance_outlined),
-                    title: const Text('Accounts'),
+                    leading: Icon(Icons.account_balance_outlined,
+                        color: palette.textDark),
+                    title: Text(
+                        'Accounts', style: TextStyle(color: palette.textDark)),
                     onTap: () {
                       Navigator.of(ctx).pop();
+                      // Assuming AccountsScreen exists, otherwise this will fail
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => AccountsScreen()),
@@ -75,8 +85,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     },
                   ),
                   ListTile(
-                    leading: const Icon(Icons.tune),
-                    title: const Text('Preferences'),
+                    leading: Icon(Icons.tune, color: palette.textDark),
+                    title: Text('Preferences',
+                        style: TextStyle(color: palette.textDark)),
                     onTap: () {
                       Navigator.of(ctx).pop();
                       Navigator.push(
@@ -88,8 +99,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     },
                   ),
                   ListTile(
-                    leading: const Icon(Icons.info_outline),
-                    title: const Text('About'),
+                    leading: Icon(Icons.info_outline, color: palette.textDark),
+                    title: Text(
+                        'About', style: TextStyle(color: palette.textDark)),
                     onTap: () {
                       Navigator.of(ctx).pop();
                       // Add navigation or callback as needed
@@ -107,18 +119,22 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    // We access the current palette directly, relying on the
+    // parent MaterialApp (or similar) to rebuild when the palette changes.
+    final palette = currentPalette;
+
     return AppBar(
-      backgroundColor: AppColors.bgPrimary,
+      backgroundColor: palette.bgPrimary,
       scrolledUnderElevation: 0.0,
       surfaceTintColor: Colors.transparent,
-      title: Text(title, style: const TextStyle(color: AppColors.textDark)),
+      title: Text(title, style: TextStyle(color: palette.textDark)),
       titleSpacing: 0,
       leading: leading,
       actions: [
         if (extraActions != null) ...extraActions!,
         IconButton(
           tooltip: 'Settings',
-          icon: const Icon(Icons.menu, color: AppColors.textDark),
+          icon: Icon(Icons.menu, color: palette.textDark),
           onPressed: () => _openSettings(context),
         ),
       ],

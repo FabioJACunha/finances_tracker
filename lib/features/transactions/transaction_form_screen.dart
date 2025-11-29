@@ -33,6 +33,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   String? _description;
   double? _amount;
   late DateTime _date;
+  final palette = currentPalette;
 
   bool get isEditing => widget.transactionToEdit != null;
 
@@ -99,7 +100,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                 : 'Transaction added successfully',
             style: const TextStyle(color: AppColors.green),
           ),
-          backgroundColor: AppColors.bgGreen,
+          backgroundColor: palette.bgGreen,
         ),
       );
     } catch (e) {
@@ -128,12 +129,13 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     final accountsAsync = ref.watch(accountsListProvider);
     final categoriesAsync = ref.watch(categoriesByTypeProvider(_type));
     final title = isEditing ? "Edit Transaction" : "Add Transaction";
+    final palette = currentPalette;
 
     return Scaffold(
       appBar: CustomAppBar(
         title: title,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
+          icon: Icon(Icons.arrow_back, color: palette.textDark),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -210,7 +212,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 
                         // Date picker
                         Material(
-                          color: AppColors.bgTerciary,
+                          color: palette.bgTerciary,
                           borderRadius: BorderRadius.circular(8),
                           clipBehavior: Clip.none,
                           child: InkWell(
@@ -228,21 +230,21 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                                     DatePickerEntryMode.calendarOnly,
                                 builder: (context, child) => Theme(
                                   data: theme.copyWith(
-                                    colorScheme: const ColorScheme.light(
-                                      primary: AppColors.secondary,
-                                      onPrimary: AppColors.bgPrimary,
-                                      onSurface: AppColors.textDark,
-                                      surface: AppColors.bgPrimary,
+                                    colorScheme: ColorScheme.light(
+                                      primary: palette.secondary,
+                                      onPrimary: palette.bgPrimary,
+                                      onSurface: palette.textDark,
+                                      surface: palette.bgPrimary,
                                     ),
                                     dialogTheme: DialogThemeData(
-                                      backgroundColor: AppColors.bgPrimary,
+                                      backgroundColor: palette.bgPrimary,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                     ),
                                     textButtonTheme: TextButtonThemeData(
                                       style: TextButton.styleFrom(
-                                        foregroundColor: AppColors.textDark,
+                                        foregroundColor: palette.textDark,
                                       ),
                                     ),
                                   ),
@@ -263,14 +265,14 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                                   ).copyWith(alwaysUse24HourFormat: true),
                                   child: Theme(
                                     data: theme.copyWith(
-                                      colorScheme: const ColorScheme.light(
-                                        primary: AppColors.secondary,
-                                        onPrimary: AppColors.bgPrimary,
-                                        onSurface: AppColors.textDark,
-                                        surface: AppColors.bgPrimary,
+                                      colorScheme: ColorScheme.light(
+                                        primary: palette.secondary,
+                                        onPrimary: palette.bgPrimary,
+                                        onSurface: palette.textDark,
+                                        surface: palette.bgPrimary,
                                       ),
                                       dialogTheme: DialogThemeData(
-                                        backgroundColor: AppColors.bgPrimary,
+                                        backgroundColor: palette.bgPrimary,
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(
                                             8,
@@ -279,7 +281,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                                       ),
                                       textButtonTheme: TextButtonThemeData(
                                         style: TextButton.styleFrom(
-                                          foregroundColor: AppColors.textDark,
+                                          foregroundColor: palette.textDark,
                                         ),
                                       ),
                                     ),
@@ -319,15 +321,15 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                                           "${_date.year} "
                                           "${_date.hour.toString().padLeft(2, '0')}:"
                                           "${_date.minute.toString().padLeft(2, '0')}",
-                                          style: const TextStyle(
-                                            color: AppColors.textDark,
+                                          style: TextStyle(
+                                            color: palette.textDark,
                                             fontSize: 16,
                                           ),
                                         ),
                                       ),
-                                      const Icon(
+                                      Icon(
                                         Icons.calendar_today_outlined,
-                                        color: AppColors.textDark,
+                                        color: palette.textDark,
                                         size: 20,
                                       ),
                                     ],
@@ -341,10 +343,10 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                                       horizontal: 8,
                                     ),
                                     color: Colors.transparent,
-                                    child: const Text(
+                                    child: Text(
                                       "Date",
                                       style: TextStyle(
-                                        color: AppColors.secondary,
+                                        color: palette.secondary,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 12,
                                       ),
@@ -385,8 +387,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                                 isEditing ? "Save Changes" : "Add Transaction",
                               ),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                foregroundColor: AppColors.textDark,
+                                backgroundColor: palette.primary,
+                                foregroundColor: palette.textDark,
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 12,
                                   horizontal: 24,

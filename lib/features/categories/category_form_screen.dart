@@ -19,6 +19,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   late IconData _selectedIcon;
   late Color _selectedColor;
   late CategoryUsageType _usageType;
+  final palette = currentPalette;
 
   bool get isEditing => widget.categoryToEdit != null;
 
@@ -150,7 +151,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   void _showIconPicker() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.bgPrimary,
+      backgroundColor: palette.bgPrimary,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -160,10 +161,10 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               "Select Icon",
               style: TextStyle(
-                color: AppColors.textDark,
+                color: palette.textDark,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -191,18 +192,18 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                     child: Container(
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? AppColors.primary
-                            : AppColors.bgTerciary,
+                            ? palette.primary
+                            : palette.bgTerciary,
                         borderRadius: BorderRadius.circular(8),
                         border: isSelected
-                            ? Border.all(color: AppColors.secondary, width: 2)
+                            ? Border.all(color: palette.secondary, width: 2)
                             : null,
                       ),
                       child: Icon(
                         icon,
                         color: isSelected
-                            ? AppColors.textDark
-                            : AppColors.secondary,
+                            ? palette.textDark
+                            : palette.secondary,
                         size: 28,
                       ),
                     ),
@@ -219,7 +220,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   void _showColorPicker() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.bgPrimary,
+      backgroundColor: palette.bgPrimary,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -229,10 +230,10 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               "Select Color",
               style: TextStyle(
-                color: AppColors.textDark,
+                color: palette.textDark,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -259,7 +260,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                       color: color,
                       shape: BoxShape.circle,
                       border: isSelected
-                          ? Border.all(color: AppColors.textDark, width: 3)
+                          ? Border.all(color: palette.textDark, width: 3)
                           : null,
                     ),
                     child: isSelected
@@ -278,19 +279,21 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = currentPalette;
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.bgPrimary,
+        backgroundColor: palette.bgPrimary,
         scrolledUnderElevation: 0.0,
         surfaceTintColor: Colors.transparent,
         titleSpacing: 0.0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
+          icon: Icon(Icons.arrow_back, color: palette.textDark),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           isEditing ? "Edit Category" : "Add Category",
-          style: const TextStyle(color: AppColors.textDark),
+          style: TextStyle(color: palette.textDark),
         ),
       ),
       body: SafeArea(
@@ -324,10 +327,10 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                 const SizedBox(height: 16),
 
                 // Icon selector
-                const Text(
+                Text(
                   "Icon",
                   style: TextStyle(
-                    color: AppColors.textDark,
+                    color: palette.textDark,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -338,25 +341,25 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.bgTerciary,
+                      color: palette.bgTerciary,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
                       children: [
                         Icon(
                           _selectedIcon,
-                          color: AppColors.textDark,
+                          color: palette.textDark,
                           size: 24,
                         ),
                         const SizedBox(width: 16),
-                        const Text(
+                        Text(
                           "Tap to change icon",
-                          style: TextStyle(color: AppColors.textDark),
+                          style: TextStyle(color: palette.textDark),
                         ),
                         const Spacer(),
-                        const Icon(
+                        Icon(
                           Icons.arrow_forward_ios,
-                          color: AppColors.textDark,
+                          color: palette.textDark,
                           size: 16,
                         ),
                       ],
@@ -366,10 +369,10 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                 const SizedBox(height: 16),
 
                 // Color selector
-                const Text(
+                Text(
                   "Color",
                   style: TextStyle(
-                    color: AppColors.textDark,
+                    color: palette.textDark,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -380,7 +383,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.bgTerciary,
+                      color: palette.bgTerciary,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -394,14 +397,14 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                           ),
                         ),
                         const SizedBox(width: 16),
-                        const Text(
+                        Text(
                           "Tap to change color",
-                          style: TextStyle(color: AppColors.textDark),
+                          style: TextStyle(color: palette.textDark),
                         ),
                         const Spacer(),
-                        const Icon(
+                        Icon(
                           Icons.arrow_forward_ios,
-                          color: AppColors.textDark,
+                          color: palette.textDark,
                           size: 16,
                         ),
                       ],
@@ -411,10 +414,10 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                 const SizedBox(height: 16),
 
                 // Usage type selector
-                const Text(
+                Text(
                   "Usage Type",
                   style: TextStyle(
-                    color: AppColors.textDark,
+                    color: palette.textDark,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -460,8 +463,8 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                         margin: const EdgeInsets.only(bottom: 8),
                         decoration: BoxDecoration(
                           color: _usageType == type
-                              ? AppColors.terciary
-                              : AppColors.bgTerciary,
+                              ? palette.terciary
+                              : palette.bgTerciary,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: RadioListTile<CategoryUsageType>(
@@ -471,8 +474,8 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                               Icon(
                                 icon,
                                 color: _usageType == type
-                                    ? AppColors.secondary
-                                    : AppColors.textDark,
+                                    ? palette.secondary
+                                    : palette.textDark,
                                 size: 20,
                               ),
                               const SizedBox(width: 8),
@@ -480,8 +483,8 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                                 label,
                                 style: TextStyle(
                                   color: _usageType == type
-                                      ? AppColors.secondary
-                                      : AppColors.textDark,
+                                      ? palette.secondary
+                                      : palette.textDark,
                                   fontWeight: _usageType == type
                                       ? FontWeight.bold
                                       : FontWeight.normal,
@@ -493,12 +496,12 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                             description,
                             style: TextStyle(
                               color: _usageType == type
-                                  ? AppColors.secondary
-                                  : AppColors.textDark,
+                                  ? palette.secondary
+                                  : palette.textDark,
                               fontSize: 12,
                             ),
                           ),
-                          activeColor: AppColors.secondary,
+                          activeColor: palette.secondary,
                         ),
                       );
                     }).toList(),
@@ -515,8 +518,8 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                       icon: Icon(isEditing ? Icons.save : Icons.add),
                       label: Text(isEditing ? "Save Changes" : "Add Category"),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.textDark,
+                        backgroundColor: palette.primary,
+                        foregroundColor: palette.textDark,
                         padding: const EdgeInsets.symmetric(
                           vertical: 12,
                           horizontal: 24,

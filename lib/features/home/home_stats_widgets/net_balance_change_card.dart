@@ -18,6 +18,8 @@ class NetBalanceChangeCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final palette = currentPalette;
+
     final dataAsync = ref.watch(
       netBalanceChangeProvider(
         PeriodArgs(accountId: accountId, start: start, end: end),
@@ -25,7 +27,7 @@ class NetBalanceChangeCard extends ConsumerWidget {
     );
 
     return Card(
-      color: AppColors.bgTerciary,
+      color: palette.bgTerciary,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Padding(
@@ -33,11 +35,11 @@ class NetBalanceChangeCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Net Balance Change',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: AppColors.textDark,
+                color: palette.textDark,
                 fontSize: 20,
               ),
             ),
@@ -45,7 +47,7 @@ class NetBalanceChangeCard extends ConsumerWidget {
             dataAsync.when(
               data: (value) {
                 final isPositive = value >= 0;
-                final color = isPositive ? AppColors.green : AppColors.red;
+                final color = isPositive ? palette.green : palette.red;
                 final icon = isPositive ? Icons.trending_up : Icons
                     .trending_down;
 

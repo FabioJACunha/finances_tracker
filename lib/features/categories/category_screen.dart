@@ -11,6 +11,7 @@ class CategoryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final palette = currentPalette;
     final categoriesAsync = ref.watch(categoriesListProvider);
 
     return Scaffold(
@@ -18,7 +19,7 @@ class CategoryScreen extends ConsumerWidget {
         title: 'Categories',
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: AppColors.textDark,
+          color: palette.textDark,
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -29,31 +30,31 @@ class CategoryScreen extends ConsumerWidget {
             MaterialPageRoute(builder: (context) => const CategoryFormScreen()),
           );
         },
-        backgroundColor: AppColors.primary,
-        child: const Icon(Icons.add, color: AppColors.textDark),
+        backgroundColor: palette.primary,
+        child: Icon(Icons.add, color: palette.textDark),
       ),
       body: SafeArea(
         child: categoriesAsync.when(
           data: (categories) {
             if (categories.isEmpty) {
-              return const Center(
+              return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
                       Icons.category_outlined,
                       size: 80,
-                      color: AppColors.textDark,
+                      color: palette.textDark,
                     ),
                     SizedBox(height: 16),
                     Text(
                       "No categories yet",
-                      style: TextStyle(color: AppColors.textDark, fontSize: 18),
+                      style: TextStyle(color: palette.textDark, fontSize: 18),
                     ),
                     SizedBox(height: 8),
                     Text(
                       "Tap + to add your first category",
-                      style: TextStyle(color: AppColors.textDark, fontSize: 14),
+                      style: TextStyle(color: palette.textDark, fontSize: 14),
                     ),
                   ],
                 ),
@@ -84,8 +85,9 @@ class CategoryScreen extends ConsumerWidget {
 
 class _CategoryCard extends ConsumerWidget {
   final Category category;
+  final palette = currentPalette;
 
-  const _CategoryCard({required this.category});
+  _CategoryCard({required this.category});
 
   String _getUsageTypeLabel(CategoryUsageType type) {
     switch (type) {
@@ -124,23 +126,23 @@ class _CategoryCard extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.bgPrimary,
+        backgroundColor: palette.bgPrimary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        title: const Text(
+        title: Text(
           "Delete Category",
-          style: TextStyle(color: AppColors.textDark),
+          style: TextStyle(color: palette.textDark),
         ),
         content: Text(
           "Are you sure you want to delete '${category.name}'? "
           "This action cannot be undone if the category has no transactions.",
-          style: const TextStyle(color: AppColors.textDark),
+          style: TextStyle(color: palette.textDark),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text(
+            child: Text(
               "Cancel",
-              style: TextStyle(color: AppColors.textDark),
+              style: TextStyle(color: palette.textDark),
             ),
           ),
           ElevatedButton(
@@ -166,9 +168,9 @@ class _CategoryCard extends ConsumerWidget {
         SnackBar(
           content: Text(
             'Category "${category.name}" deleted successfully',
-            style: const TextStyle(color: AppColors.green),
+            style: TextStyle(color: palette.green),
           ),
-          backgroundColor: AppColors.bgGreen,
+          backgroundColor: palette.bgGreen,
         ),
       );
     } catch (e) {
@@ -188,7 +190,7 @@ class _CategoryCard extends ConsumerWidget {
     );
 
     return Card(
-      color: AppColors.bgTerciary,
+      color: palette.bgTerciary,
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -225,8 +227,8 @@ class _CategoryCard extends ConsumerWidget {
                   children: [
                     Text(
                       category.name,
-                      style: const TextStyle(
-                        color: AppColors.textDark,
+                      style: TextStyle(
+                        color: palette.textDark,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
@@ -255,8 +257,8 @@ class _CategoryCard extends ConsumerWidget {
               ),
               // Actions
               PopupMenuButton<String>(
-                icon: const Icon(Icons.more_vert, color: AppColors.textDark),
-                color: AppColors.bgPrimary,
+                icon: Icon(Icons.more_vert, color: palette.textDark),
+                color: palette.bgPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -274,15 +276,15 @@ class _CategoryCard extends ConsumerWidget {
                   }
                 },
                 itemBuilder: (context) => [
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'edit',
                     child: Row(
                       children: [
-                        Icon(Icons.edit, color: AppColors.textDark, size: 20),
+                        Icon(Icons.edit, color: palette.textDark, size: 20),
                         SizedBox(width: 12),
                         Text(
                           'Edit',
-                          style: TextStyle(color: AppColors.textDark),
+                          style: TextStyle(color: palette.textDark),
                         ),
                       ],
                     ),

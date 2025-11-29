@@ -18,6 +18,8 @@ class SavingsRateCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final palette = currentPalette;
+
     final dataAsync = ref.watch(
       savingsRateProvider(
         PeriodArgs(accountId: accountId, start: start, end: end),
@@ -25,7 +27,7 @@ class SavingsRateCard extends ConsumerWidget {
     );
 
     return Card(
-      color: AppColors.bgTerciary,
+      color: palette.bgTerciary,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Padding(
@@ -33,11 +35,11 @@ class SavingsRateCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Savings Rate',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: AppColors.textDark,
+                color: palette.textDark,
                 fontSize: 20,
               ),
             ),
@@ -85,16 +87,16 @@ class SavingsRateCard extends ConsumerWidget {
                       child: LinearProgressIndicator(
                         value: clampedValue / 100,
                         minHeight: 8,
-                        backgroundColor: AppColors.bgTerciary,
+                        backgroundColor: palette.bgTerciary,
                         valueColor: AlwaysStoppedAnimation<Color>(color),
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       _getSavingsDescription(clampedValue),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.textMuted,
+                        color: palette.textMuted,
                         fontStyle: FontStyle.italic,
                       ),
                     ),

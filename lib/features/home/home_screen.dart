@@ -72,6 +72,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   @override
   Widget build(BuildContext context) {
     final accountsAsync = ref.watch(accountsListProvider);
+    final palette = currentPalette;
 
     return accountsAsync.when(
       data: (accounts) {
@@ -85,7 +86,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         return Scaffold(
           appBar: CustomAppBar(
             title: 'Home',
-            leading: Icon(Icons.home_outlined, color: AppColors.textDark),
+            leading: Icon(Icons.home_outlined, color: palette.textDark),
           ),
           body: Column(
             children: [
@@ -109,8 +110,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         padding: const EdgeInsets.symmetric(horizontal: 24),
                         decoration: BoxDecoration(
                           color: selected
-                              ? AppColors.terciary
-                              : AppColors.bgTerciary,
+                              ? palette.terciary
+                              : palette.bgTerciary,
                           borderRadius: BorderRadius.circular(100),
                         ),
                         child: Center(
@@ -118,8 +119,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             account.name,
                             style: TextStyle(
                               color: selected
-                                  ? AppColors.secondary
-                                  : AppColors.textDark,
+                                  ? palette.secondary
+                                  : palette.textDark,
                               fontWeight: selected
                                   ? FontWeight.bold
                                   : FontWeight.normal,
@@ -137,14 +138,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               /// Tabs: Week / Month / Year ----------------------------------------
               TabBar(
                 controller: _tabController,
-                labelColor: AppColors.secondary,
-                unselectedLabelColor: AppColors.textDark,
+                labelColor: palette.secondary,
+                unselectedLabelColor: palette.textDark,
                 dividerHeight: 0,
                 indicatorSize: TabBarIndicatorSize.tab,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 indicator: BoxDecoration(
                   border: Border(
-                    bottom: BorderSide(color: AppColors.secondary, width: 2),
+                    bottom: BorderSide(color: palette.secondary, width: 2),
                   ),
                 ),
                 splashFactory: NoSplash.splashFactory,
@@ -221,8 +222,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           ),
 
           floatingActionButton: FloatingActionButton(
-            backgroundColor: AppColors.primary,
-            foregroundColor: AppColors.textDark,
+            backgroundColor: palette.primary,
+            foregroundColor: palette.textDark,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(18),
             ),

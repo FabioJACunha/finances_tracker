@@ -20,6 +20,8 @@ class ExpensesByCategoryPie extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final palette = currentPalette;
+
     final categoryColorsAsync = ref.watch(categoryColorsMapProvider);
     final dataAsync = ref.watch(
       expensesByCategoryProvider(
@@ -28,7 +30,7 @@ class ExpensesByCategoryPie extends ConsumerWidget {
     );
 
     return Card(
-      color: AppColors.bgTerciary,
+      color: palette.bgTerciary,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Padding(
@@ -36,12 +38,12 @@ class ExpensesByCategoryPie extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               "Expenses by category",
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textDark,
+                color: palette.textDark,
               ),
             ),
             const SizedBox(height: 16),
@@ -50,13 +52,13 @@ class ExpensesByCategoryPie extends ConsumerWidget {
                 return dataAsync.when(
                   data: (data) {
                     if (data.isEmpty) {
-                      return const Center(
+                      return Center(
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 16),
                           child: Text(
                             'No expenses in this period',
                             style: TextStyle(
-                              color: AppColors.textMuted,
+                              color: palette.textMuted,
                               fontSize: 14,
                             ),
                           ),
@@ -93,14 +95,14 @@ class ExpensesByCategoryPie extends ConsumerWidget {
                                 pointColorMapper: (data, _) => data.color,
                                 dataLabelMapper: (data, _) =>
                                 '${data.amount.toStringAsFixed(0)}€',
-                                dataLabelSettings: const DataLabelSettings(
+                                dataLabelSettings: DataLabelSettings(
                                   isVisible: true,
                                   labelPosition:
                                   ChartDataLabelPosition.outside,
                                   textStyle: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.bold,
-                                    color: AppColors.textDark,
+                                    color: palette.textDark,
                                   ),
                                 ),
                                 innerRadius: '60%',
@@ -113,10 +115,10 @@ class ExpensesByCategoryPie extends ConsumerWidget {
                                   children: [
                                     Text(
                                       '${total.toStringAsFixed(2)}€',
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
-                                        color: AppColors.secondary,
+                                        color: palette.secondary,
                                       ),
                                     ),
                                   ],
@@ -146,9 +148,9 @@ class ExpensesByCategoryPie extends ConsumerWidget {
                                 const SizedBox(width: 6),
                                 Text(
                                   data.category,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 12,
-                                    color: AppColors.textDark,
+                                    color: palette.textDark,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),

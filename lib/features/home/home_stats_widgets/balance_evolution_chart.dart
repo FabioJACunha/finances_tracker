@@ -20,6 +20,8 @@ class BalanceEvolutionChart extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final palette = currentPalette;
+
     final dataAsync = ref.watch(
       balanceEvolutionProvider(
         PeriodArgs(accountId: accountId, start: start, end: end),
@@ -27,7 +29,7 @@ class BalanceEvolutionChart extends ConsumerWidget {
     );
 
     return Card(
-      color: AppColors.bgTerciary,
+      color: palette.bgTerciary,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Padding(
@@ -35,11 +37,11 @@ class BalanceEvolutionChart extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Balance Evolution',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: AppColors.textDark,
+                color: palette.textDark,
                 fontSize: 20,
               ),
             ),
@@ -49,11 +51,11 @@ class BalanceEvolutionChart extends ConsumerWidget {
               child: dataAsync.when(
                 data: (points) {
                   if (points.isEmpty) {
-                    return const Center(
+                    return Center(
                       child: Text(
                         'No transactions in this period',
                         style: TextStyle(
-                          color: AppColors.textMuted,
+                          color: palette.textMuted,
                           fontSize: 14,
                         ),
                       ),
@@ -67,16 +69,16 @@ class BalanceEvolutionChart extends ConsumerWidget {
                   return SfCartesianChart(
                     primaryXAxis: DateTimeAxis(
                       dateFormat: DateFormat('dd/MM'),
-                      labelStyle: const TextStyle(
-                        color: AppColors.textMuted,
+                      labelStyle: TextStyle(
+                        color: palette.textMuted,
                         fontSize: 10,
                       ),
                       intervalType: DateTimeIntervalType.auto,
                     ),
                     primaryYAxis: NumericAxis(
                       labelFormat: '{value}€',
-                      labelStyle: const TextStyle(
-                        color: AppColors.textMuted,
+                      labelStyle: TextStyle(
+                        color: palette.textMuted,
                         fontSize: 10,
                       ),
                     ),
@@ -85,8 +87,8 @@ class BalanceEvolutionChart extends ConsumerWidget {
                         dataSource: chartData,
                         xValueMapper: (data, _) => data.date,
                         yValueMapper: (data, _) => data.balance,
-                        color: AppColors.secondary,
-                        borderColor: AppColors.secondary,
+                        color: palette.secondary,
+                        borderColor: palette.secondary,
                         borderWidth: 3,
                         splineType: SplineType.natural,
                       ),

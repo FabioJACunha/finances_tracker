@@ -65,6 +65,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = currentPalette;
     final screenWidth = MediaQuery.of(context).size.width;
     const horizontalPadding = 16.0;
     final isEditing = widget.initialAccount != null;
@@ -73,7 +74,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
       insetPadding: const EdgeInsets.symmetric(horizontal: horizontalPadding),
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.bgPrimary,
+          color: palette.bgPrimary,
           borderRadius: BorderRadius.circular(8),
         ),
         width: screenWidth - 2 * horizontalPadding,
@@ -87,15 +88,15 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
               children: [
                 Text(
                   isEditing ? 'Edit Account' : 'Add Account',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 20,
-                    color: AppColors.textDark,
+                    color: palette.textDark,
                   ),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
-                  style: const TextStyle(color: AppColors.textDark),
+                  style: TextStyle(color: palette.textDark),
                   initialValue: _name,
                   decoration: const InputDecoration(labelText: 'Account Name'),
                   validator: (val) =>
@@ -106,7 +107,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                 // Only show balance field when creating new account
                 if (!isEditing) ...[
                   TextFormField(
-                    style: const TextStyle(color: AppColors.textDark),
+                    style: TextStyle(color: palette.textDark),
                     initialValue: _balance.toStringAsFixed(2),
                     decoration: const InputDecoration(
                       labelText: 'Initial Balance',
@@ -129,28 +130,28 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Current Balance',
                         style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.secondary,
+                          color: palette.secondary,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         '${_balance.toStringAsFixed(2)} €',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.textDark,
+                          color: palette.textDark,
                         ),
                       ),
                       const SizedBox(height: 4),
-                      const Text(
+                      Text(
                         'Use transactions to change balance',
                         style: TextStyle(
                           fontSize: 11,
-                          color: AppColors.secondary,
+                          color: palette.secondary,
                           fontStyle: FontStyle.italic,
                         ),
                       ),
@@ -162,22 +163,22 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Exclude from total balance',
                         style: TextStyle(
                           fontSize: 14,
-                          color: AppColors.secondary,
+                          color: palette.secondary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                     Switch(
                       value: _excludeFromTotal,
-                      activeThumbColor: AppColors.textDark,
-                      activeTrackColor: AppColors.primary,
-                      inactiveThumbColor: AppColors.bgTerciary,
-                      inactiveTrackColor: AppColors.terciary,
+                      activeThumbColor: palette.textDark,
+                      activeTrackColor: palette.primary,
+                      inactiveThumbColor: palette.bgTerciary,
+                      inactiveTrackColor: palette.terciary,
                       trackOutlineColor:
                           WidgetStateProperty.resolveWith<Color?>((
                             Set<WidgetState> states,
@@ -199,13 +200,13 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                             WidgetStateProperty.resolveWith<Color?>((
                               Set<WidgetState> states,
                             ) {
-                              return AppColors.terciary;
+                              return palette.terciary;
                             }),
                       ),
                       onPressed: () => Navigator.pop(context),
-                      child: const Text(
+                      child: Text(
                         'Cancel',
-                        style: TextStyle(color: AppColors.textDark),
+                        style: TextStyle(color: palette.textDark),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -215,13 +216,13 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                             WidgetStateProperty.resolveWith<Color?>((
                               Set<WidgetState> states,
                             ) {
-                              return AppColors.primary;
+                              return palette.primary;
                             }),
                       ),
                       onPressed: _submit,
-                      child: const Text(
+                      child: Text(
                         'Save',
-                        style: TextStyle(color: AppColors.textDark),
+                        style: TextStyle(color: palette.textDark),
                       ),
                     ),
                   ],

@@ -19,23 +19,24 @@ class BudgetsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final budgetsAsync = ref.watch(budgetsListProvider);
+    final palette = currentPalette;
 
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Budgets',
-        leading: const Icon(Icons.pie_chart_outline, color: AppColors.textDark),
+        leading: Icon(Icons.pie_chart_outline, color: palette.textDark),
       ),
       body: budgetsAsync.when(
         data: (budgets) {
           if (budgets.isEmpty) {
-            return const Center(
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
                     Icons.account_balance_wallet_outlined,
                     size: 80,
-                    color: AppColors.textDark,
+                    color: palette.textDark,
                   ),
                   SizedBox(height: 16),
                   Text(
@@ -43,7 +44,7 @@ class BudgetsScreen extends ConsumerWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.textDark,
+                      color: palette.textDark,
                     ),
                   ),
                   SizedBox(height: 8),
@@ -51,7 +52,7 @@ class BudgetsScreen extends ConsumerWidget {
                     'Tap + to create your first budget',
                     style: TextStyle(
                       fontSize: 14,
-                      color: AppColors.textDark,
+                      color: palette.textDark,
                     ),
                   ),
                 ],
@@ -84,8 +85,8 @@ class BudgetsScreen extends ConsumerWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.textDark,
+        backgroundColor: palette.primary,
+        foregroundColor: palette.textDark,
         onPressed: () => _openForm(context),
         child: const Icon(Icons.add),
       ),
@@ -115,6 +116,7 @@ class _BudgetListItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final spentAsync = ref.watch(budgetSpentProvider(budget));
+    final palette = currentPalette;
 
     // FIXED: Use budget.id instead of budget object
     final categoriesAsync = ref.watch(budgetCategoriesProvider(budget.id));
@@ -122,7 +124,7 @@ class _BudgetListItem extends ConsumerWidget {
     return GestureDetector(
       onTap: () => _openForm(context, ref),
       child: Card(
-        color: AppColors.bgTerciary,
+        color: palette.bgTerciary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 0,
         margin: const EdgeInsets.only(bottom: 12),
@@ -152,12 +154,12 @@ class _BudgetListItem extends ConsumerWidget {
                               width: 40,
                               height: 40,
                               decoration: BoxDecoration(
-                                color: AppColors.secondary,
+                                color: palette.secondary,
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.all_inclusive,
-                                color: AppColors.secondary,
+                                color: palette.secondary,
                                 size: 24,
                               ),
                             );
@@ -212,19 +214,19 @@ class _BudgetListItem extends ConsumerWidget {
                           children: [
                             Text(
                               budget.label,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
-                                color: AppColors.textDark,
+                                color: palette.textDark,
                               ),
                             ),
                             Text(
                               budget.period == BudgetPeriod.weekly
                                   ? 'Weekly Budget'
                                   : 'Monthly Budget',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
-                                color: AppColors.textMuted,
+                                color: palette.textMuted,
                               ),
                             ),
                           ],
@@ -259,7 +261,7 @@ class _BudgetListItem extends ConsumerWidget {
                     child: LinearProgressIndicator(
                       value: progress,
                       minHeight: 8,
-                      backgroundColor: AppColors.bgTerciary,
+                      backgroundColor: palette.bgTerciary,
                       valueColor: AlwaysStoppedAnimation<Color>(progressColor),
                     ),
                   ),
@@ -272,10 +274,10 @@ class _BudgetListItem extends ConsumerWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Spent',
                             style: TextStyle(
-                              color: AppColors.textMuted,
+                              color: palette.textMuted,
                               fontSize: 11,
                             ),
                           ),
@@ -292,17 +294,17 @@ class _BudgetListItem extends ConsumerWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          const Text(
+                          Text(
                             'Limit',
                             style: TextStyle(
-                              color: AppColors.textMuted,
+                              color: palette.textMuted,
                               fontSize: 11,
                             ),
                           ),
                           Text(
                             '${limit.toStringAsFixed(2)}€',
-                            style: const TextStyle(
-                              color: AppColors.textDark,
+                            style: TextStyle(
+                              color: palette.textDark,
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                             ),
@@ -320,7 +322,7 @@ class _BudgetListItem extends ConsumerWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: (isOverBudget ? Colors.red : AppColors.green),
+                      color: (isOverBudget ? Colors.red : palette.green),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Row(
@@ -329,7 +331,7 @@ class _BudgetListItem extends ConsumerWidget {
                         Icon(
                           isOverBudget ? Icons.warning_amber : Icons.check_circle,
                           size: 16,
-                          color: isOverBudget ? Colors.red : AppColors.green,
+                          color: isOverBudget ? Colors.red : palette.green,
                         ),
                         const SizedBox(width: 6),
                         Text(
@@ -337,7 +339,7 @@ class _BudgetListItem extends ConsumerWidget {
                               ? '${(remaining.abs()).toStringAsFixed(2)}€ over budget'
                               : '${remaining.toStringAsFixed(2)}€ remaining',
                           style: TextStyle(
-                            color: isOverBudget ? Colors.red : AppColors.green,
+                            color: isOverBudget ? Colors.red : palette.green,
                             fontWeight: FontWeight.bold,
                             fontSize: 12,
                           ),

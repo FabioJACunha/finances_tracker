@@ -52,6 +52,8 @@ class ChipSelector<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = currentPalette;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -62,8 +64,8 @@ class ChipSelector<T> extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: const TextStyle(
-                  color: AppColors.secondary,
+                style: TextStyle(
+                  color: palette.secondary,
                   fontWeight: FontWeight.bold,
                   fontSize: 12,
                 ),
@@ -77,7 +79,7 @@ class ChipSelector<T> extends StatelessWidget {
                     padding: EdgeInsets.zero,
                     minimumSize: const Size(0, 0),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    foregroundColor: AppColors.secondary,
+                    foregroundColor: palette.secondary,
                   ),
                 ),
             ],
@@ -97,11 +99,11 @@ class ChipSelector<T> extends StatelessWidget {
               final IconData? itemIcon = getItemIcon?.call(item);
 
               final Color borderColor = isSelected
-                  ? (itemColor ?? AppColors.secondary)
-                  : AppColors.bgTerciary;
+                  ? (itemColor ?? palette.secondary)
+                  : palette.bgTerciary;
               final Color bgColor = isSelected
-                  ? (itemColor ?? AppColors.terciary)
-                  : AppColors.bgTerciary;
+                  ? (itemColor ?? palette.terciary)
+                  : palette.bgTerciary;
 
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
@@ -141,8 +143,8 @@ class ChipSelector<T> extends StatelessWidget {
                             itemIcon,
                             size: 16,
                             color: isSelected
-                                ? (itemColor ?? AppColors.secondary)
-                                : AppColors.textDark,
+                                ? (itemColor ?? palette.secondary)
+                                : palette.textDark,
                           ),
                           const SizedBox(width: 6),
                         ],
@@ -163,8 +165,8 @@ class ChipSelector<T> extends StatelessWidget {
                           labelBuilder(item),
                           style: TextStyle(
                             color: isSelected
-                                ? (itemColor ?? AppColors.secondary)
-                                : AppColors.textDark,
+                                ? (itemColor ?? palette.secondary)
+                                : palette.textDark,
                             fontWeight: isSelected
                                 ? FontWeight.bold
                                 : FontWeight.normal,
@@ -176,7 +178,7 @@ class ChipSelector<T> extends StatelessWidget {
                           Icon(
                             Icons.check_circle,
                             size: 16,
-                            color: itemColor ?? AppColors.secondary,
+                            color: itemColor ?? palette.secondary,
                           ),
                         ],
                       ],

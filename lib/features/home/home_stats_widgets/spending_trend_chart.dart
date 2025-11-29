@@ -30,6 +30,7 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
   Widget build(BuildContext context) {
     final categoriesAsync = ref.watch(categoriesListProvider);
     final categoryColorsAsync = ref.watch(categoryColorsMapProvider);
+    final palette = currentPalette;
 
     // Calculate previous period
     final duration = widget.end.difference(widget.start);
@@ -57,7 +58,7 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
     );
 
     return Card(
-      color: AppColors.bgTerciary,
+      color: palette.bgTerciary,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Padding(
@@ -67,12 +68,12 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
           children: [
             Row(
               children: [
-                const Expanded(
+                Expanded(
                   child: Text(
                     'Spending Trend',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: AppColors.textDark,
+                      color: palette.textDark,
                       fontSize: 20,
                     ),
                   ),
@@ -82,17 +83,17 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
                   data: (categories) {
                     return DropdownButton<String?>(
                       value: _selectedCategory,
-                      hint: const Text(
+                      hint: Text(
                         'All',
-                        style: TextStyle(color: AppColors.textDark),
+                        style: TextStyle(color: palette.textDark),
                       ),
-                      dropdownColor: AppColors.bgTerciary,
+                      dropdownColor: palette.bgTerciary,
                       items: [
-                        const DropdownMenuItem<String?>(
+                        DropdownMenuItem<String?>(
                           value: null,
                           child: Text(
                             'All Categories',
-                            style: TextStyle(color: AppColors.textDark),
+                            style: TextStyle(color: palette.textDark),
                           ),
                         ),
                         ...categories.map((cat) {
@@ -111,8 +112,8 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
                                 const SizedBox(width: 8),
                                 Text(
                                   cat.name,
-                                  style: const TextStyle(
-                                    color: AppColors.textDark,
+                                  style: TextStyle(
+                                    color: palette.textDark,
                                   ),
                                 ),
                               ],
@@ -173,7 +174,7 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: AppColors.bgTerciary,
+                                color: palette.bgTerciary,
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
@@ -183,22 +184,22 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
                                   _buildPeriodItem(
                                     'Previous',
                                     previousAmount,
-                                    AppColors.textMuted,
+                                    palette.textMuted,
                                   ),
                                   Container(
                                     width: 1,
                                     height: 40,
-                                    color: AppColors.textMuted,
+                                    color: palette.textMuted,
                                   ),
                                   _buildPeriodItem(
                                     'Current',
                                     currentAmount,
-                                    AppColors.secondary,
+                                    palette.secondary,
                                   ),
                                   Container(
                                     width: 1,
                                     height: 40,
-                                    color: AppColors.textMuted,
+                                    color: palette.textMuted,
                                   ),
                                   _buildChangeItem(change, percentChange),
                                 ],
@@ -209,16 +210,16 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
                             SizedBox(
                               height: 200,
                               child: SfCartesianChart(
-                                primaryXAxis: const CategoryAxis(
+                                primaryXAxis: CategoryAxis(
                                   labelStyle: TextStyle(
-                                    color: AppColors.textDark,
+                                    color: palette.textDark,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
                                 primaryYAxis: NumericAxis(
                                   labelFormat: '{value}€',
-                                  labelStyle: const TextStyle(
-                                    color: AppColors.textMuted,
+                                  labelStyle: TextStyle(
+                                    color: palette.textMuted,
                                     fontSize: 10,
                                   ),
                                 ),
@@ -227,11 +228,11 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
                                     dataSource: chartData,
                                     xValueMapper: (data, _) => data.period,
                                     yValueMapper: (data, _) => data.amount,
-                                    color: AppColors.secondary,
+                                    color: palette.secondary,
                                     dataLabelSettings: DataLabelSettings(
                                       isVisible: true,
-                                      textStyle: const TextStyle(
-                                        color: AppColors.textDark,
+                                      textStyle: TextStyle(
+                                        color: palette.textDark,
                                         fontWeight: FontWeight.bold,
                                       ),
                                       builder: (data, point, series,
@@ -239,8 +240,8 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
                                         final chartData = data as _ChartData;
                                         return Text(
                                           '${chartData.amount.toStringAsFixed(2)}€',
-                                          style: const TextStyle(
-                                            color: AppColors.textDark,
+                                          style: TextStyle(
+                                            color: palette.textDark,
                                             fontWeight: FontWeight.bold,
                                             fontSize: 12,
                                           ),

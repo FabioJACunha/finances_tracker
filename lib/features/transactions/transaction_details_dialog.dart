@@ -9,11 +9,14 @@ import 'transaction_form_screen.dart';
 
 class TransactionDetailsDialog extends ConsumerWidget {
   final TransactionWithCategory data;
+  final palette = currentPalette;
 
-  const TransactionDetailsDialog({required this.data, super.key});
+  TransactionDetailsDialog({required this.data, super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final palette = currentPalette;
+
     final transaction = data.transaction;
     final category = data.category;
     final isIncome = transaction.type == TransactionType.income;
@@ -23,7 +26,7 @@ class TransactionDetailsDialog extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
         decoration: BoxDecoration(
-          color: AppColors.bgPrimary,
+          color: palette.bgPrimary,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
@@ -36,17 +39,17 @@ class TransactionDetailsDialog extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     'Transaction Details',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.textDark,
+                      color: palette.textDark,
                     ),
                   ),
                 ),
                 IconButton(
                   onPressed: () => _showDeleteConfirmation(context, ref),
                   icon: const Icon(Icons.delete_outline),
-                  color: AppColors.textMuted,
+                  color: palette.textMuted,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                 ),
@@ -58,7 +61,7 @@ class TransactionDetailsDialog extends ConsumerWidget {
               children: [
                 Icon(
                   isIncome ? Icons.south_west: Icons.north_east,
-                  color: isIncome ? AppColors.green : AppColors.red,
+                  color: isIncome ? palette.green : palette.red,
                   size: 36,
                 ),
                 const SizedBox(height: 8),
@@ -67,7 +70,7 @@ class TransactionDetailsDialog extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 32,
                     // fontWeight: FontWeight.bold,
-                    color: isIncome ? AppColors.green : AppColors.red,
+                    color: isIncome ? palette.green : palette.red,
                   ),
                 ),
               ],
@@ -112,8 +115,8 @@ class TransactionDetailsDialog extends ConsumerWidget {
                   icon: const Icon(Icons.edit),
                   label: const Text('Edit'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.textDark,
+                    backgroundColor: palette.primary,
+                    foregroundColor: palette.textDark,
                     padding: const EdgeInsets.symmetric(
                       vertical: 12,
                       horizontal: 24,
@@ -136,7 +139,7 @@ class TransactionDetailsDialog extends ConsumerWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 24, color: AppColors.textDark),
+        Icon(icon, size: 24, color: palette.textDark),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -144,7 +147,7 @@ class TransactionDetailsDialog extends ConsumerWidget {
             children: [
               Text(
                 value,
-                style: const TextStyle(fontSize: 18, color: AppColors.textDark),
+                style: TextStyle(fontSize: 18, color: palette.textDark),
                 maxLines: maxLines,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -162,20 +165,20 @@ class TransactionDetailsDialog extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.bgPrimary,
+        backgroundColor: palette.bgPrimary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: const Text(
+        title: Text(
           'Delete Transaction',
-          style: TextStyle(color: AppColors.textDark),
+          style: TextStyle(color: palette.textDark),
         ),
         content: Text(
           'Are you sure you want to delete this transaction? This action cannot be undone.',
-          style: const TextStyle(color: AppColors.textDark),
+          style: TextStyle(color: palette.textDark),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            style: TextButton.styleFrom(foregroundColor: AppColors.textDark),
+            style: TextButton.styleFrom(foregroundColor: palette.textDark),
             child: const Text('Cancel'),
           ),
           TextButton(
@@ -196,12 +199,12 @@ class TransactionDetailsDialog extends ConsumerWidget {
       if (context.mounted) {
         Navigator.pop(context); // Close the details dialog
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
               'Transaction deleted successfully',
-              style: TextStyle(color: AppColors.green),
+              style: TextStyle(color: palette.green),
             ),
-            backgroundColor: AppColors.bgGreen,
+            backgroundColor: palette.bgGreen,
           ),
         );
       }

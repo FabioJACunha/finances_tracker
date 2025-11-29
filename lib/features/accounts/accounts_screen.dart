@@ -3,13 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/accounts_provider.dart';
 import '../../data/db/database.dart';
 import 'account_form_screen.dart';
-import '../../theme/app_colors.dart';
+import '../../theme/app_colors.dart'; // Import to get the currentPalette getter
 import '../../widgets/custom_app_bar.dart';
 
 class AccountsScreen extends ConsumerWidget {
   const AccountsScreen({super.key});
 
   void _openForm(BuildContext context, WidgetRef ref, [Account? account]) {
+    // Note: showDialog defaults to using the theme colors now set in MaterialApp
     showDialog(
       context: context,
       builder: (_) => AccountFormScreen(initialAccount: account),
@@ -18,14 +19,20 @@ class AccountsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 1. Get the currently active color palette
+    final palette = currentPalette;
+
     final accountsAsync = ref.watch(accountsListProvider);
     final totalBalanceAsync = ref.watch(totalBalanceProvider);
 
+    // 2. The Scaffold color is already handled by the MaterialApp theme,
+    // but setting it explicitly ensures it uses the correct dynamic color.
     return Scaffold(
+      backgroundColor: palette.bgPrimary,
       appBar: CustomAppBar(
         title: 'Accounts',
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
+          icon: Icon(Icons.arrow_back, color: palette.textDark), // Use dynamic color
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -38,10 +45,10 @@ class AccountsScreen extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
                   'Total Balance: ${totalBalanceAsync.toStringAsFixed(2)} €',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textDark,
+                    color: palette.textDark, // Use dynamic color
                   ),
                 ),
               ),
@@ -59,7 +66,7 @@ class AccountsScreen extends ConsumerWidget {
                     return GestureDetector(
                       onTap: () => _openForm(context, ref, acc),
                       child: Card(
-                        color: AppColors.bgTerciary,
+                        color: palette.bgTerciary, // Use dynamic color
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -72,6 +79,7 @@ class AccountsScreen extends ConsumerWidget {
                           ),
                           child: Row(
                             children: [
+                              // You might want a dynamic icon color here, or an icon reflecting the account type
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Column(
@@ -79,16 +87,16 @@ class AccountsScreen extends ConsumerWidget {
                                   children: [
                                     Text(
                                       acc.name,
-                                      style: const TextStyle(
+                                      style: TextStyle( // Use dynamic style
                                         fontWeight: FontWeight.bold,
-                                        color: AppColors.textDark,
+                                        color: palette.textDark, // Use dynamic color
                                       ),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
                                       'Balance: ${acc.balance.toStringAsFixed(2)} €',
-                                      style: const TextStyle(
-                                        color: AppColors.secondary,
+                                      style: TextStyle( // Use dynamic style
+                                        color: palette.secondary, // Use dynamic accent color
                                         fontWeight: FontWeight.bold,
                                         fontSize: 13,
                                       ),
@@ -96,7 +104,7 @@ class AccountsScreen extends ConsumerWidget {
                                   ],
                                 ),
                               ),
-                              const Icon(Icons.edit, color: AppColors.textDark),
+                              Icon(Icons.edit, color: palette.textDark), // Use dynamic color
                             ],
                           ),
                         ),
@@ -112,8 +120,8 @@ class AccountsScreen extends ConsumerWidget {
         error: (e, st) => Center(child: Text('Error: $e')),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.textDark,
+        backgroundColor: palette.primary, // Use dynamic color
+        foregroundColor: palette.textDark, // Use dynamic color for icon
         onPressed: () => _openForm(context, ref),
         child: const Icon(Icons.add),
       ),

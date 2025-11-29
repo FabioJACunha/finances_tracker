@@ -19,6 +19,8 @@ class TopExpenseCategories extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final palette = currentPalette;
+
     final categoryColorsAsync = ref.watch(categoryColorsMapProvider);
     final categoryIconsAsync = ref.watch(categoryIconsMapProvider);
     final dataAsync = ref.watch(
@@ -33,7 +35,7 @@ class TopExpenseCategories extends ConsumerWidget {
     );
 
     return Card(
-      color: AppColors.bgTerciary,
+      color: palette.bgTerciary,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Padding(
@@ -41,11 +43,11 @@ class TopExpenseCategories extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Top 3 Expense Categories',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: AppColors.textDark,
+                color: palette.textDark,
                 fontSize: 20,
               ),
             ),
@@ -57,13 +59,13 @@ class TopExpenseCategories extends ConsumerWidget {
                     return dataAsync.when(
                       data: (data) {
                         if (data.isEmpty) {
-                          return const Center(
+                          return Center(
                             child: Padding(
                               padding: EdgeInsets.symmetric(vertical: 16),
                               child: Text(
                                 'No expenses in this period',
                                 style: TextStyle(
-                                  color: AppColors.textMuted,
+                                  color: palette.textMuted,
                                   fontSize: 14,
                                 ),
                               ),
@@ -107,9 +109,9 @@ class TopExpenseCategories extends ConsumerWidget {
                                       Expanded(
                                         child: Text(
                                           categoryName,
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontWeight: FontWeight.bold,
-                                            color: AppColors.textDark,
+                                            color: palette.textDark,
                                             fontSize: 14,
                                           ),
                                         ),
@@ -135,7 +137,7 @@ class TopExpenseCategories extends ConsumerWidget {
                                             value: percentage / 100,
                                             minHeight: 6,
                                             backgroundColor:
-                                            AppColors.bgTerciary,
+                                            palette.bgTerciary,
                                             valueColor:
                                             AlwaysStoppedAnimation<Color>(
                                               color,
