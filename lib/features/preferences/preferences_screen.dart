@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_colors.dart'; // Ensure the path is correct
+import '../../theme/app_colors.dart';
+import '../../widgets/custom_app_bar.dart';
 
 class PreferencesScreen extends StatefulWidget {
   const PreferencesScreen({super.key});
@@ -56,15 +57,11 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
         _selectedPalette = palette;
 
         return Scaffold(
-          appBar: AppBar(
-            title: const Text("Preferences"),
-            backgroundColor: palette.bgPrimary,
-            elevation: 0,
-            iconTheme: IconThemeData(color: palette.textDark),
-            titleTextStyle: TextStyle(
-              color: palette.textDark,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+          appBar: CustomAppBar(
+            title: 'Preferences',
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: palette.textDark),
+              onPressed: () => Navigator.pop(context),
             ),
           ),
           backgroundColor: palette.bgPrimary,
@@ -72,9 +69,9 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             padding: const EdgeInsets.all(16.0),
             child: ListView(
               children: [
-                const Text(
+                Text(
                   "Color Theme",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 22, color: palette.textDark),
                 ),
                 const SizedBox(height: 12),
                 // Map over the list of available palettes to build the tiles

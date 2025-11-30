@@ -11,34 +11,25 @@ class AppTheme {
       useMaterial3: true,
       // Use the palette passed into the method
       scaffoldBackgroundColor: palette.bgPrimary,
-      iconTheme: IconThemeData(color: palette.textDark), // Removed const
-      textSelectionTheme: TextSelectionThemeData( // Removed const
+      iconTheme: IconThemeData(color: palette.textDark),
+      // Removed const
+      textSelectionTheme: TextSelectionThemeData(
+        // Removed const
         cursorColor: palette.textDark,
         selectionColor: palette.bgPrimary,
         selectionHandleColor: palette.textDark,
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        labelStyle: TextStyle(color: palette.secondary), // Removed const
-        floatingLabelStyle: TextStyle( // Removed const
-          color: palette.secondary,
-          fontWeight: FontWeight.bold,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.transparent),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.transparent),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        filled: true,
-        fillColor: palette.bgTerciary,
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         insetPadding: const EdgeInsets.all(16),
         elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      dialogTheme: DialogThemeData(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        backgroundColor: palette.bgPrimary,
+        titleTextStyle: TextStyle(color: palette.textDark, fontSize: 22, fontWeight: FontWeight.w500),
+        contentTextStyle: TextStyle(color: palette.textDark),
       ),
     );
   }

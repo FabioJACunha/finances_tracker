@@ -21,47 +21,47 @@ Future<void> seedDatabase(AppDatabase db) async {
   final categories = {
     'Food': _CategorySeed(
       icon: Icons.restaurant,
-      color: Colors.orange,
+      color: Color(0xFFFFAB91),
       usageType: CategoryUsageType.expense,
     ),
     'Transport': _CategorySeed(
       icon: Icons.directions_car_filled,
-      color: Colors.blue,
+      color: Color(0xFF90CAF9),
       usageType: CategoryUsageType.expense,
     ),
     'Salary': _CategorySeed(
       icon: Icons.euro,
-      color: Colors.green,
+      color: Color(0xFFA5D6A7),
       usageType: CategoryUsageType.income,
     ),
     'Shopping': _CategorySeed(
       icon: Icons.shopping_bag_outlined,
-      color: Colors.purple,
+      color: Color(0xFFB39DDB),
       usageType: CategoryUsageType.expense,
     ),
     'Entertainment': _CategorySeed(
       icon: Icons.movie,
-      color: Colors.pink,
+      color: Color(0xFFF48FB1),
       usageType: CategoryUsageType.expense,
     ),
     'Bills': _CategorySeed(
       icon: Icons.receipt_outlined,
-      color: Colors.red,
+      color: Color(0xFFE57373),
       usageType: CategoryUsageType.expense,
     ),
     'Health': _CategorySeed(
       icon: Icons.local_hospital_outlined,
-      color: Colors.teal,
+      color: Color(0xFF80CBC4),
       usageType: CategoryUsageType.expense,
     ),
     'Freelance': _CategorySeed(
       icon: Icons.card_travel_outlined,
-      color: Colors.indigo,
+      color: Color(0xFF9FA8DA),
       usageType: CategoryUsageType.income,
     ),
     'Other': _CategorySeed(
       icon: Icons.more_horiz,
-      color: Colors.grey,
+      color: Color(0xFFEEEEEE),
       usageType: CategoryUsageType.both,
     ),
   };

@@ -7,7 +7,23 @@ import '../../data/db/database.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/chip_selector.dart';
 import '../../widgets/custom_app_bar.dart';
+import '../../widgets/custom_text_form_field.dart';
 import '../categories/category_form_screen.dart';
+import 'package:calendar_date_picker2/calendar_date_picker2.dart';
+import 'package:day_night_time_picker/day_night_time_picker.dart';
+
+// Extension to map TransactionType to CategoryUsageType
+extension _TransactionTypeMapper on TransactionType {
+  CategoryUsageType toCategoryUsageType() {
+    // FIX: Only handle expense and income, removing 'transfer'.
+    switch (this) {
+      case TransactionType.expense:
+        return CategoryUsageType.expense;
+      case TransactionType.income:
+        return CategoryUsageType.income;
+    }
+  }
+}
 
 class TransactionFormScreen extends ConsumerStatefulWidget {
   final int initialAccountId;
@@ -28,7 +44,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   final _formKey = GlobalKey<FormState>();
   late int _accountId;
   late TransactionType _type;
-  int? _categoryId;
+  int? _categoryId; // Null means 'No Category' / Global
   String? _title;
   String? _description;
   double? _amount;
@@ -98,15 +114,18 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
             isEditing
                 ? 'Transaction updated successfully'
                 : 'Transaction added successfully',
-            style: const TextStyle(color: AppColors.green),
+            style: TextStyle(color: AppColors.green),
           ),
-          backgroundColor: palette.bgGreen,
+          backgroundColor: AppColors.bgGreen,
         ),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text('Error: $e', style: TextStyle(color: AppColors.red)),
+          backgroundColor: AppColors.bgRed,
+        ),
       );
     }
   }
@@ -118,15 +137,15 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     );
 
     // If a category was added, the stream will update automatically
-    // We just need to wait a moment for the UI to refresh
     if (result == true && mounted) {
-      // Optional: Show a message or handle the result
+      // The categoriesAsync provider will automatically refresh
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final accountsAsync = ref.watch(accountsListProvider);
+    // Provider watches the current type (_type) for relevant categories
     final categoriesAsync = ref.watch(categoriesByTypeProvider(_type));
     final title = isEditing ? "Edit Transaction" : "Add Transaction";
     final palette = currentPalette;
@@ -142,8 +161,37 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       body: SafeArea(
         child: accountsAsync.when(
           data: (accounts) {
+            // Set default account if not set (for new transactions)
+            if (_accountId == 0 && accounts.isNotEmpty) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  setState(() => _accountId = accounts.first.id);
+                }
+              });
+            }
+
             return categoriesAsync.when(
               data: (categories) {
+                // Determine the initial selected Category object
+                final initialCategory = _categoryId == null
+                    ? null // null means 'No Category' (globalItem)
+                    : categories.where((c) => c.id == _categoryId).firstOrNull;
+
+                // Determine the initial selected Account object
+                final initialAccount = accounts
+                    .where((a) => a.id == _accountId)
+                    .firstOrNull;
+
+                // Synthetic 'No Category' item for the ChipSelector globalItem
+                final noCategory = Category(
+                  id: -1,
+                  // Placeholder ID
+                  name: 'Global',
+                  iconCodePoint: Icons.remove.codePoint,
+                  colorValue: palette.textMuted.toARGB32(),
+                  usageType: _type.toCategoryUsageType(),
+                );
+
                 return SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Form(
@@ -154,163 +202,183 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                       children: [
                         const SizedBox(height: 16),
                         // Title field
-                        TextFormField(
+                        CustomTextFormField(
                           initialValue: _title,
-                          decoration: const InputDecoration(labelText: "Title"),
+                          maxLength: 20,
+                          label: "Title",
                           onSaved: (val) => _title = val?.trim(),
+                          validator: (val) {
+                            if (val == null || val.trim().isEmpty) {
+                              return 'This field is required';
+                            }
+                            return null;
+                          },
                         ),
                         const SizedBox(height: 8),
 
                         // Account selector
-                        ChipSelector<int>(
+                        ChipSelector<Account>(
                           label: "Account",
-                          items: accounts.map((a) => a.id).toList(),
-                          selectedValue: _accountId,
-                          labelBuilder: (id) =>
-                              accounts.firstWhere((a) => a.id == id).name,
-                          onChanged: (id) => setState(() => _accountId = id),
+                          items: accounts,
+                          initialValue: initialAccount,
+                          labelBuilder: (a) => a.name,
+                          // a is Account?, but guaranteed non-null since no globalItem is set
+                          onChanged: (a) => setState(() => _accountId = a!.id),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 18),
 
+                        // Type selector
                         ChipSelector<TransactionType>(
                           label: "Type",
                           items: TransactionType.values,
-                          selectedValue: _type,
+                          initialValue: _type,
                           labelBuilder: (t) => t.name.capitalize(),
                           onChanged: (t) => setState(() {
-                            _type = t;
-                            _categoryId = null;
+                            _type = t!; // Guaranteed non-null
+                            _categoryId =
+                                null; // Reset category when type changes
                           }),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 18),
 
-                        // Category selector with icons
-                        ChipSelector<int>(
+                        // Category selector (uses 'globalItem' logic)
+                        ChipSelector<Category>(
                           label: "Category",
-                          items: categories.map((c) => c.id).toList(),
-                          selectedValue: _categoryId,
+                          items: categories,
+                          globalItem: noCategory,
+                          // Pass the 'No Category' item
+                          initialValue: initialCategory,
+                          // Selected category object or null
                           allowAddNew: true,
                           onAddNew: _navigateToAddCategory,
-                          labelBuilder: (id) =>
-                              categories.firstWhere((c) => c.id == id).name,
-                          onChanged: (id) => setState(() => _categoryId = id),
-                          getItemColor: (id) => Color(
-                            categories.firstWhere((c) => c.id == id).colorValue,
-                          ),
+                          onChanged: (cat) {
+                            // cat is Category?
+                            // null is returned when 'No Category' is selected
+                            setState(() => _categoryId = cat?.id);
+                          },
+                          labelBuilder: (cat) => cat.name,
+                          getItemColor: (cat) => Color(cat.colorValue),
+                          getItemIcon: (cat) {
+                            if (cat.id == -1) {
+                              return Icons.all_inclusive;
+                            }
+                            return IconData(
+                              cat.iconCodePoint,
+                              fontFamily: 'MaterialIcons',
+                            );
+                          },
+                          // Removed validator: null is a valid state for a transaction category
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 18),
 
                         // Description field
-                        TextFormField(
+                        CustomTextFormField(
                           initialValue: _description,
-                          decoration: const InputDecoration(
-                            labelText: "Description",
-                          ),
+                          label: "Description",
                           onSaved: (val) => _description = val?.trim(),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 22),
 
                         // Date picker
                         Material(
-                          color: palette.bgTerciary,
-                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.transparent,
                           clipBehavior: Clip.none,
                           child: InkWell(
-                            borderRadius: BorderRadius.circular(8),
                             onTap: () async {
                               final navigator = Navigator.of(context);
-                              final theme = Theme.of(context);
+                              final screenWidth = MediaQuery.of(context).size.width;
+                              final horizontalPadding = 16.0;
 
-                              final pickedDate = await showDatePicker(
+                              // Open the calendar_date_picker2 dialog
+                              final pickedDates = await showCalendarDatePicker2Dialog(
+                                dialogSize: Size(
+                                  screenWidth - (horizontalPadding * 2),
+                                  400,
+                                ),
                                 context: context,
-                                initialDate: _date,
-                                firstDate: DateTime(2020),
-                                lastDate: DateTime.now(),
-                                initialEntryMode:
-                                    DatePickerEntryMode.calendarOnly,
-                                builder: (context, child) => Theme(
-                                  data: theme.copyWith(
-                                    colorScheme: ColorScheme.light(
-                                      primary: palette.secondary,
-                                      onPrimary: palette.bgPrimary,
-                                      onSurface: palette.textDark,
-                                      surface: palette.bgPrimary,
-                                    ),
-                                    dialogTheme: DialogThemeData(
-                                      backgroundColor: palette.bgPrimary,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                    ),
-                                    textButtonTheme: TextButtonThemeData(
-                                      style: TextButton.styleFrom(
-                                        foregroundColor: palette.textDark,
-                                      ),
-                                    ),
-                                  ),
-                                  child: child!,
+                                config: CalendarDatePicker2WithActionButtonsConfig(
+                                  firstDate: DateTime(2020),
+                                  lastDate: DateTime.now(),
+                                  currentDate: _date,
+                                  calendarType: CalendarDatePicker2Type.single,
+                                  selectedDayHighlightColor: palette.secondary,
+                                  weekdayLabelTextStyle: TextStyle(color: palette.textDark),
+                                  dayTextStyle: TextStyle(color: palette.textDark),
+                                  yearTextStyle: TextStyle(color: palette.textDark),
                                 ),
+                                dialogBackgroundColor: palette.bgPrimary,
+                                value: [_date],
+                                borderRadius: BorderRadius.circular(8),
                               );
 
-                              if (pickedDate == null) return;
+                              if (pickedDates == null || pickedDates.isEmpty || pickedDates.first == null) {
+                                return;
+                              }
                               if (!mounted) return;
 
-                              final pickedTime = await showTimePicker(
-                                context: navigator.context,
-                                initialTime: TimeOfDay.fromDateTime(_date),
-                                initialEntryMode: TimePickerEntryMode.dialOnly,
-                                builder: (context, child) => MediaQuery(
-                                  data: MediaQuery.of(
-                                    context,
-                                  ).copyWith(alwaysUse24HourFormat: true),
-                                  child: Theme(
-                                    data: theme.copyWith(
-                                      colorScheme: ColorScheme.light(
-                                        primary: palette.secondary,
-                                        onPrimary: palette.bgPrimary,
-                                        onSurface: palette.textDark,
-                                        surface: palette.bgPrimary,
-                                      ),
-                                      dialogTheme: DialogThemeData(
-                                        backgroundColor: palette.bgPrimary,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                        ),
-                                      ),
-                                      textButtonTheme: TextButtonThemeData(
-                                        style: TextButton.styleFrom(
-                                          foregroundColor: palette.textDark,
-                                        ),
-                                      ),
-                                    ),
-                                    child: child!,
+                              final pickedDate = pickedDates.first!;
+
+                              // Use day_night_time_picker for time selection
+                              Time initialTime = Time(hour: _date.hour, minute: _date.minute);
+
+                              Navigator.of(navigator.context).push(
+                                showPicker(
+                                  context: navigator.context,
+                                  value: initialTime,
+                                  onChange: (Time newTime) {
+                                    if (!mounted) return;
+
+                                    setState(() {
+                                      _date = DateTime(
+                                        pickedDate.year,
+                                        pickedDate.month,
+                                        pickedDate.day,
+                                        newTime.hour,
+                                        newTime.minute,
+                                      );
+                                    });
+                                  },
+                                  is24HrFormat: true,
+                                  accentColor: palette.textDark,
+                                  unselectedColor: palette.textMuted,
+                                  cancelText: "Cancel",
+                                  okText: "Confirm",
+                                  cancelStyle: TextStyle(color: palette.textDark),
+                                  buttonsSpacing: 8,
+                                  okStyle: TextStyle(color: palette.textDark),
+                                  cancelButtonStyle: ButtonStyle(
+                                    backgroundColor: WidgetStateProperty.all(palette.terciary),
+                                    foregroundColor: WidgetStateProperty.all(palette.textDark),
                                   ),
+                                  buttonStyle: ButtonStyle(
+                                    backgroundColor: WidgetStateProperty.all(palette.primary),
+                                    foregroundColor: WidgetStateProperty.all(palette.textDark),
+                                  ),
+                                  dialogInsetPadding: const EdgeInsets.symmetric(horizontal: 16),
+                                  borderRadius: 12,
                                 ),
                               );
-
-                              if (!mounted) return;
-
-                              setState(() {
-                                _date = DateTime(
-                                  pickedDate.year,
-                                  pickedDate.month,
-                                  pickedDate.day,
-                                  pickedTime?.hour ?? _date.hour,
-                                  pickedTime?.minute ?? _date.minute,
-                                );
-                              });
                             },
-                            child: Stack(
-                              clipBehavior: Clip.none,
+
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    12,
-                                    16,
-                                    12,
-                                    16,
+                                Text(
+                                  "Date",
+                                  style: TextStyle(
+                                    color: palette.textDark,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: palette.terciary,
+                                      ),
+                                    ),
                                   ),
                                   child: Row(
                                     children: [
@@ -330,49 +398,30 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                                       Icon(
                                         Icons.calendar_today_outlined,
                                         color: palette.textDark,
-                                        size: 20,
+                                        size: 18,
                                       ),
                                     ],
-                                  ),
-                                ),
-                                Positioned(
-                                  left: 8,
-                                  top: -8,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                    ),
-                                    color: Colors.transparent,
-                                    child: Text(
-                                      "Date",
-                                      style: TextStyle(
-                                        color: palette.secondary,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12,
-                                      ),
-                                    ),
                                   ),
                                 ),
                               ],
                             ),
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 22),
 
                         // Amount field
-                        TextFormField(
+                        CustomTextFormField(
                           initialValue: _amount?.toString(),
-                          decoration: const InputDecoration(
-                            labelText: "Amount",
-                          ),
+                          label: "Amount",
+                          decoration: const InputDecoration(hintText: "0.00"),
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
+                          onSaved: (val) => _amount = double.tryParse(val!),
                           validator: (val) =>
-                          val == null || double.tryParse(val) == null
+                              val == null || double.tryParse(val) == null
                               ? "Enter a valid number"
                               : null,
-                          onSaved: (val) => _amount = double.tryParse(val!),
                         ),
                         const SizedBox(height: 24),
 
@@ -417,4 +466,22 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 
 extension StringCasingExtension on String {
   String capitalize() => '${this[0].toUpperCase()}${substring(1)}';
+}
+
+extension CategoryListExtensions on List<Category> {
+  Category? firstWhereOrNull(bool Function(Category) test) {
+    for (final element in this) {
+      if (test(element)) return element;
+    }
+    return null;
+  }
+}
+
+extension AccountListExtensions on List<Account> {
+  Account? firstWhereOrNull(bool Function(Account) test) {
+    for (final element in this) {
+      if (test(element)) return element;
+    }
+    return null;
+  }
 }

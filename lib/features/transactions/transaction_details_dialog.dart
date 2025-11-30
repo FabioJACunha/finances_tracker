@@ -60,7 +60,7 @@ class TransactionDetailsDialog extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  isIncome ? Icons.south_west: Icons.north_east,
+                  isIncome ? Icons.south_west : Icons.north_east,
                   color: isIncome ? palette.green : palette.red,
                   size: 36,
                 ),
@@ -86,7 +86,7 @@ class TransactionDetailsDialog extends ConsumerWidget {
             const SizedBox(height: 12),
             _buildDetailRow(
               icon: Icons.category_outlined,
-              value: category?.name ?? 'Uncategorized',
+              value: category?.name ?? 'Global',
             ),
             const SizedBox(height: 12),
             _buildDetailRow(
@@ -165,25 +165,25 @@ class TransactionDetailsDialog extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: palette.bgPrimary,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: Text(
-          'Delete Transaction',
-          style: TextStyle(color: palette.textDark),
-        ),
+        title: Text('Delete Transaction'),
         content: Text(
           'Are you sure you want to delete this transaction? This action cannot be undone.',
-          style: TextStyle(color: palette.textDark),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            style: TextButton.styleFrom(foregroundColor: palette.textDark),
+            style: TextButton.styleFrom(
+              foregroundColor: palette.textDark,
+              backgroundColor: palette.primary,
+            ),
             child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.red,
+              backgroundColor: AppColors.bgRed,
+            ),
             child: const Text('Delete'),
           ),
         ],
@@ -202,7 +202,7 @@ class TransactionDetailsDialog extends ConsumerWidget {
           SnackBar(
             content: Text(
               'Transaction deleted successfully',
-              style: TextStyle(color: palette.green),
+              style: TextStyle(color: AppColors.green),
             ),
             backgroundColor: palette.bgGreen,
           ),

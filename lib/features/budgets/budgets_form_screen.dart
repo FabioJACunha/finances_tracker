@@ -6,6 +6,8 @@ import '../../providers/budgets_provider.dart';
 import '../../providers/categories_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/chip_selector.dart';
+import '../../widgets/custom_text_form_field.dart';
+import '../../widgets/custom_app_bar.dart';
 
 class BudgetFormScreen extends ConsumerStatefulWidget {
   final Budget? initialBudget;
@@ -20,10 +22,11 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _labelController;
   late final TextEditingController _limitController;
+  final palette = currentPalette;
 
   int? _selectedAccountId;
   BudgetPeriod _selectedPeriod = BudgetPeriod.monthly;
-  List<int> _selectedCategoryIds = [];
+  List<int> _selectedCategoryIds = []; // Empty list means Global budget
 
   bool _isLoading = false;
   bool _isInitialized = false; // Track if we've loaded initial data
@@ -33,8 +36,9 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
   void initState() {
     super.initState();
     _labelController = TextEditingController(text: widget.initialBudget?.label);
-    _limitController =
-        TextEditingController(text: widget.initialBudget?.limit.toString());
+    _limitController = TextEditingController(
+      text: widget.initialBudget?.limit.toString(),
+    );
     _selectedAccountId = widget.initialBudget?.accountId;
     _selectedPeriod = widget.initialBudget?.period ?? BudgetPeriod.monthly;
 
@@ -62,7 +66,13 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
       if (mounted) {
         setState(() => _isInitialized = true);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load categories: $e')),
+          SnackBar(
+            content: Text(
+              'Failed to load categories: $e',
+              style: TextStyle(color: AppColors.red),
+            ),
+            backgroundColor: AppColors.bgRed,
+          ),
         );
       }
     }
@@ -77,39 +87,37 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
 
   void _save() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_selectedAccountId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select an account')),
-      );
-      return;
-    }
-
-    // Validation: At least one category must be selected (Global or specific)
-    // This is now always true since Global is selected by default when list is empty
 
     setState(() => _isLoading = true);
 
     try {
+      final categoryIdsToSave = _selectedCategoryIds.isEmpty
+          ? <int>[]
+          : _selectedCategoryIds;
+
       if (_isEditing) {
-        await ref.read(budgetServiceProvider).updateBudget(
-          id: widget.initialBudget!.id,
-          label: _labelController.text.trim(),
-          limit: double.parse(_limitController.text),
-          accountId: _selectedAccountId!,
-          period: _selectedPeriod,
-          categoryIds: _selectedCategoryIds, // Empty list = Global
-        );
+        await ref
+            .read(budgetServiceProvider)
+            .updateBudget(
+              id: widget.initialBudget!.id,
+              label: _labelController.text.trim(),
+              limit: double.parse(_limitController.text),
+              accountId: _selectedAccountId!,
+              period: _selectedPeriod,
+              categoryIds: categoryIdsToSave, // Empty list = Global
+            );
       } else {
-        await ref.read(budgetServiceProvider).createBudget(
-          label: _labelController.text.trim(),
-          limit: double.parse(_limitController.text),
-          accountId: _selectedAccountId!,
-          period: _selectedPeriod,
-          categoryIds: _selectedCategoryIds, // Empty list = Global
-        );
+        await ref
+            .read(budgetServiceProvider)
+            .createBudget(
+              label: _labelController.text.trim(),
+              limit: double.parse(_limitController.text),
+              accountId: _selectedAccountId!,
+              period: _selectedPeriod,
+              categoryIds: categoryIdsToSave, // Empty list = Global
+            );
       }
 
-      // Invalidate providers to force refresh
       ref.invalidate(budgetsListProvider);
       ref.invalidate(budgetSpentProvider);
 
@@ -117,8 +125,11 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(_isEditing ? 'Budget updated' : 'Budget created'),
-            backgroundColor: AppColors.green,
+            content: Text(
+              _isEditing ? 'Budget updated' : 'Budget created',
+              style: TextStyle(color: AppColors.green),
+            ),
+            backgroundColor: AppColors.bgGreen,
           ),
         );
       }
@@ -126,8 +137,11 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to save budget: $e'),
-            backgroundColor: Colors.red,
+            content: Text(
+              'Failed to save budget: $e',
+              style: TextStyle(color: AppColors.red),
+            ),
+            backgroundColor: AppColors.bgRed,
           ),
         );
       }
@@ -144,15 +158,18 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Delete Budget'),
         content: const Text(
-            'Are you sure you want to delete this budget? This action cannot be undone.'),
+          'Are you sure you want to delete this budget? This action cannot be undone.',
+        ),
         actions: [
           TextButton(
+            style: TextButton.styleFrom(foregroundColor: palette.textDark, backgroundColor: palette.primary),
             onPressed: () => Navigator.of(context).pop(false),
             child: const Text('Cancel'),
           ),
           TextButton(
+            style: TextButton.styleFrom(foregroundColor: AppColors.red, backgroundColor: AppColors.bgRed),
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Delete'),
           ),
         ],
       ),
@@ -165,7 +182,6 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
             .read(budgetServiceProvider)
             .deleteBudget(widget.initialBudget!.id);
 
-        // Invalidate providers to force refresh
         ref.invalidate(budgetsListProvider);
         ref.invalidate(budgetSpentProvider);
 
@@ -173,8 +189,11 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Budget deleted'),
-              backgroundColor: AppColors.green,
+              content: Text(
+                'Budget deleted',
+                style: TextStyle(color: AppColors.green),
+              ),
+              backgroundColor: AppColors.bgGreen,
             ),
           );
         }
@@ -182,8 +201,11 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Failed to delete budget: $e'),
-              backgroundColor: Colors.red,
+              content: Text(
+                'Failed to delete budget: $e',
+                style: TextStyle(color: AppColors.red),
+              ),
+              backgroundColor: AppColors.bgRed,
             ),
           );
         }
@@ -197,19 +219,29 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
   Widget build(BuildContext context) {
     final accountsAsync = ref.watch(accountsListProvider);
     final categoriesAsync = ref.watch(expenseCategoriesProvider);
-    final palette = currentPalette;
 
-
-    // Show loading while initializing edit mode
+    // Keep showing a loading screen while initializing (same behavior you had)
     if (!_isInitialized) {
-      return Dialog(
+      return Scaffold(
         backgroundColor: palette.bgPrimary,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: const Padding(
-          padding: EdgeInsets.all(40),
+        appBar: CustomAppBar(
+          title: _isEditing ? 'Edit Budget' : 'Create Budget',
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: palette.textDark),
+            onPressed: () => Navigator.pop(context),
+          ),
+          extraActions: [
+            if (_isEditing)
+              IconButton(
+                icon: Icon(Icons.delete_outline, color: palette.textMuted),
+                onPressed: _isLoading ? null : _delete,
+              ),
+          ],
+        ),
+        body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: [
+            children: const [
               CircularProgressIndicator(),
               SizedBox(height: 16),
               Text('Loading budget...'),
@@ -219,47 +251,34 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
       );
     }
 
-    return Dialog(
+    return Scaffold(
       backgroundColor: palette.bgPrimary,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      insetPadding: const EdgeInsets.all(16),
-      child: SingleChildScrollView(
+      appBar: CustomAppBar(
+        title: _isEditing ? 'Edit Budget' : 'Create Budget',
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: palette.textDark),
+          onPressed: () => Navigator.pop(context),
+        ),
+        extraActions: [
+          if (_isEditing)
+            IconButton(
+              icon: Icon(Icons.delete_outline, color: palette.textMuted),
+              onPressed: _isLoading ? null : _delete,
+            ),
+        ],
+      ),
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Form(
             key: _formKey,
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      _isEditing ? 'Edit Budget' : 'New Budget',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: palette.textDark,
-                      ),
-                    ),
-                    if (_isEditing)
-                      IconButton(
-                        icon: const Icon(Icons.delete_outline, color: Colors.red),
-                        onPressed: _isLoading ? null : _delete,
-                      )
-                  ],
-                ),
-                const SizedBox(height: 20),
-
                 // Label
-                TextFormField(
+                CustomTextFormField(
                   controller: _labelController,
-                  decoration: const InputDecoration(
-                    labelText: 'Budget Label',
-                    hintText: 'e.g., Groceries Budget',
-                  ),
+                  label: "Label",
                   enabled: !_isLoading,
                   validator: (value) => (value == null || value.trim().isEmpty)
                       ? 'Enter a label'
@@ -268,14 +287,9 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
                 const SizedBox(height: 16),
 
                 // Limit
-                TextFormField(
+                CustomTextFormField(
                   controller: _limitController,
-                  decoration: const InputDecoration(
-                    labelText: 'Limit Amount (€)',
-                    hintText: '0.00',
-                  ),
-                  keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+                  label: "Limit Amount",
                   enabled: !_isLoading,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -290,6 +304,10 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
                     }
                     return null;
                   },
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: const InputDecoration(hintText: "0.00"),
                 ),
                 const SizedBox(height: 20),
 
@@ -303,147 +321,127 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
                       );
                     }
 
-                    // Set default if not set
-                    if (_selectedAccountId == null && accounts.isNotEmpty) {
+                    // Preserve your original safe pattern: only call setState in a post frame callback
+                    // to set the default when creating a new budget and no account is selected.
+                    if (!_isEditing &&
+                        _selectedAccountId == null &&
+                        accounts.isNotEmpty) {
+                      // *** FIX: Set the ID for the current build immediately ***
+                      final defaultAccountId = accounts.first.id;
+                      _selectedAccountId = defaultAccountId;
+
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (mounted) {
-                          setState(() => _selectedAccountId = accounts.first.id);
+                          setState(
+                            () => _selectedAccountId = accounts.first.id,
+                          );
                         }
                       });
                     }
 
+                    final initialAccount = accounts
+                        .where((a) => a.id == _selectedAccountId)
+                        .firstOrNull;
+
                     return ChipSelector<Account>(
                       label: 'Account',
                       items: accounts,
-                      selectedValue: accounts
-                          .where((a) => a.id == _selectedAccountId)
-                          .firstOrNull,
+                      initialValue: initialAccount,
                       labelBuilder: (acc) => acc.name,
                       onChanged: (acc) {
                         if (!_isLoading) {
-                          setState(() => _selectedAccountId = acc.id);
+                          setState(() => _selectedAccountId = acc?.id);
                         }
                       },
                     );
                   },
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (e, st) => Text(
                     'Error loading accounts: $e',
                     style: const TextStyle(color: Colors.red),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 18),
 
                 // Period Selector
                 ChipSelector<BudgetPeriod>(
                   label: 'Period',
                   items: BudgetPeriod.values,
-                  selectedValue: _selectedPeriod,
+                  initialValue: _selectedPeriod,
                   labelBuilder: (period) =>
-                  period == BudgetPeriod.weekly ? 'Weekly' : 'Monthly',
+                      period == BudgetPeriod.weekly ? 'Weekly' : 'Monthly',
                   onChanged: (period) {
                     if (!_isLoading) {
-                      setState(() => _selectedPeriod = period);
+                      setState(() => _selectedPeriod = period!);
                     }
                   },
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 18),
 
                 // Category Selector
                 categoriesAsync.when(
                   data: (allCategories) {
                     // Create a synthetic "Global" category
                     final globalCategory = Category(
-                      id: -1, // Special ID for global
+                      id: -1,
+                      // Special ID for global
                       name: 'Global',
                       iconCodePoint: Icons.all_inclusive.codePoint,
                       colorValue: palette.secondary.toARGB32(),
                       usageType: CategoryUsageType.expense,
                     );
 
-                    // Add global category at the beginning
-                    final selectableCategories = [globalCategory, ...allCategories];
+                    final selectableCategories = allCategories;
 
-                    if (selectableCategories.length == 1) {
-                      // Only global available, need real categories
+                    if (selectableCategories.isEmpty) {
                       return const Text(
                         'No categories available. Create a category first.',
                         style: TextStyle(color: Colors.red),
                       );
                     }
 
-                    // Determine selected categories
-                    // If empty list, select global; otherwise select the specific categories
                     final selectedCats = _selectedCategoryIds.isEmpty
-                        ? [globalCategory]
+                        ? null
                         : selectableCategories
-                        .where((c) => _selectedCategoryIds.contains(c.id))
-                        .toList();
+                              .where((c) => _selectedCategoryIds.contains(c.id))
+                              .toList();
 
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ChipSelector<Category>(
-                          label: 'Categories',
+                        ChipSelector<Category>.multi(
+                          label: "Categories",
                           items: selectableCategories,
-                          multiSelect: true,
+                          globalItem: globalCategory,
                           selectedValues: selectedCats,
+                          onMultiChanged: (cats) {
+                            if (!_isLoading) {
+                              setState(() {
+                                _selectedCategoryIds =
+                                    cats?.map((c) => c.id).toList() ?? [];
+                              });
+                            }
+                          },
                           labelBuilder: (cat) => cat.name,
-                          // Show icons for all categories
+                          validator: (cats) {
+                            return cats == null || cats.isNotEmpty
+                                ? null
+                                : "Please select at least one category";
+                          },
                           getItemIcon: (cat) {
                             if (cat.id == -1) {
                               return Icons.all_inclusive;
                             }
-                            return IconData(cat.iconCodePoint, fontFamily: 'MaterialIcons');
+                            return IconData(
+                              cat.iconCodePoint,
+                              fontFamily: 'MaterialIcons',
+                            );
                           },
-                          // Global gets secondary color, others get their category color
                           getItemColor: (cat) => Color(cat.colorValue),
-                          onMultiChanged: (cats) {
-                            if (!_isLoading) {
-                              // Check if Global is in the selection
-                              final hasGlobal = cats.any((c) => c.id == -1);
-                              final hasNonGlobal = cats.any((c) => c.id != -1);
-
-                              if (hasGlobal && hasNonGlobal) {
-                                // Both Global and specific categories selected
-                                // Determine which was just added
-                                final wasGlobalSelected = _selectedCategoryIds.isEmpty;
-
-                                if (wasGlobalSelected) {
-                                  // Global was selected, user is now picking specific categories
-                                  // Remove Global, keep only the non-Global categories
-                                  setState(() {
-                                    _selectedCategoryIds = cats
-                                        .where((c) => c.id != -1)
-                                        .map((c) => c.id)
-                                        .toList();
-                                  });
-                                } else {
-                                  // Specific categories were selected, user just picked Global
-                                  // Clear everything (Global = empty list)
-                                  setState(() {
-                                    _selectedCategoryIds = [];
-                                  });
-                                }
-                              } else if (hasGlobal && !hasNonGlobal) {
-                                // Only Global selected
-                                setState(() {
-                                  _selectedCategoryIds = [];
-                                });
-                              } else {
-                                // Only non-Global categories selected
-                                setState(() {
-                                  _selectedCategoryIds = cats
-                                      .where((c) => c.id != -1)
-                                      .map((c) => c.id)
-                                      .toList();
-                                });
-                              }
-                            }
-                          },
                         ),
                         Padding(
-                          padding: const EdgeInsets.only(left: 16, top: 8),
+                          padding: const EdgeInsets.only(top: 4),
                           child: Text(
                             _selectedCategoryIds.isEmpty
                                 ? 'Global budget applies to all categories'
@@ -458,7 +456,8 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
                       ],
                     );
                   },
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (e, st) => Text(
                     'Error loading categories: $e',
                     style: const TextStyle(color: Colors.red),
@@ -478,13 +477,13 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
                     ),
                     child: _isLoading
                         ? SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: palette.textDark,
-                      ),
-                    )
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: palette.textDark,
+                            ),
+                          )
                         : Text(_isEditing ? 'Save Changes' : 'Create Budget'),
                   ),
                 ),

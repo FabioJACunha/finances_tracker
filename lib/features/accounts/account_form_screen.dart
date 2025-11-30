@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/services_provider.dart';
 import '../../data/db/database.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/custom_text_form_field.dart';
 
 class AccountFormScreen extends ConsumerStatefulWidget {
   final Account? initialAccount;
@@ -57,9 +58,12 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
       Navigator.of(context).pop();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e', style: TextStyle(color: AppColors.red)),
+          backgroundColor: AppColors.bgRed,
+        ),
+      );
     }
   }
 
@@ -95,36 +99,35 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
-                  style: TextStyle(color: palette.textDark),
+                CustomTextFormField(
+                  label: "Account Name",
                   initialValue: _name,
-                  decoration: const InputDecoration(labelText: 'Account Name'),
                   validator: (val) =>
                       val == null || val.isEmpty ? 'Required' : null,
                   onSaved: (val) => _name = val!,
+                  decoration: InputDecoration(hintText: "Enter account name"),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 20),
                 // Only show balance field when creating new account
                 if (!isEditing) ...[
-                  TextFormField(
-                    style: TextStyle(color: palette.textDark),
+                  CustomTextFormField(
+                    label: "Initial Balance",
                     initialValue: _balance.toStringAsFixed(2),
-                    decoration: const InputDecoration(
-                      labelText: 'Initial Balance',
-                      helperText:
-                          'Balance can only be changed through transactions after creation',
-                      helperMaxLines: 2,
-                    ),
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
                     validator: (val) =>
                         val == null || double.tryParse(val) == null
                         ? 'Enter a valid number'
                         : null,
                     onSaved: (val) => _balance = double.parse(val!),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: InputDecoration(
+                      helperText:
+                          'Balance can only be changed through transactions after creation',
+                      helperMaxLines: 2,
+                      helperStyle: TextStyle(color: palette.secondary)
+                    ),
                   ),
-                  const SizedBox(height: 12),
                 ] else ...[
                   // Show current balance as read-only when editing
                   Column(
@@ -133,18 +136,15 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                       Text(
                         'Current Balance',
                         style: TextStyle(
-                          fontSize: 12,
-                          color: palette.secondary,
+                          fontSize: 14,
+                          color: palette.textDark,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         '${_balance.toStringAsFixed(2)} €',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: palette.textDark,
-                        ),
+                        style: TextStyle(fontSize: 16, color: palette.textDark),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -153,9 +153,9 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                           fontSize: 11,
                           color: palette.secondary,
                           fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const SizedBox(height: 12),
                     ],
                   ),
                 ],
@@ -168,8 +168,8 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                         'Exclude from total balance',
                         style: TextStyle(
                           fontSize: 14,
-                          color: palette.secondary,
-                          fontWeight: FontWeight.bold,
+                          color: palette.textDark,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
