@@ -278,10 +278,10 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
                 // Label
                 CustomTextFormField(
                   controller: _labelController,
-                  label: "Label",
+                  label: "Title",
                   enabled: !_isLoading,
                   validator: (value) => (value == null || value.trim().isEmpty)
-                      ? 'Enter a label'
+                      ? 'Enter a title'
                       : null,
                 ),
                 const SizedBox(height: 16),
@@ -388,7 +388,7 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
                       // Special ID for global
                       name: 'Global',
                       iconCodePoint: Icons.all_inclusive.codePoint,
-                      colorValue: palette.secondary.toARGB32(),
+                      colorValue: Colors.black.toARGB32(),
                       usageType: CategoryUsageType.expense,
                     );
 

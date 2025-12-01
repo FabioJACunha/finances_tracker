@@ -100,19 +100,17 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                 ),
                 const SizedBox(height: 16),
                 CustomTextFormField(
-                  label: "Account Name",
+                  label: "Title",
                   initialValue: _name,
                   validator: (val) =>
-                      val == null || val.isEmpty ? 'Required' : null,
+                      val == null || val.isEmpty ? 'Enter a title' : null,
                   onSaved: (val) => _name = val!,
-                  decoration: InputDecoration(hintText: "Enter account name"),
                 ),
                 const SizedBox(height: 20),
                 // Only show balance field when creating new account
                 if (!isEditing) ...[
                   CustomTextFormField(
                     label: "Initial Balance",
-                    initialValue: _balance.toStringAsFixed(2),
                     validator: (val) =>
                         val == null || double.tryParse(val) == null
                         ? 'Enter a valid number'
@@ -122,6 +120,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                       decimal: true,
                     ),
                     decoration: InputDecoration(
+                      hintText: "0.00",
                       helperText:
                           'Balance can only be changed through transactions after creation',
                       helperMaxLines: 2,

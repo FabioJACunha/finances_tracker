@@ -46,6 +46,35 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase>
     });
   }
 
+  Stream<List<TransactionWithCategory>> watchByAccountWithCategoryInRange(
+    int accountId,
+    DateTime startDate,
+    DateTime endDate,
+  ) {
+    final query =
+        select(transactions).join([
+            leftOuterJoin(
+              categories,
+              categories.id.equalsExp(transactions.categoryId),
+            ),
+          ])
+          ..where(transactions.accountId.equals(accountId))
+          ..where(transactions.date.isBiggerOrEqualValue(startDate))
+          ..where(transactions.date.isSmallerOrEqualValue(endDate))
+          ..orderBy([
+            OrderingTerm.desc(transactions.date),
+          ]); // Recent first for UI
+
+    return query.watch().map((rows) {
+      return rows.map((row) {
+        return TransactionWithCategory(
+          transaction: row.readTable(transactions),
+          category: row.readTableOrNull(categories),
+        );
+      }).toList();
+    });
+  }
+
   Future<List<Transaction>> getByAccountIdOrderedByDate(int accountId) {
     return (select(transactions)
           ..where((t) => t.accountId.equals(accountId))
@@ -133,7 +162,9 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase>
       ..where((t) => t.accountId.equals(accountId))
       ..where((t) => t.date.isBiggerOrEqualValue(startDate))
       ..where((t) => t.date.isSmallerOrEqualValue(endDate))
-      ..orderBy([(t) => OrderingTerm.asc(t.date)]); // Optional: keep them ordered
+      ..orderBy([
+        (t) => OrderingTerm.asc(t.date),
+      ]); // Optional: keep them ordered
 
     // If categoryIds is provided and non-empty, filter by the list.
     // An empty list means "All Categories" (no filtering by category ID).

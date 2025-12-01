@@ -5,6 +5,8 @@ import '../../../providers/analytics_provider.dart';
 import '../../../providers/categories_provider.dart';
 import '../../../models/period_args.dart';
 import '../../../theme/app_colors.dart';
+import '../../../data/db/database.dart';
+import '../../../widgets/chip_selector.dart';
 
 class SpendingTrendChart extends ConsumerStatefulWidget {
   final int accountId;
@@ -19,12 +21,11 @@ class SpendingTrendChart extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<SpendingTrendChart> createState() =>
-      _SpendingTrendChartState();
+  ConsumerState<SpendingTrendChart> createState() => _SpendingTrendChartState();
 }
 
 class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
-  String? _selectedCategory;
+  Category? _selectedCategory;
 
   @override
   Widget build(BuildContext context) {
@@ -66,72 +67,48 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Spending Trend',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: palette.textDark,
-                      fontSize: 20,
-                    ),
-                  ),
-                ),
-                // Category dropdown
-                categoriesAsync.when(
-                  data: (categories) {
-                    return DropdownButton<String?>(
-                      value: _selectedCategory,
-                      hint: Text(
-                        'All',
-                        style: TextStyle(color: palette.textDark),
-                      ),
-                      dropdownColor: palette.bgTerciary,
-                      items: [
-                        DropdownMenuItem<String?>(
-                          value: null,
-                          child: Text(
-                            'All Categories',
-                            style: TextStyle(color: palette.textDark),
-                          ),
-                        ),
-                        ...categories.map((cat) {
-                          return DropdownMenuItem<String?>(
-                            value: cat.name,
-                            child: Row(
-                              children: [
-                                Icon(
-                                  IconData(
-                                    cat.iconCodePoint,
-                                    fontFamily: 'MaterialIcons',
-                                  ),
-                                  size: 16,
-                                  color: Color(cat.colorValue),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  cat.name,
-                                  style: TextStyle(
-                                    color: palette.textDark,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }),
-                      ],
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedCategory = value;
-                        });
-                      },
+            Text(
+              'Spending Trend',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: palette.textDark,
+                fontSize: 20,
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Category selector
+            categoriesAsync.when(
+              data: (categories) {
+                // Synthetic 'All Categories' item for the ChipSelector globalItem
+                final allCategories = Category(
+                  id: -1,
+                  name: 'Global',
+                  iconCodePoint: Icons.all_inclusive.codePoint,
+                  colorValue: Colors.black.toARGB32(),
+                  usageType: CategoryUsageType.expense,
+                );
+
+                return ChipSelector<Category>(
+                  label: "Filter by Category",
+                  items: categories,
+                  hideLabel: true,
+                  globalItem: allCategories,
+                  initialValue: _selectedCategory,
+                  onChanged: (cat) {
+                    setState(() => _selectedCategory = cat);
+                  },
+                  labelBuilder: (cat) => cat.name,
+                  getItemColor: (cat) => Color(cat.colorValue),
+                  getItemIcon: (cat) {
+                    return IconData(
+                      cat.iconCodePoint,
+                      fontFamily: 'MaterialIcons',
                     );
                   },
-                  loading: () => const SizedBox.shrink(),
-                  error: (_, _) => const SizedBox.shrink(),
-                ),
-              ],
+                );
+              },
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
             ),
             const SizedBox(height: 16),
             categoryColorsAsync.when(
@@ -146,16 +123,20 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
 
                         if (_selectedCategory == null) {
                           // All categories
-                          currentAmount = currentData.values
-                              .fold(0.0, (sum, val) => sum + val);
-                          previousAmount = previousData.values
-                              .fold(0.0, (sum, val) => sum + val);
+                          currentAmount = currentData.values.fold(
+                            0.0,
+                            (sum, val) => sum + val,
+                          );
+                          previousAmount = previousData.values.fold(
+                            0.0,
+                            (sum, val) => sum + val,
+                          );
                         } else {
                           // Specific category
                           currentAmount =
-                              currentData[_selectedCategory] ?? 0.0;
+                              currentData[_selectedCategory!.name] ?? 0.0;
                           previousAmount =
-                              previousData[_selectedCategory] ?? 0.0;
+                              previousData[_selectedCategory!.name] ?? 0.0;
                         }
 
                         final chartData = [
@@ -179,7 +160,7 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
                               ),
                               child: Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment.spaceAround,
+                                    MainAxisAlignment.spaceAround,
                                 children: [
                                   _buildPeriodItem(
                                     'Previous',
@@ -235,18 +216,25 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
                                         color: palette.textDark,
                                         fontWeight: FontWeight.bold,
                                       ),
-                                      builder: (data, point, series,
-                                          pointIndex, seriesIndex) {
-                                        final chartData = data as _ChartData;
-                                        return Text(
-                                          '${chartData.amount.toStringAsFixed(2)}€',
-                                          style: TextStyle(
-                                            color: palette.textDark,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 12,
-                                          ),
-                                        );
-                                      },
+                                      builder:
+                                          (
+                                            data,
+                                            point,
+                                            series,
+                                            pointIndex,
+                                            seriesIndex,
+                                          ) {
+                                            final chartData =
+                                                data as _ChartData;
+                                            return Text(
+                                              '${chartData.amount.toStringAsFixed(2)}€',
+                                              style: TextStyle(
+                                                color: palette.textDark,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 12,
+                                              ),
+                                            );
+                                          },
                                     ),
                                     borderRadius: const BorderRadius.vertical(
                                       top: Radius.circular(4),

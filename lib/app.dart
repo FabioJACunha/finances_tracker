@@ -21,7 +21,7 @@ class _MyAppState extends ConsumerState<MyApp> {
   Widget build(BuildContext context) {
     final screens = [
       const HomeScreen(),
-      const TransactionHistoryScreen(),
+      const TransactionsScreen(),
       const BudgetsScreen(),
     ];
 

@@ -36,7 +36,7 @@ class BudgetsScreen extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.account_balance_wallet_outlined,
+                    Icons.pie_chart_outline,
                     size: 80,
                     color: palette.textDark,
                   ),

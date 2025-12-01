@@ -20,7 +20,7 @@ class AnalyticsService {
 
       final map = <String, double>{};
       for (var data in filtered) {
-        final cat = data.category?.name ?? 'Uncategorized';
+        final cat = data.category?.name ?? 'Global';
         map[cat] = (map[cat] ?? 0.0) + data.transaction.amount;
       }
 

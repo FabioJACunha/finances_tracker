@@ -11,19 +11,7 @@ import '../../widgets/custom_text_form_field.dart';
 import '../categories/category_form_screen.dart';
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:day_night_time_picker/day_night_time_picker.dart';
-
-// Extension to map TransactionType to CategoryUsageType
-extension _TransactionTypeMapper on TransactionType {
-  CategoryUsageType toCategoryUsageType() {
-    // FIX: Only handle expense and income, removing 'transfer'.
-    switch (this) {
-      case TransactionType.expense:
-        return CategoryUsageType.expense;
-      case TransactionType.income:
-        return CategoryUsageType.income;
-    }
-  }
-}
+import 'package:intl/intl.dart';
 
 class TransactionFormScreen extends ConsumerStatefulWidget {
   final int initialAccountId;
@@ -174,23 +162,13 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
               data: (categories) {
                 // Determine the initial selected Category object
                 final initialCategory = _categoryId == null
-                    ? null // null means 'No Category' (globalItem)
+                    ? categories.first
                     : categories.where((c) => c.id == _categoryId).firstOrNull;
 
                 // Determine the initial selected Account object
                 final initialAccount = accounts
                     .where((a) => a.id == _accountId)
                     .firstOrNull;
-
-                // Synthetic 'No Category' item for the ChipSelector globalItem
-                final noCategory = Category(
-                  id: -1,
-                  // Placeholder ID
-                  name: 'Global',
-                  iconCodePoint: Icons.remove.codePoint,
-                  colorValue: palette.textMuted.toARGB32(),
-                  usageType: _type.toCategoryUsageType(),
-                );
 
                 return SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -245,7 +223,6 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                         ChipSelector<Category>(
                           label: "Category",
                           items: categories,
-                          globalItem: noCategory,
                           // Pass the 'No Category' item
                           initialValue: initialCategory,
                           // Selected category object or null
@@ -286,32 +263,79 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                           child: InkWell(
                             onTap: () async {
                               final navigator = Navigator.of(context);
-                              final screenWidth = MediaQuery.of(context).size.width;
+                              final screenWidth = MediaQuery.of(
+                                context,
+                              ).size.width;
                               final horizontalPadding = 16.0;
 
                               // Open the calendar_date_picker2 dialog
-                              final pickedDates = await showCalendarDatePicker2Dialog(
-                                dialogSize: Size(
-                                  screenWidth - (horizontalPadding * 2),
-                                  400,
-                                ),
-                                context: context,
-                                config: CalendarDatePicker2WithActionButtonsConfig(
-                                  firstDate: DateTime(2020),
-                                  lastDate: DateTime.now(),
-                                  currentDate: _date,
-                                  calendarType: CalendarDatePicker2Type.single,
-                                  selectedDayHighlightColor: palette.secondary,
-                                  weekdayLabelTextStyle: TextStyle(color: palette.textDark),
-                                  dayTextStyle: TextStyle(color: palette.textDark),
-                                  yearTextStyle: TextStyle(color: palette.textDark),
-                                ),
-                                dialogBackgroundColor: palette.bgPrimary,
-                                value: [_date],
-                                borderRadius: BorderRadius.circular(8),
-                              );
+                              final pickedDates =
+                                  await showCalendarDatePicker2Dialog(
+                                    dialogSize: Size(
+                                      screenWidth - (horizontalPadding * 2),
+                                      450,
+                                    ),
+                                    context: context,
+                                    config:
+                                        CalendarDatePicker2WithActionButtonsConfig(
+                                          firstDate: DateTime(2020),
+                                          lastDate: DateTime.now(),
+                                          currentDate: _date,
+                                          calendarType:
+                                              CalendarDatePicker2Type.single,
+                                          selectedDayHighlightColor:
+                                              palette.secondary,
+                                          weekdayLabelTextStyle: TextStyle(
+                                            color: palette.textDark,
+                                          ),
+                                          dayTextStyle: TextStyle(
+                                            color: palette.textDark,
+                                          ),
+                                          yearTextStyle: TextStyle(
+                                            color: palette.textDark,
+                                          ),
+                                          buttonPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                                          okButton: Container(
+                                            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                            decoration: BoxDecoration(
+                                              color: palette.primary,
+                                              borderRadius: BorderRadius.circular(20),
+                                            ),
+                                            child: Text(
+                                              'Confirm',
+                                              style: TextStyle(
+                                                color: palette.textDark,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                          cancelButton: Container(
+                                            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                            decoration: BoxDecoration(
+                                              color: palette.terciary,
+                                              borderRadius: BorderRadius.circular(20),
+                                            ),
+                                            child: Text(
+                                              'Cancel',
+                                              style: TextStyle(
+                                                color: palette.textDark,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                          controlsTextStyle: TextStyle(
+                                            color: palette.textDark,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                    dialogBackgroundColor: palette.bgPrimary,
+                                    value: [_date],
+                                    borderRadius: BorderRadius.circular(8),
+                                  );
 
-                              if (pickedDates == null || pickedDates.isEmpty || pickedDates.first == null) {
+                              if (pickedDates == null ||
+                                  pickedDates.isEmpty ||
+                                  pickedDates.first == null) {
                                 return;
                               }
                               if (!mounted) return;
@@ -319,7 +343,10 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                               final pickedDate = pickedDates.first!;
 
                               // Use day_night_time_picker for time selection
-                              Time initialTime = Time(hour: _date.hour, minute: _date.minute);
+                              Time initialTime = Time(
+                                hour: _date.hour,
+                                minute: _date.minute,
+                              );
 
                               Navigator.of(navigator.context).push(
                                 showPicker(
@@ -343,18 +370,31 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                                   unselectedColor: palette.textMuted,
                                   cancelText: "Cancel",
                                   okText: "Confirm",
-                                  cancelStyle: TextStyle(color: palette.textDark),
+                                  cancelStyle: TextStyle(
+                                    color: palette.textDark,
+                                  ),
                                   buttonsSpacing: 8,
                                   okStyle: TextStyle(color: palette.textDark),
                                   cancelButtonStyle: ButtonStyle(
-                                    backgroundColor: WidgetStateProperty.all(palette.terciary),
-                                    foregroundColor: WidgetStateProperty.all(palette.textDark),
+                                    backgroundColor: WidgetStateProperty.all(
+                                      palette.terciary,
+                                    ),
+                                    foregroundColor: WidgetStateProperty.all(
+                                      palette.textDark,
+                                    ),
                                   ),
                                   buttonStyle: ButtonStyle(
-                                    backgroundColor: WidgetStateProperty.all(palette.primary),
-                                    foregroundColor: WidgetStateProperty.all(palette.textDark),
+                                    backgroundColor: WidgetStateProperty.all(
+                                      palette.primary,
+                                    ),
+                                    foregroundColor: WidgetStateProperty.all(
+                                      palette.textDark,
+                                    ),
                                   ),
-                                  dialogInsetPadding: const EdgeInsets.symmetric(horizontal: 16),
+                                  dialogInsetPadding:
+                                      const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                      ),
                                   borderRadius: 12,
                                 ),
                               );
@@ -384,11 +424,9 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                                     children: [
                                       Expanded(
                                         child: Text(
-                                          "${_date.day.toString().padLeft(2, '0')}/"
-                                          "${_date.month.toString().padLeft(2, '0')}/"
-                                          "${_date.year} "
-                                          "${_date.hour.toString().padLeft(2, '0')}:"
-                                          "${_date.minute.toString().padLeft(2, '0')}",
+                                          DateFormat(
+                                            'd MMM y HH:mm',
+                                          ).format(_date),
                                           style: TextStyle(
                                             color: palette.textDark,
                                             fontSize: 16,

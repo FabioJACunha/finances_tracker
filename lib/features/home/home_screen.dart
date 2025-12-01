@@ -1,11 +1,12 @@
 import '../../theme/app_colors.dart';
-import '../../models/date_period_filter.dart';
+import '../../models/date_range_selection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/accounts_provider.dart';
 import '../transactions/transaction_form_screen.dart';
 import 'home_stats_widgets/home_stats_widgets.dart';
 import '../../widgets/custom_app_bar.dart';
+import '../../widgets/date_range_selector.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -19,17 +20,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   int? _selectedAccountId;
   late final TabController _tabController;
 
-  DatePeriodFilter _currentFilter = DatePeriodFilter.week;
+  DateRangeSelection _selectedRange = DateRangeSelection.week();
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this); // Changed to 4 tabs
 
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
         setState(() {
-          _currentFilter = DatePeriodFilter.values[_tabController.index];
+          switch (_tabController.index) {
+            case 0:
+              _selectedRange = DateRangeSelection.week();
+              break;
+            case 1:
+              _selectedRange = DateRangeSelection.month();
+              break;
+            case 2:
+              _selectedRange = DateRangeSelection.year();
+              break;
+            case 3:
+              // Keep current custom range or default to last month
+              if (_selectedRange.type != DateRangeType.custom) {
+                _selectedRange = DateRangeSelection.month();
+              }
+              break;
+          }
         });
       }
     });
@@ -41,32 +58,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     super.dispose();
   }
 
-  DateTimeRange _getSelectedDateRange() {
-    final now = DateTime.now();
-
-    switch (_currentFilter) {
-      case DatePeriodFilter.week:
-        final weekday = now.weekday;
-        final start = DateTime(
-          now.year,
-          now.month,
-          now.day,
-        ).subtract(Duration(days: weekday - 1));
-        final end = start.add(
-          const Duration(days: 6, hours: 23, minutes: 59, seconds: 59),
-        );
-        return DateTimeRange(start: start, end: end);
-
-      case DatePeriodFilter.month:
-        final start = DateTime(now.year, now.month, 1);
-        final end = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
-        return DateTimeRange(start: start, end: end);
-
-      case DatePeriodFilter.year:
-        final start = DateTime(now.year, 1, 1);
-        final end = DateTime(now.year, 12, 31, 23, 59, 59);
-        return DateTimeRange(start: start, end: end);
-    }
+  void _onDateRangeChanged(DateRangeSelection newRange) {
+    setState(() {
+      _selectedRange = newRange;
+    });
   }
 
   @override
@@ -81,7 +76,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         }
 
         _selectedAccountId ??= accounts.first.id;
-        final range = _getSelectedDateRange();
 
         return Scaffold(
           appBar: CustomAppBar(
@@ -135,7 +129,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
               const SizedBox(height: 8),
 
-              /// Tabs: Week / Month / Year ----------------------------------------
+              /// Tabs: Week / Month / Year / Period ----------------------------------------
               TabBar(
                 controller: _tabController,
                 labelColor: palette.secondary,
@@ -154,10 +148,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   Tab(text: "Week"),
                   Tab(text: "Month"),
                   Tab(text: "Year"),
+                  Tab(text: "Period"),
                 ],
               ),
 
               const SizedBox(height: 8),
+
+              /// Custom date range picker (shown when Period tab is selected)
+              if (_tabController.index == 3)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: DateRangeSelector(
+                    currentRange: _selectedRange,
+                    onRangeChanged: _onDateRangeChanged,
+                  ),
+                ),
+
+              if (_tabController.index == 3) const SizedBox(height: 8),
 
               /// Charts ------------------------------------------------------------
               Expanded(
@@ -166,52 +173,53 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   transitionBuilder: (child, animation) =>
                       FadeTransition(opacity: animation, child: child),
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.only(
-                      bottom: 80,
+                    padding: const EdgeInsets.only(bottom: 80),
+                    key: ValueKey(
+                      '${_selectedRange.start}_${_selectedRange.end}',
                     ),
-                    key: ValueKey(_currentFilter),
-                    // <- important for switching!
                     child: Column(
                       spacing: 10,
                       children: [
                         ExpensesByCategoryPie(
                           accountId: _selectedAccountId!,
-                          start: range.start,
-                          end: range.end,
+                          start: _selectedRange.start,
+                          end: _selectedRange.end,
                         ),
-                        if (_currentFilter != DatePeriodFilter.week)
+                        if (_selectedRange.type != DateRangeType.week)
                           IncomeVsExpenseBar(
                             accountId: _selectedAccountId!,
-                            start: range.start,
-                            end: range.end,
+                            start: _selectedRange.start,
+                            end: _selectedRange.end,
                           ),
-                        if (_currentFilter == DatePeriodFilter.week)
+                        if (_selectedRange.type == DateRangeType.week)
                           NetBalanceChangeCard(
                             accountId: _selectedAccountId!,
-                            start: range.start,
-                            end: range.end,
+                            start: _selectedRange.start,
+                            end: _selectedRange.end,
                           ),
-                        if (_currentFilter != DatePeriodFilter.week)
+                        if (_selectedRange.type != DateRangeType.week &&
+                            _tabController.index != 3)
                           SavingsRateCard(
                             accountId: _selectedAccountId!,
-                            start: range.start,
-                            end: range.end,
+                            start: _selectedRange.start,
+                            end: _selectedRange.end,
                           ),
                         TopExpenseCategories(
                           accountId: _selectedAccountId!,
-                          start: range.start,
-                          end: range.end,
+                          start: _selectedRange.start,
+                          end: _selectedRange.end,
                         ),
-                        SpendingTrendChart(
-                          accountId: _selectedAccountId!,
-                          start: range.start,
-                          end: range.end,
-                        ),
-                        if (_currentFilter == DatePeriodFilter.year)
+                        if (_tabController.index != 3)
+                          SpendingTrendChart(
+                            accountId: _selectedAccountId!,
+                            start: _selectedRange.start,
+                            end: _selectedRange.end,
+                          ),
+                        if (_selectedRange.type == DateRangeType.year)
                           BalanceEvolutionChart(
                             accountId: _selectedAccountId!,
-                            start: range.start,
-                            end: range.end,
+                            start: _selectedRange.start,
+                            end: _selectedRange.end,
                           ),
                       ],
                     ),

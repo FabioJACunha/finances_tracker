@@ -44,3 +44,26 @@ class TopCategoriesArgs {
   @override
   int get hashCode => Object.hash(accountId, start, end, topN);
 }
+
+class TransactionRangeArgs {
+  final int accountId;
+  final DateTime start;
+  final DateTime end;
+
+  TransactionRangeArgs({
+    required this.accountId,
+    required this.start,
+    required this.end,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TransactionRangeArgs &&
+          accountId == other.accountId &&
+          start == other.start &&
+          end == other.end;
+
+  @override
+  int get hashCode => Object.hash(accountId, start, end);
+}

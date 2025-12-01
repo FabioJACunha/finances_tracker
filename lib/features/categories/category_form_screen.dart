@@ -426,15 +426,14 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                 CustomTextFormField(
                   initialValue: _name,
                   maxLength: 20,
-                  label: "Category Name",
+                  label: "Title",
                   validator: (val) {
                     if (val == null || val.trim().isEmpty) {
-                      return "Please enter a category name";
+                      return "Please enter a title";
                     }
                     return null;
                   },
                   onSaved: (val) => _name = val!.trim(),
-                  decoration: InputDecoration(hintText: "Enter category name"),
                 ),
                 const SizedBox(height: 16),
 

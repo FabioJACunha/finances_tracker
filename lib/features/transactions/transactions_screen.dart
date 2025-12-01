@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/accounts_provider.dart';
 import '../../providers/transactions_provider.dart';
 import '../../data/db/tables.dart';
+import '../../models/period_args.dart';
+import '../../models/date_range_selection.dart';
 import 'package:intl/intl.dart';
 import 'transaction_form_screen.dart';
 import 'transaction_details_dialog.dart';
@@ -10,32 +12,42 @@ import '../../theme/app_colors.dart';
 import '../../models/transaction_type_filter.dart';
 import 'package:collection/collection.dart';
 import '../../widgets/custom_app_bar.dart';
+import '../../widgets/date_range_selector.dart';
+import '../../providers/categories_provider.dart';
 
-class TransactionHistoryScreen extends ConsumerStatefulWidget {
-  const TransactionHistoryScreen({super.key});
+class TransactionsScreen extends ConsumerStatefulWidget {
+  const TransactionsScreen({super.key});
 
   @override
-  ConsumerState<TransactionHistoryScreen> createState() =>
-      _TransactionHistoryScreenState();
+  ConsumerState<TransactionsScreen> createState() => _TransactionsScreenState();
 }
 
-class _TransactionHistoryScreenState
-    extends ConsumerState<TransactionHistoryScreen>
+class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     with SingleTickerProviderStateMixin {
   int? _selectedAccountId;
   late TabController _tabController;
   TransactionTypeFilter _currentFilter = TransactionTypeFilter.all;
 
+  // Default to last 2 months
+  late DateRangeSelection _dateRange;
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _dateRange = DateRangeSelection.lastNMonths(2);
   }
 
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  void _onDateRangeChanged(DateRangeSelection newRange) {
+    setState(() {
+      _dateRange = newRange;
+    });
   }
 
   @override
@@ -58,44 +70,58 @@ class _TransactionHistoryScreenState
           return Column(
             children: [
               // Horizontal scrollable account pills
-              SizedBox(
-                height: 50,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: accounts.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: 8),
-                  itemBuilder: (context, index) {
-                    final account = accounts[index];
-                    final selected = account.id == _selectedAccountId;
-                    return GestureDetector(
-                      onTap: () =>
-                          setState(() => _selectedAccountId = account.id),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        decoration: BoxDecoration(
-                          color: selected
-                              ? palette.terciary
-                              : palette.bgTerciary,
-                          borderRadius: BorderRadius.circular(100),
-                        ),
-                        child: Center(
-                          child: Text(
-                            account.name,
-                            style: TextStyle(
-                              color: selected
-                                  ? palette.secondary
-                                  : palette.textDark,
-                              fontWeight: selected
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 50,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        itemCount: accounts.length,
+                        separatorBuilder: (_, _) => const SizedBox(width: 8),
+                        itemBuilder: (context, index) {
+                          final account = accounts[index];
+                          final selected = account.id == _selectedAccountId;
+                          return GestureDetector(
+                            onTap: () =>
+                                setState(() => _selectedAccountId = account.id),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                              ),
+                              decoration: BoxDecoration(
+                                color: selected
+                                    ? palette.terciary
+                                    : palette.bgTerciary,
+                                borderRadius: BorderRadius.circular(100),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  account.name,
+                                  style: TextStyle(
+                                    color: selected
+                                        ? palette.secondary
+                                        : palette.textDark,
+                                    fontWeight: selected
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  ),
+                  // Date range picker
+                  DateRangeSelector(
+                    currentRange: _dateRange,
+                    onRangeChanged: _onDateRangeChanged,
+                    isIconOnly: true,
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
 
@@ -134,18 +160,19 @@ class _TransactionHistoryScreenState
                 child: AnimatedBuilder(
                   animation: _tabController,
                   builder: (context, _) {
-                    final filter = [
-                      'All',
-                      'Expense',
-                      'Income',
-                    ][_tabController.index];
-
                     if (_selectedAccountId == null) {
                       return const SizedBox.shrink();
                     }
 
+                    // Use the new provider with date range filtering
                     final txnStream = ref.watch(
-                      transactionsWithCategoryProvider(_selectedAccountId!),
+                      transactionsWithCategoryInRangeProvider(
+                        TransactionRangeArgs(
+                          accountId: _selectedAccountId!,
+                          start: _dateRange.start,
+                          end: _dateRange.end,
+                        ),
+                      ),
                     );
 
                     return AnimatedSwitcher(
@@ -153,7 +180,9 @@ class _TransactionHistoryScreenState
                       transitionBuilder: (child, animation) =>
                           FadeTransition(opacity: animation, child: child),
                       child: Builder(
-                        key: ValueKey(_currentFilter),
+                        key: ValueKey(
+                          '${_currentFilter}_${_dateRange.start}_${_dateRange.end}',
+                        ),
                         builder: (context) {
                           return txnStream.when(
                             data: (transactions) {
@@ -203,7 +232,9 @@ class _TransactionHistoryScreenState
                                   });
 
                               return ListView.builder(
-                                key: ValueKey<String>(filter),
+                                key: ValueKey<String>(
+                                  '${_currentFilter}_${_dateRange.start}',
+                                ),
                                 itemCount: listItems.length,
                                 padding: const EdgeInsets.only(
                                   left: 16,
@@ -248,7 +279,16 @@ class _TransactionHistoryScreenState
                                   final tx = item.transaction;
                                   final isIncome =
                                       tx.type == TransactionType.income;
-
+                                  final categoryAsync = tx.categoryId == null
+                                      ? null // Assign null if there's no ID, instead of 'Global'
+                                      : ref.watch(
+                                    categoryByIdProvider(tx.categoryId!),
+                                  );
+                                  String category = 'Global'; // Default to 'Global'
+                                  if (categoryAsync != null && categoryAsync.hasValue) {
+                                    // Safely access the Category object's name property
+                                    category = categoryAsync.value!.name;
+                                  }
                                   return Padding(
                                     padding: const EdgeInsets.only(bottom: 4),
                                     child: InkWell(
@@ -286,12 +326,26 @@ class _TransactionHistoryScreenState
                                               ),
                                               const SizedBox(width: 12),
                                               Expanded(
-                                                child: Text(
-                                                  tx.title ?? 'No title',
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.w500,
-                                                    color: palette.textDark,
-                                                  ),
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      tx.title ?? 'No title',
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                        color: palette.textDark,
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      category,
+                                                      style: TextStyle(
+                                                        color:
+                                                            palette.secondary,
+                                                        fontWeight: FontWeight.w500
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
                                               Column(
@@ -309,9 +363,8 @@ class _TransactionHistoryScreenState
                                                   Text(
                                                     '${tx.resultantBalance.toStringAsFixed(2)} €',
                                                     style: TextStyle(
-                                                      color:
-                                                          palette.textMuted,
-                                                      fontSize: 12
+                                                      color: palette.textMuted,
+                                                      fontSize: 12,
                                                     ),
                                                   ),
                                                 ],
