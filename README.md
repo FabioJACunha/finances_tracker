@@ -1,4 +1,4 @@
-# finances_tracker
+# finances_pal
 
 A new Flutter project.
 

@@ -36,9 +36,6 @@ LazyDatabase _openConnection() {
 
     final file = File(dbPath);
 
-    // Delete file for testing porpuses
-    // await file.delete();
-
     // Ensure the file exists (optional)
     if (!await file.exists()) {
       await file.create(recursive: true);

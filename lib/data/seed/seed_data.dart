@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import '../db/database.dart';
-import '../../services/transaction_service.dart';
+// import '../../services/transaction_service.dart';
 
 Future<void> seedDatabase(AppDatabase db) async {
   // If there are already accounts, assume DB is seeded.
@@ -9,7 +9,7 @@ Future<void> seedDatabase(AppDatabase db) async {
   if (existing.isNotEmpty) return;
 
   // Insert account
-  final accountId = await db.accountsDao.insert(
+  await db.accountsDao.insert(
     AccountsCompanion.insert(
       name: 'Main Account',
       balance: const Value(0.00),
@@ -79,14 +79,14 @@ Future<void> seedDatabase(AppDatabase db) async {
     categoryIds[entry.key] = id;
   }
 
-  final transactionService = TransactionService(db);
-  final now = DateTime.now();
-
-  // Helper to create date
-  DateTime date(int daysAgo, int hour, int minute) {
-    final d = now.subtract(Duration(days: daysAgo));
-    return DateTime(d.year, d.month, d.day, hour, minute);
-  }
+  // final transactionService = TransactionService(db);
+  // final now = DateTime.now();
+  //
+  // // Helper to create date
+  // DateTime date(int daysAgo, int hour, int minute) {
+  //   final d = now.subtract(Duration(days: daysAgo));
+  //   return DateTime(d.year, d.month, d.day, hour, minute);
+  // }
 
   // ============================================
   // MONTH 1 (Current month - last 30 days)
