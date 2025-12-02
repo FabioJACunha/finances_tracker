@@ -5,9 +5,12 @@ import '../../providers/budgets_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/custom_app_bar.dart';
 import 'budgets_form_screen.dart';
+import '../../l10n/app_localizations.dart'; // UPDATED IMPORT
 
 class BudgetsScreen extends ConsumerWidget {
-  const BudgetsScreen({super.key});
+  BudgetsScreen({super.key});
+
+  final palette = currentPalette;
 
   void _openForm(BuildContext context, [Budget? budget]) {
     Navigator.push(
@@ -20,12 +23,12 @@ class BudgetsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context)!; // USE 'loc'
     final budgetsAsync = ref.watch(budgetsListProvider);
-    final palette = currentPalette;
 
     return Scaffold(
       appBar: CustomAppBar(
-        title: 'Budgets',
+        title: loc.budgetsTitle,
         leading: Icon(Icons.pie_chart_outline, color: palette.textDark),
       ),
       body: budgetsAsync.when(
@@ -40,18 +43,18 @@ class BudgetsScreen extends ConsumerWidget {
                     size: 80,
                     color: palette.textDark,
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   Text(
-                    'No budgets yet',
+                    loc.budgetsEmptyTitle,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: palette.textDark,
                     ),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
-                    'Tap + to create your first budget',
+                    loc.budgetsEmptySubtitle,
                     style: TextStyle(fontSize: 14, color: palette.textDark),
                   ),
                 ],
@@ -78,7 +81,10 @@ class BudgetsScreen extends ConsumerWidget {
             children: [
               const Icon(Icons.error_outline, size: 48, color: Colors.red),
               const SizedBox(height: 16),
-              Text('Error: $e', style: const TextStyle(color: Colors.red)),
+              Text(
+                loc.errorLoadingBudgets(e.toString()),
+                style: const TextStyle(color: Colors.red),
+              ),
             ],
           ),
         ),
@@ -95,8 +101,9 @@ class BudgetsScreen extends ConsumerWidget {
 
 class _BudgetListItem extends ConsumerWidget {
   final Budget budget;
+  final palette = currentPalette;
 
-  const _BudgetListItem({required this.budget});
+  _BudgetListItem({required this.budget});
 
   void _openForm(BuildContext context, [Budget? budget]) {
     Navigator.push(
@@ -108,14 +115,15 @@ class _BudgetListItem extends ConsumerWidget {
   }
 
   Color _getProgressColor(double progress, bool isOverBudget) {
-    if (isOverBudget) return AppColors.red;
+    if (isOverBudget) return palette.red;
     if (progress >= 0.9) return Colors.orange;
     if (progress >= 0.7) return Colors.yellow.shade700;
-    return AppColors.green;
+    return palette.green;
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context)!; // USE 'loc'
     final spentAsync = ref.watch(budgetSpentProvider(budget));
     final palette = currentPalette;
 
@@ -141,6 +149,11 @@ class _BudgetListItem extends ConsumerWidget {
               final isOverBudget = spent > limit;
               final progressColor = _getProgressColor(progress, isOverBudget);
 
+              final formattedRemainingAbs = (remaining.abs()).toStringAsFixed(
+                2,
+              );
+              final formattedRemaining = remaining.toStringAsFixed(2);
+
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -161,12 +174,12 @@ class _BudgetListItem extends ConsumerWidget {
                                 decoration: BoxDecoration(
                                   color: Colors.transparent,
                                   borderRadius: BorderRadius.circular(4),
-                                  border: BoxBorder.all(
+                                  border: Border.all(
                                     color: Colors.black,
                                     width: 2,
                                   ),
                                 ),
-                                child: Icon(
+                                child: const Icon(
                                   Icons.all_inclusive_outlined,
                                   color: Colors.black,
                                   size: 18,
@@ -189,7 +202,7 @@ class _BudgetListItem extends ConsumerWidget {
                                   decoration: BoxDecoration(
                                     color: Colors.transparent,
                                     borderRadius: BorderRadius.circular(4),
-                                    border: BoxBorder.all(
+                                    border: Border.all(
                                       color: itemColor,
                                       width: 2,
                                     ),
@@ -236,8 +249,8 @@ class _BudgetListItem extends ConsumerWidget {
                             ),
                             Text(
                               budget.period == BudgetPeriod.weekly
-                                  ? 'Weekly Budget'
-                                  : 'Monthly Budget',
+                                  ? loc.budgetPeriodWeekly
+                                  : loc.budgetPeriodMonthly,
                               style: TextStyle(
                                 fontSize: 12,
                                 color: palette.textMuted,
@@ -247,7 +260,7 @@ class _BudgetListItem extends ConsumerWidget {
                         ),
                       ),
                       Padding(
-                        padding: .only(top: 10),
+                        padding: const EdgeInsets.only(top: 10),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
@@ -261,8 +274,8 @@ class _BudgetListItem extends ConsumerWidget {
                             if (progress >= 0.7) const SizedBox(width: 6),
                             Text(
                               isOverBudget
-                                  ? '${(remaining.abs()).toStringAsFixed(2)}€ over budget'
-                                  : '${remaining.toStringAsFixed(2)}€ remaining',
+                                  ? loc.budgetOver(formattedRemainingAbs)
+                                  : loc.budgetRemaining(formattedRemaining),
                               style: TextStyle(
                                 color: progressColor,
                                 fontWeight: FontWeight.bold,
@@ -296,7 +309,7 @@ class _BudgetListItem extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Spent',
+                            loc.budgetSpentLabel,
                             style: TextStyle(
                               color: palette.textMuted,
                               fontSize: 11,
@@ -316,7 +329,7 @@ class _BudgetListItem extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            'Limit',
+                            loc.budgetLimitLabel,
                             style: TextStyle(
                               color: palette.textMuted,
                               fontSize: 11,
@@ -346,7 +359,7 @@ class _BudgetListItem extends ConsumerWidget {
             error: (e, st) => Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
-                'Error loading data: $e',
+                loc.errorLoadingBudgetData(e.toString()),
                 style: const TextStyle(color: Colors.red, fontSize: 12),
               ),
             ),

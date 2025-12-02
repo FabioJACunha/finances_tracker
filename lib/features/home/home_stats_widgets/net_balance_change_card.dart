@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../providers/analytics_provider.dart';
-import '../../../theme/app_colors.dart';
 import '../../../models/period_args.dart';
+import '../../../theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 
 class NetBalanceChangeCard extends ConsumerWidget {
   final int accountId;
@@ -18,6 +19,7 @@ class NetBalanceChangeCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context)!;
     final palette = currentPalette;
 
     final dataAsync = ref.watch(
@@ -36,9 +38,9 @@ class NetBalanceChangeCard extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Net Balance Change',
+              loc.cardNetBalanceChangeTitle,
               style: TextStyle(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
                 color: palette.textDark,
                 fontSize: 20,
               ),
@@ -48,24 +50,20 @@ class NetBalanceChangeCard extends ConsumerWidget {
               data: (value) {
                 final isPositive = value >= 0;
                 final color = isPositive ? palette.green : palette.red;
-                final icon = isPositive ? Icons.trending_up : Icons
-                    .trending_down;
+                final icon = isPositive
+                    ? Icons.trending_up
+                    : Icons.trending_down;
 
                 return Row(
                   children: [
-                    Icon(
-                      icon,
-                      color: color,
-                      size: 32,
-                    ),
+                    Icon(icon, color: color, size: 32),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '${value >= 0 ? '+' : ''}${value.toStringAsFixed(
-                                2)} €',
+                            '${value >= 0 ? '+' : ''}${value.toStringAsFixed(2)} €',
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -73,7 +71,7 @@ class NetBalanceChangeCard extends ConsumerWidget {
                             ),
                           ),
                           Text(
-                            isPositive ? 'Surplus' : 'Deficit',
+                            isPositive ? loc.surplusLabel : loc.deficitLabel,
                             style: TextStyle(
                               fontSize: 12,
                               color: color,
@@ -86,33 +84,22 @@ class NetBalanceChangeCard extends ConsumerWidget {
                   ],
                 );
               },
-              loading: () =>
-              const SizedBox(
+              loading: () => const SizedBox(
                 height: 60,
-                child: Center(
-                  child: CircularProgressIndicator(),
-                ),
+                child: Center(child: CircularProgressIndicator()),
               ),
-              error: (err, stack) =>
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        color: Colors.red,
-                        size: 24,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Error loading data',
-                          style: const TextStyle(
-                            color: Colors.red,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    ],
+              error: (err, stack) => Row(
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.red, size: 24),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      loc.errorLoadingData(err.toString()),
+                      style: const TextStyle(color: Colors.red, fontSize: 14),
+                    ),
                   ),
+                ],
+              ),
             ),
           ],
         ),

@@ -8,6 +8,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/chip_selector.dart';
 import '../../widgets/custom_text_form_field.dart';
 import '../../widgets/custom_app_bar.dart';
+import '../../l10n/app_localizations.dart';
 
 class BudgetFormScreen extends ConsumerStatefulWidget {
   final Budget? initialBudget;
@@ -51,6 +52,7 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
   }
 
   Future<void> _loadInitialCategories() async {
+    final loc = AppLocalizations.of(context)!;
     try {
       final ids = await ref
           .read(budgetsDaoProvider)
@@ -68,10 +70,11 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Failed to load categories: $e',
-              style: TextStyle(color: AppColors.red),
+              loc.errorLoadCategories(e.toString()),
+
+              style: TextStyle(color: palette.red),
             ),
-            backgroundColor: AppColors.bgRed,
+            backgroundColor: palette.bgRed,
           ),
         );
       }
@@ -86,6 +89,7 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
   }
 
   void _save() async {
+    final loc = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
@@ -126,10 +130,10 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              _isEditing ? 'Budget updated' : 'Budget created',
-              style: TextStyle(color: AppColors.green),
+              _isEditing ? loc.budgetUpdated : loc.budgetCreated,
+              style: TextStyle(color: palette.green),
             ),
-            backgroundColor: AppColors.bgGreen,
+            backgroundColor: palette.bgGreen,
           ),
         );
       }
@@ -138,10 +142,10 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Failed to save budget: $e',
-              style: TextStyle(color: AppColors.red),
+              loc.errorSaveBudget(e.toString()),
+              style: TextStyle(color: palette.red),
             ),
-            backgroundColor: AppColors.bgRed,
+            backgroundColor: palette.bgRed,
           ),
         );
       }
@@ -151,25 +155,30 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
   }
 
   void _delete() async {
+    final loc = AppLocalizations.of(context)!;
     if (!mounted || widget.initialBudget == null) return;
 
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Budget'),
-        content: const Text(
-          'Are you sure you want to delete this budget? This action cannot be undone.',
-        ),
+        title: Text(loc.deleteBudgetTitle),
+        content: Text(loc.deleteBudgetConfirmation),
         actions: [
           TextButton(
-            style: TextButton.styleFrom(foregroundColor: palette.textDark, backgroundColor: palette.primary),
+            style: TextButton.styleFrom(
+              foregroundColor: palette.textDark,
+              backgroundColor: palette.primary,
+            ),
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(loc.cancel),
           ),
           TextButton(
-            style: TextButton.styleFrom(foregroundColor: AppColors.red, backgroundColor: AppColors.bgRed),
+            style: TextButton.styleFrom(
+              foregroundColor: palette.red,
+              backgroundColor: palette.bgRed,
+            ),
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
+            child: Text(loc.delete),
           ),
         ],
       ),
@@ -190,10 +199,10 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Budget deleted',
-                style: TextStyle(color: AppColors.green),
+                loc.budgetDeleted,
+                style: TextStyle(color: palette.green),
               ),
-              backgroundColor: AppColors.bgGreen,
+              backgroundColor: palette.bgGreen,
             ),
           );
         }
@@ -202,10 +211,11 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Failed to delete budget: $e',
-                style: TextStyle(color: AppColors.red),
+                loc.errorDeleteBudget(e.toString()),
+
+                style: TextStyle(color: palette.red),
               ),
-              backgroundColor: AppColors.bgRed,
+              backgroundColor: palette.bgRed,
             ),
           );
         }
@@ -217,6 +227,7 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!; // GET LOCALIZATIONS
     final accountsAsync = ref.watch(accountsListProvider);
     final categoriesAsync = ref.watch(expenseCategoriesProvider);
 
@@ -225,7 +236,7 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
       return Scaffold(
         backgroundColor: palette.bgPrimary,
         appBar: CustomAppBar(
-          title: _isEditing ? 'Edit Budget' : 'Create Budget',
+          title: _isEditing ? loc.editBudget : loc.createBudget,
           leading: IconButton(
             icon: Icon(Icons.arrow_back, color: palette.textDark),
             onPressed: () => Navigator.pop(context),
@@ -241,10 +252,10 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: const [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('Loading budget...'),
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text(loc.loadingBudget),
             ],
           ),
         ),
@@ -254,7 +265,7 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
     return Scaffold(
       backgroundColor: palette.bgPrimary,
       appBar: CustomAppBar(
-        title: _isEditing ? 'Edit Budget' : 'Create Budget',
+        title: _isEditing ? loc.editBudget : loc.createBudget,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: palette.textDark),
           onPressed: () => Navigator.pop(context),
@@ -278,10 +289,10 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
                 // Label
                 CustomTextFormField(
                   controller: _labelController,
-                  label: "Title",
+                  label: loc.fieldTitle,
                   enabled: !_isLoading,
                   validator: (value) => (value == null || value.trim().isEmpty)
-                      ? 'Enter a title'
+                      ? loc.validationEnterTitle
                       : null,
                 ),
                 const SizedBox(height: 16),
@@ -289,18 +300,19 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
                 // Limit
                 CustomTextFormField(
                   controller: _limitController,
-                  label: "Limit Amount",
+                  label: loc.budgetLimitLabel,
+
                   enabled: !_isLoading,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Enter a limit';
+                      return loc.validationEnterLimit;
                     }
                     final parsed = double.tryParse(value);
                     if (parsed == null) {
-                      return 'Enter a valid number';
+                      return loc.validationValidNumber;
                     }
                     if (parsed <= 0) {
-                      return 'Limit must be greater than 0';
+                      return loc.validationLimitMustBePositive;
                     }
                     return null;
                   },
@@ -315,9 +327,9 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
                 accountsAsync.when(
                   data: (accounts) {
                     if (accounts.isEmpty) {
-                      return const Text(
-                        'No accounts available. Create an account first.',
-                        style: TextStyle(color: Colors.red),
+                      return Text(
+                        loc.infoNoAccountsAvailable,
+                        style: const TextStyle(color: Colors.red),
                       );
                     }
 
@@ -344,7 +356,8 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
                         .firstOrNull;
 
                     return ChipSelector<Account>(
-                      label: 'Account',
+                      label: loc.accountLabel,
+
                       items: accounts,
                       initialValue: initialAccount,
                       labelBuilder: (acc) => acc.name,
@@ -357,8 +370,9 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
                   },
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
+
                   error: (e, st) => Text(
-                    'Error loading accounts: $e',
+                    loc.errorLoadAccounts(e.toString()),
                     style: const TextStyle(color: Colors.red),
                   ),
                 ),
@@ -366,11 +380,13 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
 
                 // Period Selector
                 ChipSelector<BudgetPeriod>(
-                  label: 'Period',
+                  label: loc.budgetPeriodLabel,
+
                   items: BudgetPeriod.values,
                   initialValue: _selectedPeriod,
-                  labelBuilder: (period) =>
-                      period == BudgetPeriod.weekly ? 'Weekly' : 'Monthly',
+                  labelBuilder: (period) => period == BudgetPeriod.weekly
+                      ? loc.budgetPeriodWeekly
+                      : loc.budgetPeriodMonthly,
                   onChanged: (period) {
                     if (!_isLoading) {
                       setState(() => _selectedPeriod = period!);
@@ -386,7 +402,8 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
                     final globalCategory = Category(
                       id: -1,
                       // Special ID for global
-                      name: 'Global',
+                      name: loc.categoryGlobal,
+
                       iconCodePoint: Icons.all_inclusive.codePoint,
                       colorValue: Colors.black.toARGB32(),
                       usageType: CategoryUsageType.expense,
@@ -395,9 +412,9 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
                     final selectableCategories = allCategories;
 
                     if (selectableCategories.isEmpty) {
-                      return const Text(
-                        'No categories available. Create a category first.',
-                        style: TextStyle(color: Colors.red),
+                      return Text(
+                        loc.infoNoCategoriesAvailable,
+                        style: const TextStyle(color: Colors.red),
                       );
                     }
 
@@ -411,7 +428,8 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         ChipSelector<Category>.multi(
-                          label: "Categories",
+                          label: loc.categoriesLabel,
+
                           items: selectableCategories,
                           globalItem: globalCategory,
                           selectedValues: selectedCats,
@@ -427,7 +445,7 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
                           validator: (cats) {
                             return cats == null || cats.isNotEmpty
                                 ? null
-                                : "Please select at least one category";
+                                : loc.validationSelectOneCategory;
                           },
                           getItemIcon: (cat) {
                             if (cat.id == -1) {
@@ -444,8 +462,10 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
                             _selectedCategoryIds.isEmpty
-                                ? 'Global budget applies to all categories'
-                                : '${_selectedCategoryIds.length} ${_selectedCategoryIds.length == 1 ? 'category' : 'categories'} selected',
+                                ? loc.infoGlobalBudgetApplies
+                                : loc.infoCategoriesSelected(
+                                    _selectedCategoryIds.length,
+                                  ),
                             style: TextStyle(
                               fontSize: 12,
                               color: palette.textMuted,
@@ -458,8 +478,9 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
                   },
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
+
                   error: (e, st) => Text(
-                    'Error loading categories: $e',
+                    loc.errorLoadCategories(e.toString()),
                     style: const TextStyle(color: Colors.red),
                   ),
                 ),
@@ -484,7 +505,11 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
                               color: palette.textDark,
                             ),
                           )
-                        : Text(_isEditing ? 'Save Changes' : 'Create Budget'),
+                        : Text(
+                            _isEditing
+                                ? loc.actionSaveChanges
+                                : loc.actionCreateBudget,
+                          ),
                   ),
                 ),
               ],

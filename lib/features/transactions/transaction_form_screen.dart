@@ -12,6 +12,7 @@ import '../categories/category_form_screen.dart';
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:day_night_time_picker/day_night_time_picker.dart';
 import 'package:intl/intl.dart';
+import '../../l10n/app_localizations.dart';
 
 class TransactionFormScreen extends ConsumerStatefulWidget {
   final int initialAccountId;
@@ -62,6 +63,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   }
 
   void _submit() async {
+    final loc = AppLocalizations.of(context)!;
+
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
 
@@ -100,19 +103,22 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         SnackBar(
           content: Text(
             isEditing
-                ? 'Transaction updated successfully'
-                : 'Transaction added successfully',
-            style: TextStyle(color: AppColors.green),
+                ? loc.transactionUpdatedSuccess
+                : loc.transactionAddedSuccess,
+            style: TextStyle(color: palette.green),
           ),
-          backgroundColor: AppColors.bgGreen,
+          backgroundColor: palette.bgGreen,
         ),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error: $e', style: TextStyle(color: AppColors.red)),
-          backgroundColor: AppColors.bgRed,
+          content: Text(
+            loc.errorGeneral(e.toString()),
+            style: TextStyle(color: palette.red),
+          ),
+          backgroundColor: palette.bgRed,
         ),
       );
     }
@@ -132,10 +138,13 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     final accountsAsync = ref.watch(accountsListProvider);
     // Provider watches the current type (_type) for relevant categories
     final categoriesAsync = ref.watch(categoriesByTypeProvider(_type));
-    final title = isEditing ? "Edit Transaction" : "Add Transaction";
+    final title = isEditing
+        ? loc.editTransactionTitle
+        : loc.addTransactionTitle;
     final palette = currentPalette;
 
     return Scaffold(
@@ -160,6 +169,17 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 
             return categoriesAsync.when(
               data: (categories) {
+                // If creating a transaction and _categoryId is still null, assign the first category
+                if (!isEditing &&
+                    _categoryId == null &&
+                    categories.isNotEmpty) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted) {
+                      setState(() => _categoryId = categories.first.id);
+                    }
+                  });
+                }
+
                 // Determine the initial selected Category object
                 final initialCategory = _categoryId == null
                     ? categories.first
@@ -183,11 +203,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                         CustomTextFormField(
                           initialValue: _title,
                           maxLength: 20,
-                          label: "Title",
+                          label: loc.fieldTitle,
                           onSaved: (val) => _title = val?.trim(),
                           validator: (val) {
                             if (val == null || val.trim().isEmpty) {
-                              return 'This field is required';
+                              return loc.fieldRequired;
                             }
                             return null;
                           },
@@ -196,7 +216,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 
                         // Account selector
                         ChipSelector<Account>(
-                          label: "Account",
+                          label: loc.fieldAccount,
                           items: accounts,
                           initialValue: initialAccount,
                           labelBuilder: (a) => a.name,
@@ -207,9 +227,10 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 
                         // Type selector
                         ChipSelector<TransactionType>(
-                          label: "Type",
+                          label: loc.fieldType,
                           items: TransactionType.values,
                           initialValue: _type,
+                          // Special handling for enum name capitalization/localization if needed
                           labelBuilder: (t) => t.name.capitalize(),
                           onChanged: (t) => setState(() {
                             _type = t!; // Guaranteed non-null
@@ -221,7 +242,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 
                         // Category selector (uses 'globalItem' logic)
                         ChipSelector<Category>(
-                          label: "Category",
+                          label: loc.fieldCategory,
                           items: categories,
                           // Pass the 'No Category' item
                           initialValue: initialCategory,
@@ -251,7 +272,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                         // Description field
                         CustomTextFormField(
                           initialValue: _description,
-                          label: "Description",
+                          label: loc.fieldDescription,
                           onSaved: (val) => _description = val?.trim(),
                         ),
                         const SizedBox(height: 22),
@@ -294,15 +315,22 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                                           yearTextStyle: TextStyle(
                                             color: palette.textDark,
                                           ),
-                                          buttonPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                                          buttonPadding: EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 0,
+                                          ),
                                           okButton: Container(
-                                            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                              vertical: 10,
+                                            ),
                                             decoration: BoxDecoration(
                                               color: palette.primary,
-                                              borderRadius: BorderRadius.circular(20),
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
                                             ),
                                             child: Text(
-                                              'Confirm',
+                                              loc.buttonConfirm,
                                               style: TextStyle(
                                                 color: palette.textDark,
                                                 fontWeight: FontWeight.w500,
@@ -310,13 +338,17 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                                             ),
                                           ),
                                           cancelButton: Container(
-                                            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                              vertical: 10,
+                                            ),
                                             decoration: BoxDecoration(
                                               color: palette.terciary,
-                                              borderRadius: BorderRadius.circular(20),
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
                                             ),
                                             child: Text(
-                                              'Cancel',
+                                              loc.cancel,
                                               style: TextStyle(
                                                 color: palette.textDark,
                                                 fontWeight: FontWeight.w500,
@@ -368,8 +400,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                                   is24HrFormat: true,
                                   accentColor: palette.textDark,
                                   unselectedColor: palette.textMuted,
-                                  cancelText: "Cancel",
-                                  okText: "Confirm",
+                                  cancelText: loc.cancel,
+                                  okText: loc.buttonConfirm,
                                   cancelStyle: TextStyle(
                                     color: palette.textDark,
                                   ),
@@ -404,7 +436,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "Date",
+                                  loc.fieldDate,
                                   style: TextStyle(
                                     color: palette.textDark,
                                     fontWeight: FontWeight.bold,
@@ -450,7 +482,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                         // Amount field
                         CustomTextFormField(
                           initialValue: _amount?.toString(),
-                          label: "Amount",
+                          label: loc.fieldAmount,
                           decoration: const InputDecoration(hintText: "0.00"),
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
@@ -458,7 +490,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                           onSaved: (val) => _amount = double.tryParse(val!),
                           validator: (val) =>
                               val == null || double.tryParse(val) == null
-                              ? "Enter a valid number"
+                              ? loc.validationInvalidNumber
                               : null,
                         ),
                         const SizedBox(height: 24),
@@ -471,7 +503,9 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                               onPressed: _submit,
                               icon: const Icon(Icons.add),
                               label: Text(
-                                isEditing ? "Save Changes" : "Add Transaction",
+                                isEditing
+                                    ? loc.buttonSaveChanges
+                                    : loc.buttonAddTransaction,
                               ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: palette.primary,
@@ -491,11 +525,12 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
               },
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, st) =>
-                  Center(child: Text("Error loading categories: $e")),
+                  Center(child: Text(loc.errorLoadingCategories(e.toString()))),
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, st) => Center(child: Text("Error loading accounts: $e")),
+          error: (e, st) =>
+              Center(child: Text(loc.errorLoadingAccounts(e.toString()))),
         ),
       ),
     );

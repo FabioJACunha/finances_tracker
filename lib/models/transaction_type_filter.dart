@@ -1,5 +1,1 @@
-enum TransactionTypeFilter {
-  all,
-  expense,
-  income;
-}
+enum TransactionTypeFilter { all, expense, income }

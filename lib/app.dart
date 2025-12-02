@@ -3,9 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'features/home/home_screen.dart';
 import 'features/budgets/budgets_screen.dart';
 import 'features/transactions/transactions_screen.dart';
-import 'theme/app_colors.dart'; // Import AppPalette and currentPaletteNotifier
-import 'theme/app_theme.dart'; // Import AppTheme
+import 'theme/app_colors.dart';
+import 'theme/app_theme.dart';
 import 'l10n/app_localizations.dart';
+import 'locale/app_locale.dart';
 
 class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
@@ -22,51 +23,60 @@ class _MyAppState extends ConsumerState<MyApp> {
     final screens = [
       const HomeScreen(),
       const TransactionsScreen(),
-      const BudgetsScreen(),
+      BudgetsScreen(),
     ];
 
-    // 1. Wrap the MaterialApp with ValueListenableBuilder.
+    // 1. Wrap the MaterialApp with ValueListenableBuilder for the theme
     return ValueListenableBuilder<AppPalette>(
       valueListenable: currentPaletteNotifier,
       builder: (context, palette, child) {
-
-        // 2. Use the new static method AppTheme.getTheme(palette)
-        // which returns the fully customized ThemeData based on the current palette.
         final dynamicTheme = AppTheme.getTheme(palette);
 
-        return MaterialApp(
-          // Apply the dynamic theme data
-          theme: dynamicTheme,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Builder(
-            builder: (context) {
-              final localizations = AppLocalizations.of(context)!;
+        // 2. NEW: Wrap the MaterialApp with a ValueListenableBuilder for the locale
+        return ValueListenableBuilder<Locale?>(
+          valueListenable: currentLocaleNotifier,
+          builder: (context, locale, child) {
+            // The 'locale' variable here will update the MaterialApp
+            return MaterialApp(
+              // NEW: Set the dynamic locale based on the ValueNotifier
+              locale: locale,
 
-              return Scaffold(
-                body: screens[_currentIndex],
-                bottomNavigationBar: BottomNavigationBar(
-                  // Use the dynamic palette colors directly for the BottomNavigationBar
-                  backgroundColor: palette.bgPrimary,
-                  selectedItemColor: palette.secondary, // Highlight color
-                  unselectedItemColor: palette.textMuted, // Muted color for unselected items
-                  currentIndex: _currentIndex,
-                  items: [
-                    BottomNavigationBarItem(
-                        icon: const Icon(Icons.home_outlined),
-                        label: localizations.navHome),
-                    BottomNavigationBarItem(
-                        icon: const Icon(Icons.history),
-                        label: localizations.navTransactions),
-                    BottomNavigationBarItem(
-                        icon: const Icon(Icons.pie_chart_outline),
-                        label: "Budgets"),
-                  ],
-                  onTap: (index) => setState(() => _currentIndex = index),
-                ),
-              );
-            },
-          ),
+              theme: dynamicTheme,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: Builder(
+                builder: (context) {
+                  final localizations = AppLocalizations.of(context)!;
+
+                  return Scaffold(
+                    body: screens[_currentIndex],
+                    bottomNavigationBar: BottomNavigationBar(
+                      backgroundColor: palette.bgPrimary,
+                      selectedItemColor: palette.secondary,
+                      unselectedItemColor: palette.textMuted,
+                      currentIndex: _currentIndex,
+                      items: [
+                        BottomNavigationBarItem(
+                          icon: const Icon(Icons.home_outlined),
+                          label: localizations.navHome,
+                        ),
+                        BottomNavigationBarItem(
+                          icon: const Icon(Icons.history),
+                          label: localizations.navTransactions,
+                        ),
+                        BottomNavigationBarItem(
+                          icon: const Icon(Icons.pie_chart_outline),
+                          // Assuming 'navBudgets' is in your .arb file
+                          label: localizations.navBudgets,
+                        ),
+                      ],
+                      onTap: (index) => setState(() => _currentIndex = index),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
         );
       },
     );

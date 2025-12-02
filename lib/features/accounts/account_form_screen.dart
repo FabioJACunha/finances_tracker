@@ -4,6 +4,7 @@ import '../../providers/services_provider.dart';
 import '../../data/db/database.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/custom_text_form_field.dart';
+import '../../l10n/app_localizations.dart';
 
 class AccountFormScreen extends ConsumerStatefulWidget {
   final Account? initialAccount;
@@ -16,6 +17,7 @@ class AccountFormScreen extends ConsumerStatefulWidget {
 
 class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
   final _formKey = GlobalKey<FormState>();
+  final palette = currentPalette;
   late String _name;
   late double _balance;
   bool _excludeFromTotal = false;
@@ -42,9 +44,6 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
           name: _name,
           excludeFromTotal: _excludeFromTotal,
         );
-
-        // Note: Balance is not updated here - it should only change through transactions
-        // If you want to allow manual balance adjustments, you need a separate method
       } else {
         // Create new account
         await accountService.createAccount(
@@ -60,8 +59,8 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error: $e', style: TextStyle(color: AppColors.red)),
-          backgroundColor: AppColors.bgRed,
+          content: Text('Error: $e', style: TextStyle(color: palette.red)),
+          backgroundColor: palette.bgRed,
         ),
       );
     }
@@ -69,7 +68,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final palette = currentPalette;
+    final loc = AppLocalizations.of(context)!; // <-- ADDED
     final screenWidth = MediaQuery.of(context).size.width;
     const horizontalPadding = 16.0;
     final isEditing = widget.initialAccount != null;
@@ -91,7 +90,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isEditing ? 'Edit Account' : 'Add Account',
+                  isEditing ? loc.accountEditTitle : loc.accountAddTitle,
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 20,
@@ -100,20 +99,21 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                 ),
                 const SizedBox(height: 16),
                 CustomTextFormField(
-                  label: "Title",
+                  label: loc.fieldTitle,
                   initialValue: _name,
-                  validator: (val) =>
-                      val == null || val.isEmpty ? 'Enter a title' : null,
+                  validator: (val) => val == null || val.isEmpty
+                      ? loc.accountFieldTitleError
+                      : null,
                   onSaved: (val) => _name = val!,
                 ),
                 const SizedBox(height: 20),
                 // Only show balance field when creating new account
                 if (!isEditing) ...[
                   CustomTextFormField(
-                    label: "Initial Balance",
+                    label: loc.accountInitialBalance,
                     validator: (val) =>
                         val == null || double.tryParse(val) == null
-                        ? 'Enter a valid number'
+                        ? loc.accountInitialBalanceError
                         : null,
                     onSaved: (val) => _balance = double.parse(val!),
                     keyboardType: const TextInputType.numberWithOptions(
@@ -121,10 +121,9 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                     ),
                     decoration: InputDecoration(
                       hintText: "0.00",
-                      helperText:
-                          'Balance can only be changed through transactions after creation',
+                      helperText: loc.accountInitialBalanceHelper,
                       helperMaxLines: 2,
-                      helperStyle: TextStyle(color: palette.secondary)
+                      helperStyle: TextStyle(color: palette.secondary),
                     ),
                   ),
                 ] else ...[
@@ -133,7 +132,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Current Balance',
+                        loc.accountCurrentBalance,
                         style: TextStyle(
                           fontSize: 14,
                           color: palette.textDark,
@@ -147,7 +146,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Use transactions to change balance',
+                        loc.accountChangeBalanceInfo,
                         style: TextStyle(
                           fontSize: 11,
                           color: palette.secondary,
@@ -164,7 +163,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        'Exclude from total balance',
+                        loc.accountExcludeFromTotal,
                         style: TextStyle(
                           fontSize: 14,
                           color: palette.textDark,
@@ -204,7 +203,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                       ),
                       onPressed: () => Navigator.pop(context),
                       child: Text(
-                        'Cancel',
+                        loc.cancel,
                         style: TextStyle(color: palette.textDark),
                       ),
                     ),
@@ -220,7 +219,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                       ),
                       onPressed: _submit,
                       child: Text(
-                        'Save',
+                        loc.save,
                         style: TextStyle(color: palette.textDark),
                       ),
                     ),

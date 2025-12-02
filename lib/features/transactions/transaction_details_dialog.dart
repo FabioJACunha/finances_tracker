@@ -6,6 +6,7 @@ import '../../data/db/tables.dart';
 import '../../providers/services_provider.dart';
 import '../../theme/app_colors.dart';
 import 'transaction_form_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 class TransactionDetailsDialog extends ConsumerWidget {
   final TransactionWithCategory data;
@@ -15,6 +16,7 @@ class TransactionDetailsDialog extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context)!;
     final palette = currentPalette;
 
     final transaction = data.transaction;
@@ -38,7 +40,7 @@ class TransactionDetailsDialog extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'Transaction Details',
+                    loc.transactionDetailsTitle,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w500,
@@ -47,7 +49,7 @@ class TransactionDetailsDialog extends ConsumerWidget {
                   ),
                 ),
                 IconButton(
-                  onPressed: () => _showDeleteConfirmation(context, ref),
+                  onPressed: () => _showDeleteConfirmation(context, ref, loc),
                   icon: const Icon(Icons.delete_outline),
                   color: palette.textMuted,
                   padding: EdgeInsets.zero,
@@ -81,12 +83,12 @@ class TransactionDetailsDialog extends ConsumerWidget {
             // Details
             _buildDetailRow(
               icon: Icons.label_outline,
-              value: transaction.title ?? 'No title',
+              value: transaction.title ?? loc.noTitle,
             ),
             const SizedBox(height: 12),
             _buildDetailRow(
               icon: Icons.category_outlined,
-              value: category?.name ?? 'Global',
+              value: category?.name ?? loc.categoryGlobal,
             ),
             const SizedBox(height: 12),
             _buildDetailRow(
@@ -111,9 +113,9 @@ class TransactionDetailsDialog extends ConsumerWidget {
               children: [
                 const SizedBox(width: 12),
                 ElevatedButton.icon(
-                  onPressed: () => _editTransaction(context),
+                  onPressed: () => _editTransaction(context, data),
                   icon: const Icon(Icons.edit),
-                  label: const Text('Edit'),
+                  label: Text(loc.buttonEdit),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: palette.primary,
                     foregroundColor: palette.textDark,
@@ -161,14 +163,13 @@ class TransactionDetailsDialog extends ConsumerWidget {
   Future<void> _showDeleteConfirmation(
     BuildContext context,
     WidgetRef ref,
+    AppLocalizations loc,
   ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Delete Transaction'),
-        content: Text(
-          'Are you sure you want to delete this transaction? This action cannot be undone.',
-        ),
+        title: Text(loc.deleteTransactionTitle),
+        content: Text(loc.deleteTransactionConfirmation),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -176,15 +177,15 @@ class TransactionDetailsDialog extends ConsumerWidget {
               foregroundColor: palette.textDark,
               backgroundColor: palette.primary,
             ),
-            child: const Text('Cancel'),
+            child: Text(loc.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(
-              foregroundColor: AppColors.red,
-              backgroundColor: AppColors.bgRed,
+              foregroundColor: palette.red,
+              backgroundColor: palette.bgRed,
             ),
-            child: const Text('Delete'),
+            child: Text(loc.delete),
           ),
         ],
       ),
@@ -201,8 +202,8 @@ class TransactionDetailsDialog extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Transaction deleted successfully',
-              style: TextStyle(color: AppColors.green),
+              loc.transactionDeletedSuccess,
+              style: TextStyle(color: palette.green),
             ),
             backgroundColor: palette.bgGreen,
           ),
@@ -212,7 +213,7 @@ class TransactionDetailsDialog extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error deleting transaction: $e'),
+            content: Text(loc.errorDeletingTransaction(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -220,14 +221,17 @@ class TransactionDetailsDialog extends ConsumerWidget {
     }
   }
 
-  void _editTransaction(BuildContext context) {
+  void _editTransaction(
+    BuildContext context,
+    TransactionWithCategory transactionData,
+  ) {
     Navigator.pop(context); // Close details dialog
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => TransactionFormScreen(
-          initialAccountId: data.transaction.accountId,
-          transactionToEdit: data,
+          initialAccountId: transactionData.transaction.accountId,
+          transactionToEdit: transactionData,
         ),
       ),
     );

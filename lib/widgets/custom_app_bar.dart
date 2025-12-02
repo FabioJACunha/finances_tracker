@@ -3,6 +3,7 @@ import '../theme/app_colors.dart';
 import '../features/categories/category_screen.dart';
 import '../features/accounts/accounts_screen.dart';
 import '../features/preferences/preferences_screen.dart';
+import '../l10n/app_localizations.dart'; // Import localization
 
 typedef SettingsBuilder = Widget Function(BuildContext context);
 
@@ -26,9 +27,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   void _openSettings(BuildContext context) {
-    // We access the current palette directly, relying on the
-    // parent MaterialApp (via app.dart) to rebuild when the palette changes.
     final palette = currentPalette;
+    final loc = AppLocalizations.of(context)!; // Get localization
 
     showModalBottomSheet(
       context: context,
@@ -58,9 +58,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   const SizedBox(height: 8),
                   ListTile(
                     leading: Icon(
-                        Icons.category_outlined, color: palette.textDark),
-                    title: Text('Categories',
-                        style: TextStyle(color: palette.textDark)),
+                      Icons.category_outlined,
+                      color: palette.textDark,
+                    ),
+                    title: Text(
+                      loc.settingsCategories, // Localized
+                      style: TextStyle(color: palette.textDark),
+                    ),
                     onTap: () {
                       Navigator.of(ctx).pop();
                       // Assuming CategoryScreen exists, otherwise this will fail
@@ -71,10 +75,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     },
                   ),
                   ListTile(
-                    leading: Icon(Icons.account_balance_outlined,
-                        color: palette.textDark),
+                    leading: Icon(
+                      Icons.account_balance_outlined,
+                      color: palette.textDark,
+                    ),
                     title: Text(
-                        'Accounts', style: TextStyle(color: palette.textDark)),
+                      loc.settingsAccounts, // Localized
+                      style: TextStyle(color: palette.textDark),
+                    ),
                     onTap: () {
                       Navigator.of(ctx).pop();
                       // Assuming AccountsScreen exists, otherwise this will fail
@@ -86,8 +94,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                   ListTile(
                     leading: Icon(Icons.tune, color: palette.textDark),
-                    title: Text('Preferences',
-                        style: TextStyle(color: palette.textDark)),
+                    title: Text(
+                      loc.settingsPreferences, // Localized
+                      style: TextStyle(color: palette.textDark),
+                    ),
                     onTap: () {
                       Navigator.of(ctx).pop();
                       Navigator.push(
@@ -101,7 +111,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ListTile(
                     leading: Icon(Icons.info_outline, color: palette.textDark),
                     title: Text(
-                        'About', style: TextStyle(color: palette.textDark)),
+                      loc.settingsAbout, // Localized
+                      style: TextStyle(color: palette.textDark),
+                    ),
                     onTap: () {
                       Navigator.of(ctx).pop();
                       // Add navigation or callback as needed
@@ -133,7 +145,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       actions: [
         if (extraActions != null) ...extraActions!,
         IconButton(
-          tooltip: 'Settings',
           icon: Icon(Icons.menu, color: palette.textDark),
           onPressed: () => _openSettings(context),
         ),

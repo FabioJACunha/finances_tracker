@@ -7,6 +7,7 @@ import '../transactions/transaction_form_screen.dart';
 import 'home_stats_widgets/home_stats_widgets.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/date_range_selector.dart';
+import '../../l10n/app_localizations.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -66,20 +67,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     final accountsAsync = ref.watch(accountsListProvider);
     final palette = currentPalette;
 
     return accountsAsync.when(
       data: (accounts) {
         if (accounts.isEmpty) {
-          return const Scaffold(body: Center(child: Text("No accounts yet")));
+          return Scaffold(body: Center(child: Text(loc.noAccountsYet)));
         }
 
         _selectedAccountId ??= accounts.first.id;
 
         return Scaffold(
           appBar: CustomAppBar(
-            title: 'Home',
+            title: loc.navHome,
             leading: Icon(Icons.home_outlined, color: palette.textDark),
           ),
           body: Column(
@@ -144,11 +146,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 ),
                 splashFactory: NoSplash.splashFactory,
                 overlayColor: WidgetStateProperty.all(Colors.transparent),
-                tabs: const [
-                  Tab(text: "Week"),
-                  Tab(text: "Month"),
-                  Tab(text: "Year"),
-                  Tab(text: "Period"),
+                tabs: [
+                  Tab(text: loc.periodTabWeek),
+                  Tab(text: loc.periodTabMonth),
+                  Tab(text: loc.periodTabYear),
+                  Tab(text: loc.periodTabCustom),
                 ],
               ),
 
@@ -178,25 +180,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       '${_selectedRange.start}_${_selectedRange.end}',
                     ),
                     child: Column(
-                      spacing: 10,
+                      // Using a SizedBox instead of a specific widget like Column to provide spacing
                       children: [
                         ExpensesByCategoryPie(
                           accountId: _selectedAccountId!,
                           start: _selectedRange.start,
                           end: _selectedRange.end,
                         ),
+                        const SizedBox(height: 10),
                         if (_selectedRange.type != DateRangeType.week)
                           IncomeVsExpenseBar(
                             accountId: _selectedAccountId!,
                             start: _selectedRange.start,
                             end: _selectedRange.end,
                           ),
+                        const SizedBox(height: 10),
                         if (_selectedRange.type == DateRangeType.week)
                           NetBalanceChangeCard(
                             accountId: _selectedAccountId!,
                             start: _selectedRange.start,
                             end: _selectedRange.end,
                           ),
+                        const SizedBox(height: 10),
                         if (_selectedRange.type != DateRangeType.week &&
                             _tabController.index != 3)
                           SavingsRateCard(
@@ -204,17 +209,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             start: _selectedRange.start,
                             end: _selectedRange.end,
                           ),
+                        const SizedBox(height: 10),
                         TopExpenseCategories(
                           accountId: _selectedAccountId!,
                           start: _selectedRange.start,
                           end: _selectedRange.end,
                         ),
+                        const SizedBox(height: 10),
                         if (_tabController.index != 3)
                           SpendingTrendChart(
                             accountId: _selectedAccountId!,
                             start: _selectedRange.start,
                             end: _selectedRange.end,
                           ),
+                        const SizedBox(height: 10),
                         if (_selectedRange.type == DateRangeType.year)
                           BalanceEvolutionChart(
                             accountId: _selectedAccountId!,
@@ -249,9 +257,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           ),
         );
       },
-      loading: () =>
-          const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (err, st) => Scaffold(body: Center(child: Text("Error: $err"))),
+      loading: () => Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(color: palette.secondary),
+        ),
+      ),
+      error: (err, st) =>
+          Scaffold(body: Center(child: Text(loc.errorGeneral(err.toString())))),
     );
   }
 }

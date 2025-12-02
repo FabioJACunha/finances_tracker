@@ -4,6 +4,7 @@ import '../../../providers/analytics_provider.dart';
 import '../../../providers/categories_provider.dart';
 import '../../../theme/app_colors.dart';
 import '../../../models/period_args.dart';
+import '../../../l10n/app_localizations.dart';
 
 class TopExpenseCategories extends ConsumerWidget {
   final int accountId;
@@ -19,6 +20,7 @@ class TopExpenseCategories extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context)!;
     final palette = currentPalette;
 
     final categoryColorsAsync = ref.watch(categoryColorsMapProvider);
@@ -44,9 +46,9 @@ class TopExpenseCategories extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Top 3 Expense Categories',
+              loc.cardTopExpenseCategoriesTitle,
               style: TextStyle(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
                 color: palette.textDark,
                 fontSize: 20,
               ),
@@ -61,9 +63,9 @@ class TopExpenseCategories extends ConsumerWidget {
                         if (data.isEmpty) {
                           return Center(
                             child: Padding(
-                              padding: EdgeInsets.symmetric(vertical: 16),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
                               child: Text(
-                                'No expenses in this period',
+                                loc.noExpensesInPeriod,
                                 style: TextStyle(
                                   color: palette.textMuted,
                                   fontSize: 14,
@@ -75,7 +77,7 @@ class TopExpenseCategories extends ConsumerWidget {
 
                         final total = data.fold<double>(
                           0.0,
-                              (sum, entry) => sum + entry.value,
+                          (sum, entry) => sum + entry.value,
                         );
 
                         return Column(
@@ -83,14 +85,18 @@ class TopExpenseCategories extends ConsumerWidget {
                             final entry = mapEntry.value;
                             final categoryName = entry.key;
                             final amount = entry.value;
-                            final percentage = (amount / total * 100);
+                            // Calculate percentage, ensuring total is not zero to prevent division by zero
+                            final percentage = total != 0.0
+                                ? (amount / total * 100)
+                                : 0.0;
 
                             // Get color and icon for category
-                            final color = categoryColors[categoryName] ??
-                                Colors.primaries[
-                                categoryName.hashCode %
+                            final color =
+                                categoryColors[categoryName] ??
+                                Colors.primaries[categoryName.hashCode %
                                     Colors.primaries.length];
-                            final icon = categoryIcons[categoryName] ??
+                            final icon =
+                                categoryIcons[categoryName] ??
                                 Icons.circle; // fallback
 
                             return Padding(
@@ -100,11 +106,7 @@ class TopExpenseCategories extends ConsumerWidget {
                                 children: [
                                   Row(
                                     children: [
-                                      Icon(
-                                        icon,
-                                        color: color,
-                                        size: 20,
-                                      ),
+                                      Icon(icon, color: color, size: 20),
                                       const SizedBox(width: 8),
                                       Expanded(
                                         child: Text(
@@ -131,17 +133,17 @@ class TopExpenseCategories extends ConsumerWidget {
                                     children: [
                                       Expanded(
                                         child: ClipRRect(
-                                          borderRadius:
-                                          BorderRadius.circular(4),
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
                                           child: LinearProgressIndicator(
                                             value: percentage / 100,
                                             minHeight: 6,
-                                            backgroundColor:
-                                            palette.bgTerciary,
+                                            backgroundColor: palette.bgTerciary,
                                             valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                              color,
-                                            ),
+                                                AlwaysStoppedAnimation<Color>(
+                                                  color,
+                                                ),
                                           ),
                                         ),
                                       ),
@@ -153,56 +155,78 @@ class TopExpenseCategories extends ConsumerWidget {
                           }).toList(),
                         );
                       },
-                      loading: () => const SizedBox(
+                      loading: () => SizedBox(
                         height: 120,
-                        child: Center(child: CircularProgressIndicator()),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: palette.secondary,
+                          ),
+                        ),
                       ),
-                      error: (err, stack) => const Row(
+                      error: (err, stack) => Row(
                         children: [
-                          Icon(Icons.error_outline,
-                              color: Colors.red, size: 24),
-                          SizedBox(width: 8),
+                          const Icon(
+                            Icons.error_outline,
+                            color: Colors.red,
+                            size: 24,
+                          ),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Error loading data',
-                              style:
-                              TextStyle(color: Colors.red, fontSize: 14),
+                              loc.errorLoadingData(err.toString()),
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 14,
+                              ),
                             ),
                           ),
                         ],
                       ),
                     );
                   },
-                  loading: () => const SizedBox(
+                  loading: () => SizedBox(
                     height: 120,
-                    child: Center(child: CircularProgressIndicator()),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: palette.secondary,
+                      ),
+                    ),
                   ),
-                  error: (err, stack) => const Row(
+                  error: (err, stack) => Row(
                     children: [
-                      Icon(Icons.error_outline, color: Colors.red, size: 24),
-                      SizedBox(width: 8),
+                      const Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Error loading category icons',
-                          style: TextStyle(color: Colors.red, fontSize: 14),
+                          loc.errorLoadingCategoryIcons(err.toString()),
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 14,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 );
               },
-              loading: () => const SizedBox(
+              loading: () => SizedBox(
                 height: 120,
-                child: Center(child: CircularProgressIndicator()),
+                child: Center(
+                  child: CircularProgressIndicator(color: palette.secondary),
+                ),
               ),
-              error: (err, stack) => const Row(
+              error: (err, stack) => Row(
                 children: [
-                  Icon(Icons.error_outline, color: Colors.red, size: 24),
-                  SizedBox(width: 8),
+                  const Icon(Icons.error_outline, color: Colors.red, size: 24),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Error loading categories',
-                      style: TextStyle(color: Colors.red, fontSize: 14),
+                      loc.errorLoadingCategories(err.toString()),
+                      style: const TextStyle(color: Colors.red, fontSize: 14),
                     ),
                   ),
                 ],

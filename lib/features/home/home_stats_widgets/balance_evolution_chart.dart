@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../providers/analytics_provider.dart';
 import '../../../models/period_args.dart';
 import '../../../theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 
 class BalanceEvolutionChart extends ConsumerWidget {
   final int accountId;
@@ -20,6 +21,7 @@ class BalanceEvolutionChart extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context)!;
     final palette = currentPalette;
 
     final dataAsync = ref.watch(
@@ -38,9 +40,9 @@ class BalanceEvolutionChart extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Balance Evolution',
+              loc.chartBalanceEvolutionTitle,
               style: TextStyle(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
                 color: palette.textDark,
                 fontSize: 20,
               ),
@@ -53,7 +55,7 @@ class BalanceEvolutionChart extends ConsumerWidget {
                   if (points.isEmpty) {
                     return Center(
                       child: Text(
-                        'No transactions in this period',
+                        loc.chartNoTransactionsMessage,
                         style: TextStyle(
                           color: palette.textMuted,
                           fontSize: 14,
@@ -110,7 +112,7 @@ class BalanceEvolutionChart extends ConsumerWidget {
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (err, stack) => Center(
                   child: Text(
-                    'Error loading data: $err',
+                    loc.errorLoadingData(err.toString()),
                     style: const TextStyle(color: Colors.red, fontSize: 14),
                   ),
                 ),

@@ -29,22 +29,22 @@ class BudgetsDao extends DatabaseAccessor<AppDatabase> with _$BudgetsDaoMixin {
   Future<void> deleteBudget(int id) async {
     await batch((batch) {
       // Delete category links first
-      batch.deleteWhere(
-        budgetCategoryLinks,
-            (row) => row.budgetId.equals(id),
-      );
+      batch.deleteWhere(budgetCategoryLinks, (row) => row.budgetId.equals(id));
       // Then delete the budget
       batch.deleteWhere(budgets, (b) => b.id.equals(id));
     });
   }
 
   /// Sets all categories for a given budget ID, clearing old ones in a batch.
-  Future<void> setCategoriesForBudget(int budgetId, List<int> categoryIds) async {
+  Future<void> setCategoriesForBudget(
+    int budgetId,
+    List<int> categoryIds,
+  ) async {
     await batch((batch) {
       // 1. Delete old links
       batch.deleteWhere(
         budgetCategoryLinks,
-            (row) => row.budgetId.equals(budgetId),
+        (row) => row.budgetId.equals(budgetId),
       );
 
       // 2. Insert new links

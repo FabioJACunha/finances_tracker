@@ -7,6 +7,7 @@ import '../../../models/period_args.dart';
 import '../../../theme/app_colors.dart';
 import '../../../data/db/database.dart';
 import '../../../widgets/chip_selector.dart';
+import '../../../l10n/app_localizations.dart';
 
 class SpendingTrendChart extends ConsumerStatefulWidget {
   final int accountId;
@@ -26,12 +27,15 @@ class SpendingTrendChart extends ConsumerStatefulWidget {
 
 class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
   Category? _selectedCategory;
+  final palette = currentPalette;
 
   @override
   Widget build(BuildContext context) {
-    final categoriesAsync = ref.watch(categoriesListProvider);
+    final loc = AppLocalizations.of(context)!;
+    final categoriesAsync = ref.watch(
+      categoriesByTypeProvider(TransactionType.expense),
+    );
     final categoryColorsAsync = ref.watch(categoryColorsMapProvider);
-    final palette = currentPalette;
 
     // Calculate previous period
     final duration = widget.end.difference(widget.start);
@@ -68,9 +72,9 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Spending Trend',
+              loc.chartSpendingTrendTitle,
               style: TextStyle(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
                 color: palette.textDark,
                 fontSize: 20,
               ),
@@ -82,14 +86,15 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
                 // Synthetic 'All Categories' item for the ChipSelector globalItem
                 final allCategories = Category(
                   id: -1,
-                  name: 'Global',
+                  // Use a localization key for the 'All Categories' label
+                  name: loc.allCategoriesLabel,
                   iconCodePoint: Icons.all_inclusive.codePoint,
                   colorValue: Colors.black.toARGB32(),
                   usageType: CategoryUsageType.expense,
                 );
 
                 return ChipSelector<Category>(
-                  label: "Filter by Category",
+                  label: loc.filterByCategoryLabel,
                   items: categories,
                   hideLabel: true,
                   globalItem: allCategories,
@@ -105,10 +110,11 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
                       fontFamily: 'MaterialIcons',
                     );
                   },
+                  secondaryBg: true,
                 );
               },
               loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
+              error: (_, _) => const SizedBox.shrink(),
             ),
             const SizedBox(height: 16),
             categoryColorsAsync.when(
@@ -121,7 +127,8 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
                         double currentAmount = 0.0;
                         double previousAmount = 0.0;
 
-                        if (_selectedCategory == null) {
+                        if (_selectedCategory == null ||
+                            _selectedCategory!.id == -1) {
                           // All categories
                           currentAmount = currentData.values.fold(
                             0.0,
@@ -140,13 +147,23 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
                         }
 
                         final chartData = [
-                          _ChartData('Previous', previousAmount),
-                          _ChartData('Current', currentAmount),
+                          _ChartData(
+                            loc.periodPrevious,
+                            previousAmount,
+                            palette.primary,
+                          ),
+                          _ChartData(
+                            loc.periodCurrent,
+                            currentAmount,
+                            palette.secondary,
+                          ),
                         ];
 
                         final change = currentAmount - previousAmount;
-                        final percentChange = previousAmount > 0
+                        final percentChange = previousAmount != 0
                             ? (change / previousAmount) * 100
+                            : currentAmount != 0
+                            ? 100.0
                             : 0.0;
 
                         return Column(
@@ -163,9 +180,9 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
                                     MainAxisAlignment.spaceAround,
                                 children: [
                                   _buildPeriodItem(
-                                    'Previous',
+                                    loc.periodPrevious,
                                     previousAmount,
-                                    palette.textMuted,
+                                    palette.primary,
                                   ),
                                   Container(
                                     width: 1,
@@ -173,7 +190,7 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
                                     color: palette.textMuted,
                                   ),
                                   _buildPeriodItem(
-                                    'Current',
+                                    loc.periodCurrent,
                                     currentAmount,
                                     palette.secondary,
                                   ),
@@ -209,7 +226,7 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
                                     dataSource: chartData,
                                     xValueMapper: (data, _) => data.period,
                                     yValueMapper: (data, _) => data.amount,
-                                    color: palette.secondary,
+                                    pointColorMapper: (data, _) => data.color,
                                     dataLabelSettings: DataLabelSettings(
                                       isVisible: true,
                                       textStyle: TextStyle(
@@ -256,7 +273,7 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
                       ),
                       error: (err, stack) => Center(
                         child: Text(
-                          'Error loading previous period: $err',
+                          loc.errorLoadingPreviousPeriod(err.toString()),
                           style: const TextStyle(
                             color: Colors.red,
                             fontSize: 14,
@@ -271,7 +288,7 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
                   ),
                   error: (err, stack) => Center(
                     child: Text(
-                      'Error loading current period: $err',
+                      loc.errorLoadingCurrentPeriod(err.toString()),
                       style: const TextStyle(color: Colors.red, fontSize: 14),
                     ),
                   ),
@@ -283,7 +300,7 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
               ),
               error: (err, stack) => Center(
                 child: Text(
-                  'Error loading categories: $err',
+                  loc.errorLoadingCategories(err.toString()),
                   style: const TextStyle(color: Colors.red, fontSize: 14),
                 ),
               ),
@@ -320,7 +337,7 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
 
   Widget _buildChangeItem(double change, double percentChange) {
     final isPositive = change >= 0;
-    final color = isPositive ? AppColors.red : AppColors.green;
+    final color = isPositive ? palette.red : palette.green;
     final icon = isPositive ? Icons.trending_up : Icons.trending_down;
 
     return Column(
@@ -357,6 +374,7 @@ class _SpendingTrendChartState extends ConsumerState<SpendingTrendChart> {
 class _ChartData {
   final String period;
   final double amount;
+  final Color color;
 
-  _ChartData(this.period, this.amount);
+  _ChartData(this.period, this.amount, this.color);
 }

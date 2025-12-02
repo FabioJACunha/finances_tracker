@@ -3,5 +3,280 @@
   "helloWorld": "Hello World!",
   "navHome": "Home",
   "navTransactions": "Transactions",
-  "navAccounts": "Accounts"
+  "navAccounts": "Accounts",
+  "navBudgets": "Budgets",
+  "language": "Language",
+  "preferences": "Preferences",
+  "colorTheme": "Color Theme",
+  "accountAddTitle": "Add Account",
+  "accountEditTitle": "Edit Account",
+  "accountFieldTitleError": "Enter a title",
+  "accountInitialBalance": "Initial Balance",
+  "accountInitialBalanceError": "Enter a valid number",
+  "accountInitialBalanceHelper": "Balance can only be changed through transactions after creation",
+  "accountCurrentBalance": "Current Balance",
+  "accountChangeBalanceInfo": "Use transactions to change balance",
+  "accountExcludeFromTotal": "Exclude from total balance",
+  "cancel": "Cancel",
+  "save": "Save",
+  "accountsTitle": "Accounts",
+  "totalBalance": "Total Balance: {amount} €",
+  "balanceLabel": "Balance: {amount} €",
+  "errorMessage": "Error: {error}",
+  "createBudget": "Create Budget",
+  "editBudget": "Edit Budget",
+  "loadingBudget": "Loading budget...",
+  "errorLoadCategories": "Failed to load categories: {error}",
+  "@errorLoadCategories": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "errorSaveBudget": "Failed to save budget: {error}",
+  "@errorSaveBudget": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "errorDeleteBudget": "Failed to delete budget: {error}",
+  "@errorDeleteBudget": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "errorLoadAccounts": "Error loading accounts: {error}",
+  "@errorLoadAccounts": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "budgetCreated": "Budget created",
+  "budgetUpdated": "Budget updated",
+  "budgetDeleted": "Budget deleted",
+  "deleteBudgetTitle": "Delete Budget",
+  "deleteBudgetConfirmation": "Are you sure you want to delete this budget? This action cannot be undone.",
+  "delete": "Delete",
+  "actionSaveChanges": "Save Changes",
+  "actionCreateBudget": "Create Budget",
+  "validationEnterTitle": "Enter a title",
+  "budgetLimitLabel": "Limit Amount",
+  "validationEnterLimit": "Enter a limit",
+  "validationValidNumber": "Enter a valid number",
+  "validationLimitMustBePositive": "Limit must be greater than 0",
+  "accountLabel": "Account",
+  "infoNoAccountsAvailable": "No accounts available. Create an account first.",
+  "budgetPeriodLabel": "Period",
+  "budgetPeriodWeekly": "Weekly",
+  "budgetPeriodMonthly": "Monthly",
+  "categoriesLabel": "Categories",
+  "categoryGlobal": "Global",
+  "infoNoCategoriesAvailable": "No categories available. Create a category first.",
+  "validationSelectOneCategory": "Please select at least one category",
+  "infoGlobalBudgetApplies": "Global budget applies to all categories",
+  "infoCategoriesSelected": "{count, plural, one{1 category selected} other{{count} categories selected}}",
+  "@infoCategoriesSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "compact"
+      }
+    }
+  },
+  "budgetsTitle": "Budgets",
+  "budgetsEmptyTitle": "No budgets yet",
+  "budgetsEmptySubtitle": "Tap + to create your first budget",
+  "budgetSpentLabel": "Spent",
+  "errorLoadingBudgets": "Error: {error}",
+  "@errorLoadingBudgets": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "errorLoadingBudgetData": "Error loading data: {error}",
+  "@errorLoadingBudgetData": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "budgetOver": "{amount}€ over budget",
+  "@budgetOver": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "budgetRemaining": "{amount}€ remaining",
+  "@budgetRemaining": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "createCategoryTitle": "Create Category",
+  "editCategoryTitle": "Edit Category",
+  "categoryUpdatedSuccess": "Category updated successfully",
+  "categoryCreatedSuccess": "Category added successfully",
+  "categoryDeletedSuccess": "Category \"{categoryName}\" deleted successfully",
+  "@categoryDeletedSuccess": {
+    "placeholders": {
+      "categoryName": {}
+    }
+  },
+  "errorGeneral": "Error: {error}",
+  "@errorGeneral": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "categoryDeleteTitle": "Delete Category",
+  "categoryDeleteConfirmation": "Are you sure you want to delete '{categoryName}'? This action cannot be undone if the category has no transactions.",
+  "@categoryDeleteConfirmation": {
+    "placeholders": {
+      "categoryName": {}
+    }
+  },
+  "actionAddCategory": "Add Category",
+  "actionChange": "Change",
+  "categoryIconLabel": "Icon",
+  "categoryColorLabel": "Color",
+  "selectIconTitle": "Select Icon",
+  "selectColorTitle": "Select Color",
+  "categoryUsageTypeTitle": "Usage Type",
+  "usageTypeExpenseLabel": "Expenses Only",
+  "usageTypeExpenseDesc": "Can only be used for expense transactions",
+  "usageTypeIncomeLabel": "Income Only",
+  "usageTypeIncomeDesc": "Can only be used for income transactions",
+  "usageTypeBothLabel": "Both",
+  "usageTypeBothDesc": "Can be used for both income and expenses",
+  "categoryGroupEssentials": "Essentials & Household",
+  "categoryGroupFood": "Food & Drinks",
+  "categoryGroupTransport": "Transport",
+  "categoryGroupUtilities": "Utilities & Bills",
+  "categoryGroupHealth": "Health & Personal",
+  "categoryGroupFinance": "Finance & Work",
+  "categoryGroupEntertainment": "Entertainment & Lifestyle",
+  "categoryGroupShopping": "Shopping & Gifts",
+  "categoryGroupTravel": "Travel & Experiences",
+  "categoryGroupFamily": "Family & Kids",
+  "categoryGroupEducation": "Education & Learning",
+  "categoryGroupTech": "Tech & Subscriptions",
+  "categoriesTitle": "Categories",
+  "categoriesEmptyTitle": "No categories yet",
+  "categoriesEmptySubtitle": "Tap + to add your first category",
+  "errorLoadingCategories": "Error loading categories: {error}",
+  "@errorLoadingCategories": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "chartBalanceEvolutionTitle": "Balance Evolution",
+  "chartNoTransactionsMessage": "No transactions in this period",
+  "errorLoadingData": "Error loading data: {error}",
+  "@errorLoadingData": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "chartExpensesByCategoryTitle": "Expenses by category",
+  "chartNoExpensesMessage": "No expenses in this period",
+  "chartIncomeVsExpenseTitle": "Income vs Expense",
+  "incomeLabel": "Income",
+  "expenseLabel": "Expense",
+  "netLabel": "Net",
+  "cardNetBalanceChangeTitle": "Net Balance Change",
+  "surplusLabel": "Surplus",
+  "deficitLabel": "Deficit",
+  "cardSavingsRateTitle": "Savings Rate",
+  "savingsRatingExcellent": "Excellent",
+  "savingsRatingGood": "Good",
+  "savingsRatingFair": "Fair",
+  "savingsRatingLow": "Low",
+  "savingsRatingNone": "None",
+  "savingsDescriptionExcellent": "You're saving a great portion of your income!",
+  "savingsDescriptionGood": "Healthy savings rate, keep it up!",
+  "savingsDescriptionFair": "Consider increasing your savings goal.",
+  "savingsDescriptionLow": "Try to save more of your income.",
+  "savingsDescriptionNone": "No savings in this period. Income equals or is less than expenses.",
+  "chartSpendingTrendTitle": "Spending Trend",
+  "allCategoriesLabel": "Global",
+  "filterByCategoryLabel": "Filter by Category",
+  "periodPrevious": "Previous",
+  "periodCurrent": "Current",
+  "errorLoadingPreviousPeriod": "Error loading previous period: {error}",
+  "@errorLoadingPreviousPeriod": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "errorLoadingCurrentPeriod": "Error loading current period: {error}",
+  "@errorLoadingCurrentPeriod": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "cardTopExpenseCategoriesTitle": "Top Expense Categories",
+  "noExpensesInPeriod": "No expenses in this period",
+  "errorLoadingCategoryIcons": "Error loading category icons: {error}",
+  "@errorLoadingCategoryIcons": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "noAccountsYet": "No accounts yet",
+  "periodTabWeek": "Week",
+  "periodTabMonth": "Month",
+  "periodTabYear": "Year",
+  "periodTabCustom": "Period",
+  "transactionDetailsTitle": "Transaction Details",
+  "noTitle": "No title",
+  "deleteTransactionTitle": "Delete Transaction",
+  "deleteTransactionConfirmation": "Are you sure you want to delete this transaction? This action cannot be undone.",
+  "buttonEdit": "Edit",
+  "transactionDeletedSuccess": "Transaction deleted successfully",
+  "errorDeletingTransaction": "Error deleting transaction: {error}",
+  "@errorDeletingTransaction": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "addTransactionTitle": "Add Transaction",
+  "editTransactionTitle": "Edit Transaction",
+  "fieldTitle": "Title",
+  "fieldAccount": "Account",
+  "fieldType": "Type",
+  "fieldCategory": "Category",
+  "fieldDescription": "Description",
+  "fieldDate": "Date",
+  "fieldAmount": "Amount",
+  "fieldRequired": "This field is required",
+  "validationInvalidNumber": "Enter a valid number",
+  "buttonConfirm": "Confirm",
+  "buttonSaveChanges": "Save Changes",
+  "buttonAddTransaction": "Add Transaction",
+  "transactionUpdatedSuccess": "Transaction updated successfully",
+  "transactionAddedSuccess": "Transaction added successfully",
+  "errorLoadingAccounts": "Error loading accounts: {error}",
+  "@errorLoadingAccounts": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "screenTransactionsTitle": "Transactions",
+  "filterAll": "All",
+  "noTransactions": "No transactions in this period",
+  "errorNoAccountForTransaction": "Please add an account before creating a transaction.",
+  "buttonAddNew": "Add New",
+  "settingsCategories": "Categories",
+  "settingsAccounts": "Accounts",
+  "settingsPreferences": "Preferences",
+  "settingsAbout": "About",
+  "fieldEnter": "Enter the {field}",
+  "@fieldEnter": {
+    "placeholders": {
+      "field": {}
+    }
+  },
+  "paletteSoftBlue": "Soft Blue",
+  "paletteGentlePurple": "Gentle Purple",
+  "paletteGentleBrown": "Gentle Brown",
+  "paletteMushroomIvory": "Mushroom Ivory",
+  "paletteGentlePeach": "Gentle Peach"
 }

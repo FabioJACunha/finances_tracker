@@ -3,5 +3,280 @@
   "helloWorld": "Olá Mundo!",
   "navHome": "Início",
   "navTransactions": "Transações",
-  "navAccounts": "Contas"
+  "navAccounts": "Contas",
+  "navBudgets": "Limites",
+  "language": "Idioma",
+  "preferences": "Preferências",
+  "colorTheme": "Esquema de cores",
+  "accountAddTitle": "Adicionar Conta",
+  "accountEditTitle": "Editar Conta",
+  "accountFieldTitleError": "Insira um título",
+  "accountInitialBalance": "Saldo inicial",
+  "accountInitialBalanceError": "Insira um número válido",
+  "accountInitialBalanceHelper": "O saldo só pode ser alterado através de transações após a criação",
+  "accountCurrentBalance": "Saldo atual",
+  "accountChangeBalanceInfo": "Use transações para alterar o saldo",
+  "accountExcludeFromTotal": "Excluir do saldo total",
+  "cancel": "Cancelar",
+  "save": "Guardar",
+  "accountsTitle": "Contas",
+  "totalBalance": "Saldo total: {amount} €",
+  "balanceLabel": "Saldo: {amount} €",
+  "errorMessage": "Erro: {error}",
+  "createBudget": "Criar limite",
+  "editBudget": "Editar limite",
+  "loadingBudget": "A carregar limite...",
+  "errorLoadCategories": "Falha ao carregar categorias: {error}",
+  "@errorLoadCategories": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "errorSaveBudget": "Falha ao guardar limite: {error}",
+  "@errorSaveBudget": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "errorDeleteBudget": "Falha ao apagar limite: {error}",
+  "@errorDeleteBudget": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "errorLoadAccounts": "Erro ao carregar contas: {error}",
+  "@errorLoadAccounts": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "budgetCreated": "Limite criado",
+  "budgetUpdated": "Limite atualizado",
+  "budgetDeleted": "Limite apagado",
+  "deleteBudgetTitle": "Apagar limite",
+  "deleteBudgetConfirmation": "Tem certeza de que deseja apagar este limite? Esta ação não pode ser desfeita.",
+  "actionSaveChanges": "Guardar Alterações",
+  "actionCreateBudget": "Criar limite",
+  "validationEnterTitle": "Introduza um título",
+  "budgetLimitLabel": "Valor Limite",
+  "validationEnterLimit": "Introduza um limite",
+  "validationValidNumber": "Introduza um número válido",
+  "validationLimitMustBePositive": "O limite deve ser maior que 0",
+  "accountLabel": "Conta",
+  "infoNoAccountsAvailable": "Nenhuma conta disponível. Crie uma conta primeiro.",
+  "budgetPeriodLabel": "Período",
+  "budgetPeriodWeekly": "Semanal",
+  "budgetPeriodMonthly": "Mensal",
+  "categoriesLabel": "Categorias",
+  "categoryGlobal": "Global",
+  "infoNoCategoriesAvailable": "Nenhuma categoria disponível. Crie uma categoria primeiro.",
+  "validationSelectOneCategory": "Selecione pelo menos uma categoria",
+  "infoGlobalBudgetApplies": "O limite global aplica-se a todas as categorias",
+  "infoCategoriesSelected": "{count, plural, one{1 categoria selecionada} other{{count} categorias selecionadas}}",
+  "@infoCategoriesSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "compact"
+      }
+    }
+  },
+  "budgetsTitle": "Limites",
+  "budgetsEmptyTitle": "Ainda não há limites",
+  "budgetsEmptySubtitle": "Toque em + para criar o seu primeiro limite",
+  "budgetSpentLabel": "Gasto",
+  "errorLoadingBudgets": "Erro: {error}",
+  "@errorLoadingBudgets": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "errorLoadingBudgetData": "Erro ao carregar dados: {error}",
+  "@errorLoadingBudgetData": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "budgetOver": "{amount}€ acima do limite",
+  "@budgetOver": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "budgetRemaining": "{amount}€ restantes",
+  "@budgetRemaining": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "createCategoryTitle": "Criar Categoria",
+  "editCategoryTitle": "Editar Categoria",
+  "categoryUpdatedSuccess": "Categoria atualizada com sucesso",
+  "categoryCreatedSuccess": "Categoria adicionada com sucesso",
+  "categoryDeletedSuccess": "Categoria \"{categoryName}\" apagada com sucesso",
+  "@categoryDeletedSuccess": {
+    "placeholders": {
+      "categoryName": {}
+    }
+  },
+  "errorGeneral": "Erro: {error}",
+  "@errorGeneral": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "categoryDeleteTitle": "Apagar Categoria",
+  "categoryDeleteConfirmation": "Tem certeza de que deseja apagar '{categoryName}'? Esta ação não pode ser desfeita se a categoria tiver transações.",
+  "@categoryDeleteConfirmation": {
+    "placeholders": {
+      "categoryName": {}
+    }
+  },
+  "actionAddCategory": "Adicionar Categoria",
+  "actionChange": "Alterar",
+  "categoryIconLabel": "Ícone",
+  "categoryColorLabel": "Cor",
+  "selectIconTitle": "Selecionar Ícone",
+  "selectColorTitle": "Selecionar Cor",
+  "categoryUsageTypeTitle": "Tipo de Uso",
+  "usageTypeExpenseLabel": "Apenas Despesas",
+  "usageTypeExpenseDesc": "Só pode ser usado para transações de despesa",
+  "usageTypeIncomeLabel": "Apenas Rendimentos",
+  "usageTypeIncomeDesc": "Só pode ser usado para transações de rendimento",
+  "usageTypeBothLabel": "Ambos",
+  "usageTypeBothDesc": "Pode ser usado tanto para rendimentos como para despesas",
+  "categoryGroupEssentials": "Essenciais e Doméstico",
+  "categoryGroupFood": "Comida e Bebidas",
+  "categoryGroupTransport": "Transporte",
+  "categoryGroupUtilities": "Serviços e Contas",
+  "categoryGroupHealth": "Saúde e Pessoal",
+  "categoryGroupFinance": "Finanças e Trabalho",
+  "categoryGroupEntertainment": "Entretenimento e Estilo de Vida",
+  "categoryGroupShopping": "Compras e Presentes",
+  "categoryGroupTravel": "Viagens e Experiências",
+  "categoryGroupFamily": "Família e Crianças",
+  "categoryGroupEducation": "Educação e Aprendizagem",
+  "categoryGroupTech": "Tecnologia e Subscrições",
+  "categoriesTitle": "Categorias",
+  "categoriesEmptyTitle": "Ainda não há categorias",
+  "categoriesEmptySubtitle": "Toque em + para adicionar a sua primeira categoria",
+  "errorLoadingCategories": "Erro ao carregar categorias: {error}",
+  "@errorLoadingCategories": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "chartBalanceEvolutionTitle": "Evolução do Saldo",
+  "chartNoTransactionsMessage": "Sem transações neste período",
+  "errorLoadingData": "Erro ao carregar dados: {error}",
+  "@errorLoadingData": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "chartExpensesByCategoryTitle": "Despesas por categoria",
+  "chartNoExpensesMessage": "Sem despesas neste período",
+  "chartIncomeVsExpenseTitle": "Rendimentos vs Despesas",
+  "incomeLabel": "Rendimento",
+  "expenseLabel": "Despesa",
+  "netLabel": "Líquido",
+  "cardNetBalanceChangeTitle": "Variação do Saldo Líquido",
+  "surplusLabel": "Excedente",
+  "deficitLabel": "Défice",
+  "cardSavingsRateTitle": "Taxa de Poupança",
+  "savingsRatingExcellent": "Excelente",
+  "savingsRatingGood": "Boa",
+  "savingsRatingFair": "Razoável",
+  "savingsRatingLow": "Baixa",
+  "savingsRatingNone": "Nenhuma",
+  "savingsDescriptionExcellent": "Está a poupar uma grande parte do seu rendimento!",
+  "savingsDescriptionGood": "Taxa de poupança saudável, continue assim!",
+  "savingsDescriptionFair": "Considere aumentar o seu objetivo de poupança.",
+  "savingsDescriptionLow": "Tente poupar mais do seu rendimento.",
+  "savingsDescriptionNone": "Sem poupança neste período. O rendimento é igual ou inferior às despesas.",
+  "chartSpendingTrendTitle": "Tendência de Despesas",
+  "allCategoriesLabel": "Global",
+  "filterByCategoryLabel": "Filtrar por Categoria",
+  "periodPrevious": "Anterior",
+  "periodCurrent": "Atual",
+  "errorLoadingPreviousPeriod": "Erro ao carregar o período anterior: {error}",
+  "@errorLoadingPreviousPeriod": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "errorLoadingCurrentPeriod": "Erro ao carregar o período atual: {error}",
+  "@errorLoadingCurrentPeriod": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "cardTopExpenseCategoriesTitle": "Principais Categorias de Despesas",
+  "noExpensesInPeriod": "Nenhuma despesa neste período",
+  "errorLoadingCategoryIcons": "Erro ao carregar ícones de categoria: {error}",
+  "@errorLoadingCategoryIcons": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "noAccountsYet": "Ainda não tem contas",
+  "periodTabWeek": "Semana",
+  "periodTabMonth": "Mês",
+  "periodTabYear": "Ano",
+  "periodTabCustom": "Período",
+  "transactionDetailsTitle": "Detalhes da Transação",
+  "noTitle": "Sem título",
+  "deleteTransactionTitle": "Eliminar Transação",
+  "deleteTransactionConfirmation": "Tem certeza de que deseja eliminar esta transação? Esta ação não pode ser desfeita.",
+  "delete": "Eliminar",
+  "buttonEdit": "Editar",
+  "transactionDeletedSuccess": "Transação eliminada com sucesso",
+  "errorDeletingTransaction": "Erro ao eliminar transação: {error}",
+  "@errorDeletingTransaction": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "addTransactionTitle": "Adicionar Transação",
+  "editTransactionTitle": "Editar Transação",
+  "fieldTitle": "Título",
+  "fieldAccount": "Conta",
+  "fieldType": "Tipo",
+  "fieldCategory": "Categoria",
+  "fieldDescription": "Descrição",
+  "fieldDate": "Data",
+  "fieldAmount": "Valor",
+  "fieldRequired": "Este campo é obrigatório",
+  "validationInvalidNumber": "Insira um número válido",
+  "buttonConfirm": "Confirmar",
+  "buttonSaveChanges": "Guardar Alterações",
+  "buttonAddTransaction": "Adicionar Transação",
+  "transactionUpdatedSuccess": "Transação atualizada com sucesso",
+  "transactionAddedSuccess": "Transação adicionada com sucesso",
+  "errorLoadingAccounts": "Erro ao carregar contas: {error}",
+  "@errorLoadingAccounts": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "screenTransactionsTitle": "Transações",
+  "filterAll": "Todas",
+  "noTransactions": "Nenhuma transação neste período",
+  "errorNoAccountForTransaction": "Por favor, adicione uma conta antes de criar uma transação.",
+  "buttonAddNew": "Criar nova",
+  "settingsCategories": "Categorias",
+  "settingsAccounts": "Contas",
+  "settingsPreferences": "Preferências",
+  "settingsAbout": "Sobre",
+  "fieldEnter": "Insira o {field}",
+  "@fieldEnter": {
+    "placeholders": {
+      "field": {}
+    }
+  },
+  "paletteSoftBlue": "Azul Suave",
+  "paletteGentlePurple": "Roxo Suave",
+  "paletteGentleBrown": "Castanho Suave",
+  "paletteMushroomIvory": "Marfim Cogumelo",
+  "paletteGentlePeach": "Pêssego Suave"
 }

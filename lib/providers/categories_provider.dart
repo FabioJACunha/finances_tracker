@@ -24,13 +24,13 @@ final categoriesListProvider = StreamProvider<List<Category>>((ref) {
 
 // Stream provider for watching categories by transaction type
 final categoriesByTypeProvider =
-StreamProvider.family<List<Category>, TransactionType>((
-    ref,
-    transactionType,
+    StreamProvider.family<List<Category>, TransactionType>((
+      ref,
+      transactionType,
     ) {
-  final service = ref.watch(categoryServiceProvider);
-  return service.watchCategoriesForTransactionType(transactionType);
-});
+      final service = ref.watch(categoryServiceProvider);
+      return service.watchCategoriesForTransactionType(transactionType);
+    });
 
 // Future provider for getting a specific category by ID
 final categoryByIdProvider = FutureProvider.family<Category?, int>((ref, id) {
@@ -40,8 +40,8 @@ final categoryByIdProvider = FutureProvider.family<Category?, int>((ref, id) {
 
 // Provider for category colors map (name -> Color)
 final categoryColorsMapProvider = StreamProvider<Map<String, Color>>((
-    ref,
-    ) async* {
+  ref,
+) async* {
   final categories = ref.watch(categoriesListProvider);
 
   yield* categories.when(
@@ -63,8 +63,8 @@ final categoryColorsMapProvider = StreamProvider<Map<String, Color>>((
 
 // Provider for category icons map (name -> IconData)
 final categoryIconsMapProvider = StreamProvider<Map<String, IconData>>((
-    ref,
-    ) async* {
+  ref,
+) async* {
   final categories = ref.watch(categoriesListProvider);
 
   yield* categories.when(
@@ -95,9 +95,11 @@ final expenseCategoriesProvider = Provider<AsyncValue<List<Category>>>((ref) {
   return categoriesAsync.when(
     data: (categories) {
       final filteredList = categories
-          .where((c) =>
-      c.usageType == CategoryUsageType.expense ||
-          c.usageType == CategoryUsageType.both)
+          .where(
+            (c) =>
+                c.usageType == CategoryUsageType.expense ||
+                c.usageType == CategoryUsageType.both,
+          )
           .toList();
       // Return the filtered list wrapped in AsyncValue.data
       return AsyncValue.data(filteredList);

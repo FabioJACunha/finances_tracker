@@ -14,6 +14,7 @@ import 'package:collection/collection.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/date_range_selector.dart';
 import '../../providers/categories_provider.dart';
+import '../../l10n/app_localizations.dart';
 
 class TransactionsScreen extends ConsumerStatefulWidget {
   const TransactionsScreen({super.key});
@@ -52,18 +53,19 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     final accountsAsync = ref.watch(accountsListProvider);
     final palette = currentPalette;
 
     return Scaffold(
       appBar: CustomAppBar(
-        title: 'Transactions',
+        title: loc.screenTransactionsTitle,
         leading: Icon(Icons.history, color: palette.textDark),
       ),
       body: accountsAsync.when(
         data: (accounts) {
           if (accounts.isEmpty) {
-            return const Center(child: Text("No accounts yet"));
+            return Center(child: Text(loc.noAccountsYet));
           }
           _selectedAccountId ??= accounts.first.id;
 
@@ -141,10 +143,10 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                 indicatorColor: Colors.transparent,
                 indicatorSize: TabBarIndicatorSize.tab,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                tabs: const [
-                  Tab(text: 'All'),
-                  Tab(text: 'Expense'),
-                  Tab(text: 'Income'),
+                tabs: [
+                  Tab(text: loc.filterAll),
+                  Tab(text: loc.expenseLabel),
+                  Tab(text: loc.incomeLabel),
                 ],
                 onTap: (index) {
                   setState(() {
@@ -200,9 +202,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                               }).toList();
 
                               if (filteredTxns.isEmpty) {
-                                return const Center(
-                                  child: Text("No transactions"),
-                                );
+                                return Center(child: Text(loc.noTransactions));
                               }
 
                               final groupedByDate = filteredTxns.groupListsBy(
@@ -248,8 +248,10 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                                   // Check if the item is a DateTime (our date header)
                                   if (item is DateTime) {
                                     final date = item;
-                                    final formattedDate = DateFormat.yMMMd()
-                                        .format(date);
+                                    // Use local specific date formatting
+                                    final formattedDate = DateFormat.yMMMd(
+                                      loc.localeName,
+                                    ).format(date);
 
                                     return Container(
                                       padding: const EdgeInsets.only(top: 8.0),
@@ -282,10 +284,11 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                                   final categoryAsync = tx.categoryId == null
                                       ? null // Assign null if there's no ID, instead of 'Global'
                                       : ref.watch(
-                                    categoryByIdProvider(tx.categoryId!),
-                                  );
-                                  String category = 'Global'; // Default to 'Global'
-                                  if (categoryAsync != null && categoryAsync.hasValue) {
+                                          categoryByIdProvider(tx.categoryId!),
+                                        );
+                                  String category = loc.categoryGlobal;
+                                  if (categoryAsync != null &&
+                                      categoryAsync.hasValue) {
                                     // Safely access the Category object's name property
                                     category = categoryAsync.value!.name;
                                   }
@@ -327,10 +330,11 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                                               const SizedBox(width: 12),
                                               Expanded(
                                                 child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
                                                   children: [
                                                     Text(
-                                                      tx.title ?? 'No title',
+                                                      tx.title ?? loc.noTitle,
                                                       style: TextStyle(
                                                         fontWeight:
                                                             FontWeight.w500,
@@ -342,13 +346,16 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                                                       style: TextStyle(
                                                         color:
                                                             palette.secondary,
-                                                        fontWeight: FontWeight.w500
+                                                        fontWeight:
+                                                            FontWeight.w500,
                                                       ),
                                                     ),
                                                   ],
                                                 ),
                                               ),
                                               Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.end,
                                                 children: [
                                                   Text(
                                                     '${tx.amount.toStringAsFixed(2)} €',
@@ -381,7 +388,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                             loading: () => const Center(
                               child: CircularProgressIndicator(),
                             ),
-                            error: (e, st) => Center(child: Text("Error: $e")),
+                            error: (e, st) => Center(
+                              child: Text(loc.errorGeneral(e.toString())),
+                            ),
                           );
                         },
                       ),
@@ -393,7 +402,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(child: Text("Error loading accounts: $e")),
+        error: (e, st) =>
+            Center(child: Text(loc.errorLoadingAccounts(e.toString()))),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: palette.primary,
@@ -401,7 +411,19 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
         onPressed: () {
           final accountsAsync = ref.read(accountsListProvider);
           final accounts = accountsAsync.asData?.value;
-          if (accounts == null || accounts.isEmpty) return;
+          if (accounts == null || accounts.isEmpty) {
+            // Show a snackbar/message if no accounts exist
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  loc.errorNoAccountForTransaction,
+                  style: TextStyle(color: palette.red),
+                ),
+                backgroundColor: palette.bgRed,
+              ),
+            );
+            return;
+          }
           Navigator.push(
             context,
             MaterialPageRoute(

@@ -1,19 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class AppColors {
-//   // Beige
-//   static const primary = Color.fromRGBO(243, 212, 155, 1.0);
-//   static const secondary = Color.fromRGBO(173, 95, 38, 1.0);
-//   static const terciary = Color.fromRGBO(227, 206, 187, 1.0);
-//   static const textDark = Color.fromRGBO(101, 56, 47, 1.0);
-//   static const textMuted = Color.fromRGBO(133, 130, 129, 1.0);
-//   static const bgPrimary = Color.fromRGBO(241, 229, 204, 1.0);
-//   static const bgTerciary = Color.fromRGBO(241, 233, 231, 1.0);
-  static const bgGreen = Color.fromRGBO(214, 234, 215, 1.0);
-  static const bgRed = Color.fromRGBO(246, 225, 229, 1.0);
-  static const green = Color.fromRGBO(50, 121, 53, 1.0);
-  static const red = Color.fromRGBO(248, 95, 81, 1.0);
-}
 class AppPalette {
   final String name;
   final Color bgPrimary;
@@ -45,8 +32,6 @@ class AppPalette {
 }
 
 // --- Defined Palettes ---
-
-// Soft blue
 const AppPalette softBlue = AppPalette(
   name: "Soft Blue",
   bgPrimary: Color.fromRGBO(249, 251, 253, 1.0),
@@ -61,7 +46,7 @@ const AppPalette softBlue = AppPalette(
   green: Color.fromRGBO(50, 121, 53, 1.0),
   red: Color.fromRGBO(248, 95, 81, 1.0),
 );
-// Purple
+
 const AppPalette purple = AppPalette(
   name: "Gentle Purple",
   bgPrimary: Color.fromRGBO(248, 247, 250, 1.0),
@@ -76,7 +61,7 @@ const AppPalette purple = AppPalette(
   green: Color.fromRGBO(50, 121, 53, 1.0),
   red: Color.fromRGBO(248, 95, 81, 1.0),
 );
-// Brown
+
 const AppPalette brownish = AppPalette(
   name: "Gentle Brown",
   bgPrimary: Color.fromRGBO(252, 249, 247, 1.0),
@@ -92,7 +77,6 @@ const AppPalette brownish = AppPalette(
   red: Color.fromRGBO(248, 95, 81, 1.0),
 );
 
-// Mushroom Ivory
 const AppPalette mushroomIvory = AppPalette(
   name: "Mushroom Ivory",
   bgPrimary: Color.fromRGBO(251, 250, 248, 1.0),
@@ -108,7 +92,6 @@ const AppPalette mushroomIvory = AppPalette(
   red: Color.fromRGBO(248, 95, 81, 1.0),
 );
 
-// Gentle Peach
 const AppPalette gentlePeach = AppPalette(
   name: "Gentle Peach",
   bgPrimary: Color.fromRGBO(255, 249, 246, 1.0),
@@ -124,7 +107,6 @@ const AppPalette gentlePeach = AppPalette(
   red: Color.fromRGBO(248, 95, 81, 1.0),
 );
 
-
 // --- Global Theme State Management ---
 
 /// A list of all available color palettes for the user to select from.
@@ -136,16 +118,40 @@ final List<AppPalette> availablePalettes = [
   gentlePeach,
 ];
 
+// --- Global Theme State Management ---
+
 /// The currently selected color palette.
-/// We use ValueNotifier to rebuild widgets that depend on it (like AppBars/Scaffolds).
 final ValueNotifier<AppPalette> currentPaletteNotifier = ValueNotifier(softBlue);
 
 /// Getter for the current palette value, useful for simple access.
 AppPalette get currentPalette => currentPaletteNotifier.value;
 
-/// Setter function to change the application's color palette.
-void setAppPalette(AppPalette newPalette) {
-  if (currentPaletteNotifier.value != newPalette) {
+// Helper function to find a palette by its name
+AppPalette getPaletteByName(String? name) {
+  if (name == null) return availablePalettes.first;
+  return availablePalettes.firstWhere(
+        (p) => p.name == name,
+    orElse: () => availablePalettes.first, // Fallback to default
+  );
+}
+
+// NEW: Function to initialize/load the saved color scheme
+Future<void> initializeTheme() async {
+  final prefs = await SharedPreferences.getInstance();
+  final savedPaletteName = prefs.getString('selected_color_scheme');
+
+  // Find the saved palette or default to the first in the list
+  final initialPalette = getPaletteByName(savedPaletteName);
+  currentPaletteNotifier.value = initialPalette;
+}
+
+/// Setter function to change the application's color palette and save it.
+Future<void> setAppPalette(AppPalette newPalette) async { // <-- NOW ASYNC
+  if (currentPaletteNotifier.value.name != newPalette.name) {
     currentPaletteNotifier.value = newPalette;
+
+    // NEW: Save the new palette name to SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selected_color_scheme', newPalette.name);
   }
 }

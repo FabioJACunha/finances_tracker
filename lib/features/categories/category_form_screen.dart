@@ -5,6 +5,7 @@ import '../../theme/app_colors.dart';
 import '../../providers/services_provider.dart';
 import '../../widgets/custom_text_form_field.dart';
 import '../../widgets/custom_app_bar.dart';
+import '../../l10n/app_localizations.dart'; // REQUIRED IMPORT
 
 class CategoryFormScreen extends ConsumerStatefulWidget {
   final Category? categoryToEdit;
@@ -26,6 +27,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   bool get isEditing => widget.categoryToEdit != null;
 
   // Popular material icons for categories
+  // KEYS KEPT AS IDENTIFIERS, TRANSLATED IN _showIconPicker
   static const Map<String, List<IconData>> categorizedIcons = {
     "Essentials & Household": [
       Icons.home,
@@ -130,6 +132,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   }
 
   void _submit() async {
+    final loc = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
 
@@ -159,26 +162,47 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            isEditing
-                ? 'Category updated successfully'
-                : 'Category added successfully',
-            style: const TextStyle(color: AppColors.green),
+            isEditing ? loc.categoryUpdatedSuccess : loc.categoryCreatedSuccess,
+            style: TextStyle(color: palette.green),
           ),
-          backgroundColor: AppColors.bgGreen,
+          backgroundColor: palette.bgGreen,
         ),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error: $e', style: TextStyle(color: AppColors.red)),
-          backgroundColor: AppColors.bgRed,
+          content: Text(
+            loc.errorGeneral(e.toString()),
+            style: TextStyle(color: palette.red),
+          ),
+          backgroundColor: palette.bgRed,
         ),
       );
     }
   }
 
+  // Helper to get localized icon group name
+  String _getLocalizedIconGroupName(String groupKey, AppLocalizations loc) {
+    return switch (groupKey) {
+      "Essentials & Household" => loc.categoryGroupEssentials,
+      "Food & Drinks" => loc.categoryGroupFood,
+      "Transport" => loc.categoryGroupTransport,
+      "Utilities & Bills" => loc.categoryGroupUtilities,
+      "Health & Personal" => loc.categoryGroupHealth,
+      "Finance & Work" => loc.categoryGroupFinance,
+      "Entertainment & Lifestyle" => loc.categoryGroupEntertainment,
+      "Shopping & Gifts" => loc.categoryGroupShopping,
+      "Travel & Experiences" => loc.categoryGroupTravel,
+      "Family & Kids" => loc.categoryGroupFamily,
+      "Education & Learning" => loc.categoryGroupEducation,
+      "Tech & Subscriptions" => loc.categoryGroupTech,
+      _ => groupKey, // Fallback
+    };
+  }
+
   void _showIconPicker() {
+    final loc = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       backgroundColor: palette.bgPrimary,
@@ -192,7 +216,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Select Icon",
+              loc.selectIconTitle,
               style: TextStyle(
                 color: palette.textDark,
                 fontSize: 18,
@@ -209,7 +233,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         child: Text(
-                          entry.key,
+                          _getLocalizedIconGroupName(entry.key, loc),
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
@@ -269,6 +293,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   }
 
   void _showColorPicker() {
+    final loc = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       backgroundColor: palette.bgPrimary,
@@ -282,7 +307,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Select Color",
+              loc.selectColorTitle,
               style: TextStyle(
                 color: palette.textDark,
                 fontSize: 18,
@@ -329,6 +354,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   }
 
   Future<void> _deleteCategory() async {
+    final loc = AppLocalizations.of(context)!;
     if (!mounted || widget.categoryToEdit == null) return;
 
     final confirmed = await showDialog<bool>(
@@ -337,24 +363,29 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
         backgroundColor: palette.bgPrimary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         title: Text(
-          "Delete Category",
+          loc.categoryDeleteTitle,
           style: TextStyle(color: palette.textDark),
         ),
         content: Text(
-          "Are you sure you want to delete '${widget.categoryToEdit!.name}'? "
-          "This action cannot be undone if the category has no transactions.",
+          loc.categoryDeleteConfirmation(widget.categoryToEdit!.name),
           style: TextStyle(color: palette.textDark),
         ),
         actions: [
           TextButton(
-            style: TextButton.styleFrom(foregroundColor: palette.textDark, backgroundColor: palette.primary),
+            style: TextButton.styleFrom(
+              foregroundColor: palette.textDark,
+              backgroundColor: palette.primary,
+            ),
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(loc.cancel),
           ),
           TextButton(
-            style: TextButton.styleFrom(foregroundColor: AppColors.red, backgroundColor: AppColors.bgRed),
+            style: TextButton.styleFrom(
+              foregroundColor: palette.red,
+              backgroundColor: palette.bgRed,
+            ),
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
+            child: Text(loc.delete),
           ),
         ],
       ),
@@ -373,18 +404,21 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Category "${widget.categoryToEdit!.name}" deleted successfully',
-            style: TextStyle(color: AppColors.green),
+            loc.categoryDeletedSuccess(widget.categoryToEdit!.name),
+            style: TextStyle(color: palette.green),
           ),
-          backgroundColor: AppColors.bgGreen,
+          backgroundColor: palette.bgGreen,
         ),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error: $e', style: TextStyle(color: AppColors.red)),
-          backgroundColor: AppColors.bgRed,
+          content: Text(
+            loc.errorGeneral(e.toString()),
+            style: TextStyle(color: palette.red),
+          ),
+          backgroundColor: palette.bgRed,
         ),
       );
     }
@@ -392,11 +426,12 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     final palette = currentPalette;
 
     return Scaffold(
       appBar: CustomAppBar(
-        title: isEditing ? "Edit Category" : "Create Category",
+        title: isEditing ? loc.editCategoryTitle : loc.createCategoryTitle,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: palette.textDark),
           onPressed: () => Navigator.pop(context),
@@ -426,10 +461,10 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                 CustomTextFormField(
                   initialValue: _name,
                   maxLength: 20,
-                  label: "Title",
+                  label: loc.fieldTitle,
                   validator: (val) {
                     if (val == null || val.trim().isEmpty) {
-                      return "Please enter a title";
+                      return loc.validationEnterTitle;
                     }
                     return null;
                   },
@@ -447,7 +482,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Icon",
+                            loc.categoryIconLabel,
                             style: TextStyle(
                               color: palette.textDark,
                               fontSize: 14,
@@ -473,7 +508,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                                   ),
                                   const Spacer(),
                                   Text(
-                                    "Change",
+                                    loc.actionChange,
                                     style: TextStyle(color: palette.textDark),
                                   ),
                                   const Spacer(),
@@ -496,7 +531,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Color",
+                            loc.categoryColorLabel,
                             style: TextStyle(
                               color: palette.textDark,
                               fontSize: 14,
@@ -525,7 +560,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                                   ),
                                   const Spacer(),
                                   Text(
-                                    "Change",
+                                    loc.actionChange,
                                     style: TextStyle(color: palette.textDark),
                                   ),
                                   const Spacer(),
@@ -547,7 +582,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
 
                 // Usage type selector
                 Text(
-                  "Usage Type",
+                  loc.categoryUsageTypeTitle,
                   style: TextStyle(
                     color: palette.textDark,
                     fontSize: 14,
@@ -572,21 +607,18 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
 
                       switch (type) {
                         case CategoryUsageType.expense:
-                          label = "Expenses Only";
-                          description =
-                              "Can only be used for expense transactions";
+                          label = loc.usageTypeExpenseLabel;
+                          description = loc.usageTypeExpenseDesc;
                           icon = Icons.remove_circle_outline;
                           break;
                         case CategoryUsageType.income:
-                          label = "Income Only";
-                          description =
-                              "Can only be used for income transactions";
+                          label = loc.usageTypeIncomeLabel;
+                          description = loc.usageTypeIncomeDesc;
                           icon = Icons.add_circle_outline;
                           break;
                         case CategoryUsageType.both:
-                          label = "Both";
-                          description =
-                              "Can be used for both income and expenses";
+                          label = loc.usageTypeBothLabel;
+                          description = loc.usageTypeBothDesc;
                           icon = Icons.swap_horiz;
                           break;
                       }
@@ -648,7 +680,11 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                     ElevatedButton.icon(
                       onPressed: _submit,
                       icon: Icon(isEditing ? Icons.save : Icons.add),
-                      label: Text(isEditing ? "Save Changes" : "Add Category"),
+                      label: Text(
+                        isEditing
+                            ? loc.actionSaveChanges
+                            : loc.actionAddCategory,
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: palette.primary,
                         foregroundColor: palette.textDark,

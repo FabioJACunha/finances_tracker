@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../../l10n/app_localizations.dart'; // Import localization
 
 class CustomTextFormField extends StatelessWidget {
   final String label;
@@ -32,6 +33,10 @@ class CustomTextFormField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = currentPalette;
+    final loc = AppLocalizations.of(context)!; // Get localization
+
+    // Determine the default hint text using localization
+    final String defaultHintText = loc.fieldEnter(label.toLowerCase());
 
     // Default minimal-height decoration
     final defaultDecoration = InputDecoration(
@@ -47,9 +52,10 @@ class CustomTextFormField extends StatelessWidget {
       hintStyle: TextStyle(color: palette.textMuted),
     );
 
-// Merge user decoration with defaults
+    // Merge user decoration with defaults
     final mergedDecoration = defaultDecoration.copyWith(
-      hintText: decoration?.hintText ?? "Enter the ${label.toLowerCase()}",
+      // Use the provided hintText, or the localized default if none is provided
+      hintText: decoration?.hintText ?? defaultHintText,
       hintStyle: decoration?.hintStyle ?? defaultDecoration.hintStyle,
       helperText: decoration?.helperText,
       helperStyle: decoration?.helperStyle,
@@ -57,22 +63,22 @@ class CustomTextFormField extends StatelessWidget {
       prefixIcon: decoration?.prefixIcon,
       suffixIcon: decoration?.suffixIcon,
       enabledBorder:
-      decoration?.enabledBorder ?? defaultDecoration.enabledBorder,
+          decoration?.enabledBorder ?? defaultDecoration.enabledBorder,
       focusedBorder:
-      decoration?.focusedBorder ?? defaultDecoration.focusedBorder,
+          decoration?.focusedBorder ?? defaultDecoration.focusedBorder,
       contentPadding:
-      decoration?.contentPadding ?? defaultDecoration.contentPadding,
+          decoration?.contentPadding ?? defaultDecoration.contentPadding,
       isDense: decoration?.isDense ?? defaultDecoration.isDense,
       fillColor: decoration?.fillColor ?? defaultDecoration.fillColor,
       filled: decoration?.filled ?? defaultDecoration.filled,
     );
-
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
+          // Assumed to be already localized by the caller (e.g., loc.fieldTitle)
           style: TextStyle(
             color: palette.textDark,
             fontSize: 14,

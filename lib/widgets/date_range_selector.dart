@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../theme/app_colors.dart';
 import '../models/date_range_selection.dart';
-import 'package:calendar_date_picker2/calendar_date_picker2.dart'; // New Import
+import 'package:calendar_date_picker2/calendar_date_picker2.dart';
+import '../l10n/app_localizations.dart';
 
 class DateRangeSelector extends StatelessWidget {
   final DateRangeSelection currentRange;
@@ -22,6 +23,7 @@ class DateRangeSelector extends StatelessWidget {
 
   Future<void> _pickDateRange(BuildContext context) async {
     final palette = currentPalette;
+    final loc = AppLocalizations.of(context)!;
 
     // Configuration for the calendar_date_picker2 dialog
     final config = CalendarDatePicker2WithActionButtonsConfig(
@@ -36,7 +38,6 @@ class DateRangeSelector extends StatelessWidget {
         color: palette.textDark,
         fontWeight: FontWeight.w500,
       ),
-      buttonPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
       okButton: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
@@ -44,7 +45,7 @@ class DateRangeSelector extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
-          'Confirm',
+          loc.buttonConfirm,
           style: TextStyle(
             color: palette.textDark,
             fontWeight: FontWeight.w500,
@@ -58,7 +59,7 @@ class DateRangeSelector extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
-          'Cancel',
+          loc.cancel,
           style: TextStyle(
             color: palette.textDark,
             fontWeight: FontWeight.w500,
@@ -111,7 +112,11 @@ class DateRangeSelector extends StatelessWidget {
     // Icon-only mode requested
     if (isIconOnly) {
       return IconButton(
-        icon: Icon(Icons.calendar_today_outlined, color: palette.textDark, size: 20),
+        icon: Icon(
+          Icons.calendar_today_outlined,
+          color: palette.textDark,
+          size: 20,
+        ),
         onPressed: () => _pickDateRange(context),
         padding: EdgeInsets.zero,
         splashRadius: 24,
@@ -157,7 +162,11 @@ class DateRangeSelector extends StatelessWidget {
             ),
             const SizedBox(width: 16),
             if (showIcon)
-              Icon(Icons.calendar_today_outlined, color: palette.textDark, size: 18),
+              Icon(
+                Icons.calendar_today_outlined,
+                color: palette.textDark,
+                size: 18,
+              ),
           ],
         ),
       ),

@@ -148,7 +148,9 @@ class TransactionService {
 
   /// Validates that a category can be used with a transaction type
   Future<void> _validateCategoryUsage(
-      int categoryId, TransactionType type) async {
+    int categoryId,
+    TransactionType type,
+  ) async {
     final category = await _db.categoriesDao.getById(categoryId);
 
     if (category == null) {
@@ -162,12 +164,14 @@ class TransactionService {
     }
 
     final isExpense = type == TransactionType.expense;
-    final categoryIsForExpense = category.usageType == CategoryUsageType.expense;
+    final categoryIsForExpense =
+        category.usageType == CategoryUsageType.expense;
 
     if (isExpense != categoryIsForExpense) {
       final typeName = isExpense ? 'expense' : 'income';
       throw Exception(
-          'Category "${category.name}" cannot be used for $typeName transactions');
+        'Category "${category.name}" cannot be used for $typeName transactions',
+      );
     }
   }
 
@@ -179,8 +183,8 @@ class TransactionService {
     required TransactionType type,
   }) async {
     // Get the transaction immediately before this date
-    final previousTransaction =
-    await _db.transactionsDao.getLastTransactionBefore(accountId, date);
+    final previousTransaction = await _db.transactionsDao
+        .getLastTransactionBefore(accountId, date);
 
     // Starting balance is either previous transaction's resultant balance or 0
     final startingBalance = previousTransaction?.resultantBalance ?? 0.0;
@@ -200,8 +204,8 @@ class TransactionService {
     required int excludeTransactionId,
   }) async {
     // Get all transactions before this date, excluding the one being updated
-    final allTransactions =
-    await _db.transactionsDao.getByAccountIdOrderedByDate(accountId);
+    final allTransactions = await _db.transactionsDao
+        .getByAccountIdOrderedByDate(accountId);
 
     double balance = 0.0;
     for (final tx in allTransactions) {
@@ -217,23 +221,26 @@ class TransactionService {
 
   /// Recalculate resultant balances for all transactions after a given date
   Future<void> _recalculateBalancesAfter(
-      int accountId,
-      DateTime afterDate,
-      ) async {
+    int accountId,
+    DateTime afterDate,
+  ) async {
     // Get the balance right before afterDate
-    final previousTransaction =
-    await _db.transactionsDao.getLastTransactionBefore(accountId, afterDate);
+    final previousTransaction = await _db.transactionsDao
+        .getLastTransactionBefore(accountId, afterDate);
     double runningBalance = previousTransaction?.resultantBalance ?? 0.0;
 
     // Get all transactions from afterDate onwards, ordered by date
     final transactionsToUpdate = await _db.transactionsDao
         .getTransactionsAfterDate(
-        accountId, afterDate.subtract(const Duration(seconds: 1)));
+          accountId,
+          afterDate.subtract(const Duration(seconds: 1)),
+        );
 
     // Update each transaction's resultant balance
     for (final tx in transactionsToUpdate) {
-      runningBalance +=
-      tx.type == TransactionType.income ? tx.amount : -tx.amount;
+      runningBalance += tx.type == TransactionType.income
+          ? tx.amount
+          : -tx.amount;
 
       await _db.transactionsDao.updateResultantBalance(tx.id, runningBalance);
     }
@@ -241,8 +248,8 @@ class TransactionService {
 
   /// Update account balance to match the latest transaction's resultant balance
   Future<void> _updateAccountBalance(int accountId) async {
-    final allTransactions =
-    await _db.transactionsDao.getByAccountIdOrderedByDate(accountId);
+    final allTransactions = await _db.transactionsDao
+        .getByAccountIdOrderedByDate(accountId);
 
     if (allTransactions.isEmpty) {
       await _db.accountsDao.updateBalance(accountId, 0.0);

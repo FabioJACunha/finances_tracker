@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 
 class ChipSelector<T> extends FormField<dynamic> {
   final String label;
@@ -26,6 +27,8 @@ class ChipSelector<T> extends FormField<dynamic> {
   /// Hide the label text above the chips
   final bool hideLabel;
 
+  final bool secondaryBg;
+
   // Single selection
   ChipSelector({
     super.key,
@@ -40,6 +43,7 @@ class ChipSelector<T> extends FormField<dynamic> {
     this.getItemColor,
     this.getItemIcon,
     this.hideLabel = false,
+    this.secondaryBg = false,
     super.validator,
     super.onSaved,
   }) : multiSelect = false,
@@ -48,6 +52,7 @@ class ChipSelector<T> extends FormField<dynamic> {
          builder: (FormFieldState<dynamic> state) {
            final palette = currentPalette;
            final T? currentStateValue = state.value as T?;
+           final loc = AppLocalizations.of(state.context)!;
 
            final allItems = [if (globalItem != null) globalItem, ...items];
 
@@ -70,8 +75,8 @@ class ChipSelector<T> extends FormField<dynamic> {
                        TextButton.icon(
                          onPressed: onAddNew,
                          icon: const Icon(Icons.add, size: 14),
-                         label: const Text(
-                           "Add New",
+                         label: Text(
+                           loc.buttonAddNew,
                            style: TextStyle(fontSize: 13),
                          ),
                          style: TextButton.styleFrom(
@@ -97,7 +102,9 @@ class ChipSelector<T> extends FormField<dynamic> {
 
                      final Color bgColor = isSelected
                          ? palette.terciary
-                         : palette.bgTerciary;
+                         : (secondaryBg
+                               ? palette.bgPrimary
+                               : palette.bgTerciary);
 
                      return Padding(
                        padding: const EdgeInsets.only(right: 8),
@@ -177,6 +184,7 @@ class ChipSelector<T> extends FormField<dynamic> {
     this.getItemColor,
     this.getItemIcon,
     this.hideLabel = false,
+    this.secondaryBg = false,
     FormFieldValidator<List<T>?>? validator,
     FormFieldSetter<List<T>?>? onSaved,
   }) : multiSelect = true,
@@ -197,7 +205,7 @@ class ChipSelector<T> extends FormField<dynamic> {
                : [];
            final bool isGlobalSelected =
                state.value == null || currentValues.isEmpty;
-
+           final loc = AppLocalizations.of(state.context)!;
            final allItems = [if (globalItem != null) globalItem, ...items];
 
            return Column(
@@ -219,8 +227,8 @@ class ChipSelector<T> extends FormField<dynamic> {
                        TextButton.icon(
                          onPressed: onAddNew,
                          icon: const Icon(Icons.add, size: 14),
-                         label: const Text(
-                           "Add New",
+                         label: Text(
+                           loc.buttonAddNew,
                            style: TextStyle(fontSize: 13),
                          ),
                          style: TextButton.styleFrom(

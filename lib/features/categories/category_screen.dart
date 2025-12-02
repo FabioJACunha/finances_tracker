@@ -5,18 +5,20 @@ import '../../data/db/database.dart';
 import '../../theme/app_colors.dart';
 import 'category_form_screen.dart';
 import '../../widgets/custom_app_bar.dart';
+import '../../l10n/app_localizations.dart'; // REQUIRED IMPORT
 
 class CategoryScreen extends ConsumerWidget {
   const CategoryScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context)!; // USE 'loc'
     final palette = currentPalette;
     final categoriesAsync = ref.watch(categoriesListProvider);
 
     return Scaffold(
       appBar: CustomAppBar(
-        title: 'Categories',
+        title: loc.categoriesTitle,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           color: palette.textDark,
@@ -46,14 +48,14 @@ class CategoryScreen extends ConsumerWidget {
                       size: 80,
                       color: palette.textDark,
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Text(
-                      "No categories yet",
+                      loc.categoriesEmptyTitle,
                       style: TextStyle(color: palette.textDark, fontSize: 18),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
-                      "Tap + to add your first category",
+                      loc.categoriesEmptySubtitle,
                       style: TextStyle(color: palette.textDark, fontSize: 14),
                     ),
                   ],
@@ -73,8 +75,8 @@ class CategoryScreen extends ConsumerWidget {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, stack) => Center(
             child: Text(
-              "Error loading categories: $error",
-              style: const TextStyle(color: AppColors.red),
+              loc.errorLoadingCategories(error.toString()),
+              style: TextStyle(color: palette.red),
             ),
           ),
         ),
@@ -89,23 +91,23 @@ class _CategoryCard extends ConsumerWidget {
 
   _CategoryCard({required this.category});
 
-  String _getUsageTypeLabel(CategoryUsageType type) {
+  String _getUsageTypeLabel(CategoryUsageType type, AppLocalizations loc) {
     switch (type) {
       case CategoryUsageType.expense:
-        return "Expenses only";
+        return loc.usageTypeExpenseLabel;
       case CategoryUsageType.income:
-        return "Income only";
+        return loc.usageTypeIncomeLabel;
       case CategoryUsageType.both:
-        return "Both";
+        return loc.usageTypeBothLabel;
     }
   }
 
   Color _getUsageTypeTextColor(CategoryUsageType type) {
     switch (type) {
       case CategoryUsageType.expense:
-        return AppColors.red;
+        return palette.red;
       case CategoryUsageType.income:
-        return AppColors.green;
+        return palette.green;
       case CategoryUsageType.both:
         return palette.textMuted;
     }
@@ -113,6 +115,7 @@ class _CategoryCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context)!; // USE 'loc'
     final categoryColor = Color(category.colorValue);
     final categoryIcon = IconData(
       category.iconCodePoint,
@@ -146,7 +149,7 @@ class _CategoryCard extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: palette.bgPrimary,
                   borderRadius: BorderRadius.circular(8),
-                  border: BoxBorder.all(color: palette.primary, width: 2)
+                  border: Border.all(color: palette.primary, width: 2),
                 ),
                 child: Icon(categoryIcon, color: categoryColor, size: 24),
               ),
@@ -166,7 +169,7 @@ class _CategoryCard extends ConsumerWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      _getUsageTypeLabel(category.usageType),
+                      _getUsageTypeLabel(category.usageType, loc), // USED 'loc'
                       style: TextStyle(
                         color: _getUsageTypeTextColor(category.usageType),
                         fontSize: 12,

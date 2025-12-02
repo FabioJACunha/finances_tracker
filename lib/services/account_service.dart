@@ -42,7 +42,8 @@ class AccountService {
   Future<void> deleteAccount(int id) async {
     return _db.transaction(() async {
       // Business rule: Check if account has transactions
-      final transactions = await _db.transactionsDao.getByAccountIdOrderedByDate(id);
+      final transactions = await _db.transactionsDao
+          .getByAccountIdOrderedByDate(id);
       if (transactions.isNotEmpty) {
         throw Exception('Cannot delete account with existing transactions');
       }

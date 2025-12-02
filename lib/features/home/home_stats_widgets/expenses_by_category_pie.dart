@@ -5,6 +5,7 @@ import '../../../providers/analytics_provider.dart';
 import '../../../providers/categories_provider.dart';
 import '../../../models/period_args.dart';
 import '../../../theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 
 class ExpensesByCategoryPie extends ConsumerWidget {
   final int accountId;
@@ -20,6 +21,7 @@ class ExpensesByCategoryPie extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context)!;
     final palette = currentPalette;
 
     final categoryColorsAsync = ref.watch(categoryColorsMapProvider);
@@ -39,10 +41,10 @@ class ExpensesByCategoryPie extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Expenses by category",
+              loc.chartExpensesByCategoryTitle,
               style: TextStyle(
                 fontSize: 20,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
                 color: palette.textDark,
               ),
             ),
@@ -54,9 +56,9 @@ class ExpensesByCategoryPie extends ConsumerWidget {
                     if (data.isEmpty) {
                       return Center(
                         child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                           child: Text(
-                            'No expenses in this period',
+                            loc.chartNoExpensesMessage,
                             style: TextStyle(
                               color: palette.textMuted,
                               fontSize: 14,
@@ -68,7 +70,7 @@ class ExpensesByCategoryPie extends ConsumerWidget {
 
                     final total = data.values.fold<double>(
                       0.0,
-                          (sum, value) => sum + value,
+                      (sum, value) => sum + value,
                     );
 
                     final chartData = data.entries.map((entry) {
@@ -94,11 +96,10 @@ class ExpensesByCategoryPie extends ConsumerWidget {
                                 yValueMapper: (data, _) => data.amount,
                                 pointColorMapper: (data, _) => data.color,
                                 dataLabelMapper: (data, _) =>
-                                '${data.amount.toStringAsFixed(0)}€',
+                                    '${data.amount.toStringAsFixed(0)}€',
                                 dataLabelSettings: DataLabelSettings(
                                   isVisible: true,
-                                  labelPosition:
-                                  ChartDataLabelPosition.outside,
+                                  labelPosition: ChartDataLabelPosition.outside,
                                   textStyle: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.bold,
@@ -167,7 +168,7 @@ class ExpensesByCategoryPie extends ConsumerWidget {
                   ),
                   error: (err, stack) => Center(
                     child: Text(
-                      'Error loading data: $err',
+                      loc.errorLoadingData(err.toString()), // REUSED KEY
                       style: const TextStyle(color: Colors.red, fontSize: 14),
                     ),
                   ),
@@ -179,7 +180,7 @@ class ExpensesByCategoryPie extends ConsumerWidget {
               ),
               error: (err, stack) => Center(
                 child: Text(
-                  'Error loading categories: $err',
+                  loc.errorLoadingCategories(err.toString()), // REUSED KEY
                   style: const TextStyle(color: Colors.red, fontSize: 14),
                 ),
               ),

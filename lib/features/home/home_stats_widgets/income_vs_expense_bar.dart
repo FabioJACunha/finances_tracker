@@ -4,6 +4,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import '../../../providers/analytics_provider.dart';
 import '../../../models/period_args.dart';
 import '../../../theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 
 class IncomeVsExpenseBar extends ConsumerWidget {
   final int accountId;
@@ -20,6 +21,7 @@ class IncomeVsExpenseBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context)!;
     final palette = currentPalette;
 
     final dataAsync = ref.watch(
@@ -38,9 +40,9 @@ class IncomeVsExpenseBar extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Income vs Expense',
+              loc.chartIncomeVsExpenseTitle,
               style: TextStyle(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
                 color: palette.textDark,
                 fontSize: 20,
               ),
@@ -55,9 +57,9 @@ class IncomeVsExpenseBar extends ConsumerWidget {
                 if (income == 0 && expense == 0) {
                   return Center(
                     child: Padding(
-                      padding: EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       child: Text(
-                        'No transactions in this period',
+                        loc.chartNoTransactionsMessage,
                         style: TextStyle(
                           color: palette.textMuted,
                           fontSize: 14,
@@ -68,8 +70,8 @@ class IncomeVsExpenseBar extends ConsumerWidget {
                 }
 
                 final chartData = [
-                  _ChartData('Income', income, palette.green),
-                  _ChartData('Expense', expense, palette.red),
+                  _ChartData(loc.incomeLabel, income, palette.green),
+                  _ChartData(loc.expenseLabel, expense, palette.red),
                 ];
 
                 return Column(
@@ -78,10 +80,18 @@ class IncomeVsExpenseBar extends ConsumerWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _buildSummaryItem('Income', income, palette.green),
-                        _buildSummaryItem('Expense', expense, palette.red),
                         _buildSummaryItem(
-                          'Net',
+                          loc.incomeLabel,
+                          income,
+                          palette.green,
+                        ),
+                        _buildSummaryItem(
+                          loc.expenseLabel,
+                          expense,
+                          palette.red,
+                        ),
+                        _buildSummaryItem(
+                          loc.netLabel,
                           net,
                           net >= 0 ? palette.green : palette.red,
                         ),
@@ -117,17 +127,24 @@ class IncomeVsExpenseBar extends ConsumerWidget {
                                 color: palette.textDark,
                                 fontWeight: FontWeight.bold,
                               ),
-                              builder: (data, point, series, pointIndex, seriesIndex) {
-                                final chartData = data as _ChartData;
-                                return Text(
-                                  '${chartData.amount.toStringAsFixed(2)}€',
-                                  style: TextStyle(
-                                    color: palette.textDark,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                );
-                              },
+                              builder:
+                                  (
+                                    data,
+                                    point,
+                                    series,
+                                    pointIndex,
+                                    seriesIndex,
+                                  ) {
+                                    final chartData = data as _ChartData;
+                                    return Text(
+                                      '${chartData.amount.toStringAsFixed(2)}€',
+                                      style: TextStyle(
+                                        color: palette.textDark,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
+                                    );
+                                  },
                             ),
                             borderRadius: const BorderRadius.vertical(
                               top: Radius.circular(4),
@@ -149,7 +166,7 @@ class IncomeVsExpenseBar extends ConsumerWidget {
               ),
               error: (err, stack) => Center(
                 child: Text(
-                  'Error loading data: $err',
+                  loc.errorLoadingData(err.toString()),
                   style: const TextStyle(color: Colors.red, fontSize: 14),
                 ),
               ),
